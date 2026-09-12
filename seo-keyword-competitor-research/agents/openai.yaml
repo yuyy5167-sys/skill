@@ -1,0 +1,6 @@
+interface:
+  display_name: "SEOキーワード競合リサーチ"
+  short_description: "Google検索で競合・ペルソナ・狙い目度を分析するSEO調査"
+  default_prompt: "$seo-keyword-competitor-research を使って、指定キーワードのGoogle競合調査とSEO記事設計を根拠付きで作成してください。"
+policy:
+  allow_implicit_invocation: true

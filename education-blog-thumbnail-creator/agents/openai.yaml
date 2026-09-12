@@ -1,0 +1,4 @@
+interface:
+  display_name: "教育ブログ サムネイル・H2画像作成"
+  short_description: "サムネイルとH2画像を統一画風で設計・生成・検証する"
+  default_prompt: "$education-blog-thumbnail-creator を使って、記事内容と対象学年に合うサムネイルを作成し、許可された場合は各H2の見出し画像も統一画風で生成・検証してください。"

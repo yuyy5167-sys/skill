@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>教育記事プレビュー</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --edu-text: #463b30;
+      --edu-muted: #6f6257;
+      --edu-page: #fff9f4;
+      --edu-surface: #ffffff;
+      --edu-border: #ead8ca;
+      --edu-coral-soft: #ffb68c;
+      --edu-coral-strong: #a94f2d;
+      --edu-coral-dark: #87391f;
+      --edu-info: #eaf4ff;
+      --edu-info-border: #3475a7;
+      --edu-success: #eaf7ef;
+      --edu-success-border: #397553;
+      --edu-warning: #fff6d8;
+      --edu-warning-border: #9c7117;
+      --edu-focus: #155da6;
+      --edu-shadow: 0 12px 34px rgba(70, 59, 48, 0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--edu-page);
+      color: var(--edu-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+      font-size: 16px;
+      line-height: 1.9;
+      overflow-wrap: anywhere;
+    }
+    img, svg { display: block; max-width: 100%; height: auto; }
+    a { color: var(--edu-coral-dark); text-decoration-thickness: 0.1em; text-underline-offset: 0.18em; }
+    a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid var(--edu-focus);
+      outline-offset: 3px;
+    }
+    .edu-skip-link {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      z-index: 100;
+      padding: 10px 14px;
+      background: var(--edu-surface);
+      transform: translateY(-150%);
+    }
+    .edu-skip-link:focus { transform: translateY(0); }
+    .edu-preview {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding: 12px 12px 48px;
+    }
+    .edu-preview__notice {
+      margin: 0 0 14px;
+      padding: 6px 12px;
+      border: 1px solid var(--edu-border);
+      border-radius: 999px;
+      background: var(--edu-surface);
+      color: var(--edu-muted);
+      font-size: 14px;
+      text-align: center;
+    }
+    .edu-article {
+      padding: 20px 16px 40px;
+      border: 1px solid var(--edu-border);
+      border-radius: 18px;
+      background: var(--edu-surface);
+      box-shadow: var(--edu-shadow);
+    }
+    .edu-article__category {
+      display: inline-flex;
+      min-height: 32px;
+      align-items: center;
+      margin: 0 0 12px;
+      padding: 3px 12px;
+      border-radius: 999px;
+      background: var(--edu-info);
+      color: #244f71;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .edu-article__title {
+      margin: 0;
+      font-size: clamp(21.6px, 6vw, 23.2px);
+      line-height: 1.45;
+      letter-spacing: 0.01em;
+    }
+    .edu-article__lead { margin: 22px 0 30px; }
+    .edu-section { margin-top: 46px; scroll-margin-top: 16px; }
+    .edu-section__kicker {
+      margin: 0 0 5px;
+      color: var(--edu-coral-dark);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+    .edu-heading-2 {
+      margin: 0 0 22px;
+      padding: 12px 13px;
+      border-radius: 6px;
+      background: var(--edu-coral-soft);
+      color: var(--edu-text);
+      font-size: clamp(21px, 5.9vw, 25px);
+      line-height: 1.45;
+    }
+    .edu-heading-3 {
+      margin: 34px 0 18px;
+      padding-bottom: 7px;
+      border-bottom: 3px solid var(--edu-coral-soft);
+      font-size: clamp(18px, 5vw, 21px);
+      line-height: 1.55;
+    }
+    .edu-article p { margin: 0 0 28px; }
+    .edu-emphasis {
+      color: var(--edu-coral-dark);
+      font-weight: 800;
+      background: linear-gradient(transparent 63%, #ffe0cf 63%);
+    }
+    .edu-emphasis--caution { color: #714d00; background-color: var(--edu-warning); }
+    .edu-box {
+      margin: 30px 0;
+      padding: 18px;
+      border: 2px solid var(--edu-border);
+      border-radius: 12px;
+    }
+    .edu-box--summary { background: #fff0e7; border-color: var(--edu-coral-strong); }
+    .edu-box--info { background: var(--edu-info); border-color: var(--edu-info-border); }
+    .edu-box--warning { background: var(--edu-warning); border-color: var(--edu-warning-border); }
+    .edu-box--checklist { background: var(--edu-success); border-color: var(--edu-success-border); }
+    .edu-box__label, .edu-box__lead {
+      font-weight: 800;
+    }
+    .edu-article .edu-box > p,
+    .edu-article .edu-box > ul,
+    .edu-article .edu-box > ol { margin: 12px 0; }
+    .edu-article .edu-box > .edu-box__label,
+    .edu-article .edu-box > .edu-box__lead { margin-bottom: 8px; }
+    .edu-article .edu-box > :first-child { margin-top: 0; }
+    .edu-article .edu-box > :last-child { margin-bottom: 0; }
+    .edu-checklist, .edu-steps { margin: 10px 0 0; padding-left: 1.45em; }
+    .edu-checklist__item, .edu-steps__item { margin: 9px 0; padding-left: 0.2em; }
+    .edu-steps__title { margin-bottom: 4px !important; font-weight: 800; }
+    .edu-balloon {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      margin: 30px 0;
+    }
+    .edu-balloon__icon {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--edu-coral-strong);
+      color: #fff;
+      font-weight: 800;
+    }
+    .edu-balloon__text {
+      position: relative;
+      margin: 0 !important;
+      padding: 14px 16px;
+      border: 1px solid var(--edu-border);
+      border-radius: 12px;
+      background: var(--edu-surface);
+    }
+    .edu-quote { margin: 30px 0; }
+    .edu-quote__body {
+      margin: 0;
+      padding: 18px;
+      border-left: 5px solid var(--edu-info-border);
+      background: var(--edu-info);
+    }
+    .edu-quote__source { margin-top: 8px; color: var(--edu-muted); font-size: 14px; }
+    .edu-review-card, .edu-link-card, .edu-author-profile {
+      margin: 34px 0;
+      border: 1px solid var(--edu-border);
+      border-radius: 14px;
+      background: var(--edu-surface);
+      box-shadow: 0 8px 24px rgba(70, 59, 48, 0.08);
+      overflow: hidden;
+    }
+    .edu-review-card { padding: 18px; }
+    .edu-review-card__eyebrow, .edu-review-card__label, .edu-cta__eyebrow, .edu-author-profile__role {
+      margin-bottom: 5px !important;
+      color: var(--edu-coral-dark);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .edu-review-card__title, .edu-cta__title, .edu-author-profile__name {
+      margin: 0 0 12px;
+      font-size: 21px;
+      line-height: 1.5;
+    }
+    .edu-review-card__summary { margin-bottom: 18px !important; }
+    .edu-review-card__grid { display: grid; gap: 12px; }
+    .edu-review-card__section { padding: 14px; border-radius: 10px; background: var(--edu-page); }
+    .edu-review-card__section ul { margin: 0; padding-left: 1.35em; }
+    .edu-table-scroll {
+      max-width: 100%;
+      margin: 30px 0;
+      overflow-x: auto;
+      border: 1px solid var(--edu-border);
+      border-radius: 10px;
+      background: var(--edu-surface);
+      overscroll-behavior-inline: contain;
+    }
+    .edu-table { width: 100%; min-width: 620px; border-collapse: collapse; }
+    .edu-table__caption { padding: 12px; text-align: left; font-weight: 800; }
+    .edu-table th, .edu-table td { padding: 12px; border: 1px solid var(--edu-border); text-align: left; vertical-align: top; }
+    .edu-table thead th { background: #fff0e7; }
+    .edu-link-card__link {
+      display: grid;
+      color: inherit;
+      text-decoration: none;
+    }
+    .edu-link-card__media { aspect-ratio: 16 / 9; background: var(--edu-page); overflow: hidden; }
+    .edu-link-card__image { width: 100%; height: 100%; object-fit: cover; }
+    .edu-link-card__body { display: grid; gap: 5px; padding: 16px; }
+    .edu-link-card__label { color: var(--edu-coral-dark); font-size: 13px; font-weight: 800; }
+    .edu-link-card__title { font-size: 18px; font-weight: 800; line-height: 1.5; }
+    .edu-link-card__description { color: var(--edu-muted); font-size: 14px; line-height: 1.7; }
+    .edu-faq { margin-top: 46px; }
+    .edu-faq__item { border-bottom: 1px solid var(--edu-border); }
+    .edu-faq__question {
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      padding: 12px 8px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .edu-faq__answer { padding: 4px 8px 18px; }
+    .edu-cta {
+      margin: 46px 0 0;
+      padding: 22px 18px;
+      border: 2px solid var(--edu-coral-strong);
+      border-radius: 16px;
+      background: #fff0e7;
+      text-align: center;
+    }
+    .edu-cta__text { margin-bottom: 16px !important; }
+    .edu-button {
+      display: inline-flex;
+      width: 100%;
+      min-height: 55px;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 800;
+      text-align: center;
+      text-decoration: none;
+    }
+    .edu-button--primary { background: var(--edu-coral-strong); color: #fff; }
+    .edu-button--primary:hover { background: var(--edu-coral-dark); }
+    .edu-author-profile { display: grid; gap: 16px; padding: 18px; }
+    .edu-author-profile__image { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; }
+    .edu-author-profile__intro { margin-bottom: 0 !important; }
+
+    @media (min-width: 600px) {
+      .edu-preview { padding: 24px 20px 64px; }
+      .edu-article { padding: 36px 42px 56px; }
+      .edu-article__title { font-size: clamp(28px, 4vw, 32px); }
+      .edu-review-card__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .edu-link-card__link { grid-template-columns: minmax(180px, 38%) minmax(0, 1fr); }
+      .edu-author-profile { grid-template-columns: 96px minmax(0, 1fr); align-items: center; }
+      .edu-button { width: auto; min-width: 280px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a class="edu-skip-link" href="#main-content">本文へ移動</a>
+  <div class="edu-preview">
+    <p class="edu-preview__notice">部品見本：実際の記事には必要な部品だけを使用します</p>
+    <main class="edu-article" id="main-content">
+      <p class="edu-article__category">学習ガイド</p>
+      <h1 class="edu-article__title">記事タイトル</h1>
+      <p class="edu-article__lead">記事の導入文を配置します。</p>
+
+      <section class="edu-section" aria-labelledby="section-example">
+        <p class="edu-section__kicker">最初に確認</p>
+        <h2 class="edu-heading-2" id="section-example">読者が知りたい内容から説明する</h2>
+        <p>本文を、対象読者と記事目的に合わせて配置します。</p>
+      </section>
+
+      <section class="edu-section" aria-labelledby="section-components">
+        <p class="edu-section__kicker">部品の使い分け</p>
+        <h2 class="edu-heading-2" id="section-components">意味に合う部品だけを使う</h2>
+        <p>重要な語句は、<strong class="edu-emphasis">読者の判断に必要な部分</strong>だけを強調します。</p>
+        <p>以下は選択用の部品カタログです。全要素やこの並びを記事へコピーせず、意味に合うものだけを使います。</p>
+
+        <aside class="edu-box edu-box--info" aria-label="ポイント">
+          <p class="edu-box__label">ポイント</p>
+          <p>用語や前提の補足に使用します。</p>
+        </aside>
+
+        <aside class="edu-box edu-box--warning" aria-label="注意">
+          <p class="edu-box__label">注意</p>
+          <p>料金、期限、対象外などの重要条件をまとめます。</p>
+        </aside>
+
+        <aside class="edu-box edu-box--summary" aria-label="結論枠の部品見本">
+          <p class="edu-box__label">結論枠の見本</p>
+          <p>明示指定または主要節で必要な場合の部品です。リード直下へ自動挿入しません。</p>
+        </aside>
+
+        <aside class="edu-box edu-box--checklist" aria-label="チェックリスト">
+          <p class="edu-box__label">チェックリスト</p>
+          <ul class="edu-checklist">
+            <li class="edu-checklist__item">読者が実行できる項目か</li>
+            <li class="edu-checklist__item">確認後に判断できる項目か</li>
+          </ul>
+        </aside>
+
+        <aside class="edu-balloon" aria-label="読者の疑問">
+          <span class="edu-balloon__icon" aria-hidden="true">?</span>
+          <p class="edu-balloon__text">どの部品を使えば読みやすくなりますか。</p>
+        </aside>
+
+        <section class="edu-review-card" aria-labelledby="review-example">
+          <header class="edu-review-card__header">
+            <p class="edu-review-card__eyebrow">構造見本</p>
+            <h3 class="edu-review-card__title" id="review-example">レビューカード</h3>
+          </header>
+          <p class="edu-review-card__summary">根拠のない星や点数を使わず、特徴と条件を整理します。</p>
+          <div class="edu-review-card__grid">
+            <section class="edu-review-card__section" aria-label="向いている人">
+              <p class="edu-review-card__label">向いている人</p>
+              <ul><li>本文から確認できる条件</li></ul>
+            </section>
+            <section class="edu-review-card__section" aria-label="確認したい点">
+              <p class="edu-review-card__label">確認したい点</p>
+              <ul><li>判断に必要な制約</li></ul>
+            </section>
+          </div>
+        </section>
+
+        <p>比較結果は表だけに任せず、表の前後でも結論を説明します。</p>
+        <div class="edu-table-scroll" tabindex="0" aria-label="学習方法の比較表。横にスクロールできます">
+          <table class="edu-table">
+            <caption class="edu-table__caption">学習方法の比較</caption>
+            <thead>
+              <tr><th scope="col">項目</th><th scope="col">方法A</th><th scope="col">方法B</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">進め方</th><td>確認済みの内容</td><td>確認済みの内容</td></tr>
+              <tr><th scope="row">向く人</th><td>条件A</td><td>条件B</td></tr>
+              <tr><th scope="row">注意点</th><td>制約A</td><td>制約B</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="edu-faq" aria-labelledby="faq-title">
+        <h2 class="edu-heading-2" id="faq-title">よくある質問</h2>
+        <details class="edu-faq__item">
+          <summary class="edu-faq__question">スマートフォンでも読みやすく表示されますか</summary>
+          <div class="edu-faq__answer"><p>320pxから表示を確認し、表以外の横スクロールを発生させません。</p></div>
+        </details>
+        <details class="edu-faq__item">
+          <summary class="edu-faq__question">文章にない評価を追加しますか</summary>
+          <div class="edu-faq__answer"><p>追加しません。原文と承認済み資料にある内容だけを使用します。</p></div>
+        </details>
+      </section>
+
+      <aside class="edu-cta" aria-labelledby="cta-title">
+        <p class="edu-cta__eyebrow">次にすること</p>
+        <h2 class="edu-cta__title" id="cta-title">記事の条件をもう一度確認する</h2>
+        <p class="edu-cta__text">実際の記事では、確認済みの遷移先がある場合だけCTAを表示します。</p>
+        <a class="edu-button edu-button--primary" href="#main-content">記事の冒頭へ戻る</a>
+      </aside>
+
+      <aside class="edu-author-profile" aria-labelledby="author-name">
+        <div class="edu-author-profile__body">
+          <p class="edu-author-profile__role">公開用の役割</p>
+          <h2 class="edu-author-profile__name" id="author-name">承認済み著者名</h2>
+          <p class="edu-author-profile__intro">プロフィール情報が承認されている場合だけ表示します。</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cloudflare SEO記事作成"
+  short_description: "記事、サムネイル、各H2画像、プレビューまで自動作成"
+  default_prompt: "$cloudflare-seo-article-creator を使い、サムネイルと各H2画像を含む新規記事を作成してプレビュー画面まで表示してください。"

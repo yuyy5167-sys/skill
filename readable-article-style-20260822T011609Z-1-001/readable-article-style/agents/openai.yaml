@@ -1,0 +1,7 @@
+interface:
+  display_name: "Readable Article Style"
+  short_description: "Clear adult article body writing"
+  default_prompt: "Use $readable-article-style to write or refine the supplied article body."
+
+policy:
+  allow_implicit_invocation: true

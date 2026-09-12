@@ -1,0 +1,6 @@
+interface:
+  display_name: "SEO記事見出し構成"
+  short_description: "SEOリサーチ結果から根拠付き記事見出し構成を設計する"
+  default_prompt: "$seo-heading-outline-creator を使って、リサーチ結果から根拠付きのSEO記事見出し構成を作成してください。"
+policy:
+  allow_implicit_invocation: true

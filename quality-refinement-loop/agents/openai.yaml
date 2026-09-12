@@ -1,0 +1,7 @@
+interface:
+  display_name: "品質向上ループ"
+  short_description: "ユーザー基準で成果物を見直し、必要な修正を繰り返します"
+  default_prompt: "$quality-refinement-loopを使い、希望する品質を整理して成果物を見直し、必要な修正を行ってください。"
+
+policy:
+  allow_implicit_invocation: true

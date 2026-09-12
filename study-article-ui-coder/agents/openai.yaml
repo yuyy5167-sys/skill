@@ -1,0 +1,6 @@
+interface:
+  display_name: "教育記事UIコーダー"
+  short_description: "教育記事本文をスマホ優先の読みやすいUIへ変換します"
+  default_prompt: "$study-article-ui-coder を使って、この記事本文を対象読者に合うスマホ優先UIへコーディングしてください。"
+policy:
+  allow_implicit_invocation: true

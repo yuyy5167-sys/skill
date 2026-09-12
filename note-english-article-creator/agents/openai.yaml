@@ -1,0 +1,4 @@
+interface:
+  display_name: "note English Study Article Creator"
+  short_description: "高校生向け英語勉強法のnote記事をMarkdownで作成"
+  default_prompt: "Use $note-english-article-creator to create an English study article for note. Keyword: "

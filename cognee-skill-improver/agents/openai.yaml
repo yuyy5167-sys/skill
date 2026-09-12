@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cognee Skill Improver"
+  short_description: "Capture skill usage and turn it into improvement suggestions."
+  default_prompt: "Use $cognee-skill-improver to improve a skill from past usage notes."
