@@ -57,14 +57,24 @@ if (Test-Path -LiteralPath $HooksPath) {
     $Hooks = [pscustomobject]@{description='スキルの完成版をGitHubへ保存するためのローカル確認。';hooks=[pscustomobject]@{}}
 }
 if (-not $Hooks.PSObject.Properties['hooks']) { $Hooks | Add-Member -NotePropertyName 'hooks' -NotePropertyValue ([pscustomobject]@{}) }
-$CommandText = '"' + $PythonPath + '" -X utf8 "' + $ScriptPath + '" --state "' + $StatePath + '" hook'
+# Windows hooks use PowerShell. Quoted executable paths require the call operator.
+$CommandText = "& '" + $PythonPath.Replace("'", "''") + "' -X utf8 '" + $ScriptPath.Replace("'", "''") + "' --state '" + $StatePath.Replace("'", "''") + "' hook"
+$PreviousCommand = $null
+$PreviousInstallation = Join-Path $StatePath 'installation.json'
+if (Test-Path -LiteralPath $PreviousInstallation) {
+    $PreviousCommand = ([System.IO.File]::ReadAllText($PreviousInstallation) | ConvertFrom-Json).hook_command
+}
 foreach ($EventName in @('UserPromptSubmit','Stop')) {
     $Groups = @()
     if ($Hooks.hooks.PSObject.Properties[$EventName]) { $Groups = @($Hooks.hooks.$EventName) }
     $AlreadyInstalled = $false
     foreach ($Group in $Groups) {
         foreach ($Handler in @($Group.hooks)) {
-            if ($Handler.command -eq $CommandText) { $AlreadyInstalled = $true }
+            if ($Handler.type -eq 'command' -and ($Handler.command -eq $CommandText -or ($PreviousCommand -and $Handler.command -eq $PreviousCommand))) {
+                $Handler.command = $CommandText
+                $Handler | Add-Member -NotePropertyName 'commandWindows' -NotePropertyValue $CommandText -Force
+                $AlreadyInstalled = $true
+            }
         }
     }
     if (-not $AlreadyInstalled) {

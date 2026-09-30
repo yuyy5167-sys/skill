@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -102,6 +103,45 @@ class SyncTests(unittest.TestCase):
         self.engine.ready(job["id"], "new skill checked")
         self.assertEqual(self.send()["jobs"][0]["state"], "SYNCED")
         self.assertEqual(self.bytes("new-skill/SKILL.md"), b"new\n")
+
+    @unittest.skipUnless(os.name == 'nt', 'Windows hook command execution')
+    def test_installer_migrates_and_executes_windows_hooks(self):
+        shell = shutil.which('pwsh.exe') or shutil.which('powershell.exe')
+        self.assertIsNotNone(shell)
+        user_codex = self.base / 'fixture codex'
+        (user_codex / 'skills').mkdir(parents=True)
+        agents = self.base / 'fixture agents'
+        agents.mkdir()
+        instructions = '既存の指示を保持する。\n'
+        (user_codex / 'AGENTS.md').write_text(instructions, encoding='utf-8')
+        state = self.base / "日本語 space ' quote" / 'state'
+        engine = mod.Engine(state)
+        engine.initialize(str(self.remote), 'main', [str(self.skills)])
+        old_command = '"' + sys.executable + '" -X utf8 "' + str(SCRIPT) + '" --state "' + str(state) + '" hook'
+        mod.atomic_json(state / 'installation.json', {'hook_command':old_command})
+        unrelated = {'type':'command','command':'Write-Output unrelated'}
+        mod.atomic_json(user_codex / 'hooks.json', {'hooks':{'UserPromptSubmit':[{'hooks':[{'type':'command','command':old_command}]}],'Stop':[{'hooks':[unrelated]}]}})
+        installer = SCRIPT.parent / 'install.ps1'
+        args = [shell,'-NoProfile','-NonInteractive','-File',str(installer),'-SkillPath',str(SCRIPT.parents[1]),'-StatePath',str(state),'-UserCodexPath',str(user_codex),'-UserAgentsSkills',str(agents)]
+        for _ in range(2):
+            installed = subprocess.run(args,capture_output=True)
+            self.assertEqual(installed.returncode,0,installed.stderr.decode('utf-8','replace'))
+        definition = mod.read_json(user_codex / 'hooks.json')
+        start_handlers = [h for g in definition['hooks']['UserPromptSubmit'] for h in g['hooks']]
+        stop_handlers = [h for g in definition['hooks']['Stop'] for h in g['hooks']]
+        self.assertEqual(len(start_handlers),1)
+        self.assertEqual(len(stop_handlers),2)
+        self.assertIn(unrelated,stop_handlers)
+        self.assertTrue((user_codex / 'AGENTS.md').read_text(encoding='utf-8').startswith(instructions))
+        self.assertEqual((user_codex / 'AGENTS.md').read_text(encoding='utf-8').count('<!-- skill-github-sync:start -->'),1)
+        payload = {'hook_event_name':'UserPromptSubmit','session_id':'installer-smoke','turn_id':'t'}
+        started = subprocess.run([shell,'-NoProfile','-NonInteractive','-Command',start_handlers[0]['commandWindows']],input=json.dumps(payload).encode(),capture_output=True,timeout=10)
+        self.assertEqual(started.returncode,0,started.stderr.decode('utf-8','replace'))
+        self.assertIn('session=installer-smoke',json.loads(started.stdout)['hookSpecificOutput']['additionalContext'])
+        payload['hook_event_name'] = 'Stop'
+        stopped = subprocess.run([shell,'-NoProfile','-NonInteractive','-Command',start_handlers[0]['commandWindows']],input=json.dumps(payload).encode(),capture_output=True,timeout=10)
+        self.assertEqual(stopped.returncode,0,stopped.stderr.decode('utf-8','replace'))
+        self.assertEqual(json.loads(stopped.stdout),{})
 
     def test_no_change_does_not_commit(self):
         job = self.engine.begin(self.source, session="s", turn="t")
