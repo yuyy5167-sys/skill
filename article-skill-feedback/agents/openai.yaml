@@ -1,0 +1,6 @@
+interface:
+  display_name: "記事スキル修正フィードバック"
+  short_description: "記事の修正履歴を記録し、承認済みルールだけを安全に反映"
+  default_prompt: "$article-skill-feedbackを使い、この記事の修正依頼と対応結果を記録し、未承認の好みを次の記事へ混ぜないでください。"
+policy:
+  allow_implicit_invocation: true
