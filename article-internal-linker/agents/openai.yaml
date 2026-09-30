@@ -1,4 +1,4 @@
 interface:
   display_name: "記事内部リンク設計"
-  short_description: "内部リンクと進研ゼミ公式CTAを計画・挿入・監査"
-  default_prompt: "$article-internal-linker を使い、公開確認済みの自サイト記事候補で内部リンクを扱い、対象講座が一意な場合だけ承認済みの進研ゼミ公式CTAを設置・監査してください。"
+  short_description: "目的別にCTAまたは成約記事カードを計画・挿入・監査"
+  default_prompt: "$article-internal-linker を使い、確認済みの事業目的に従って、成約用では承認済み講座別CTA、集客用では公開確認済み成約記事カードを計画・挿入・監査してください。"
