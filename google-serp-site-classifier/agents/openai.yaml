@@ -1,0 +1,6 @@
+interface:
+  display_name: "Google自然検索サイト分類"
+  short_description: "Google1ページ目を個人・企業別にExcel集計"
+  default_prompt: "Use $google-serp-site-classifier to classify Google first-page organic results in this Excel."
+policy:
+  allow_implicit_invocation: true
