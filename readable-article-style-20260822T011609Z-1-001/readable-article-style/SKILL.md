@@ -7,6 +7,12 @@ description: Write or refine adult-targeted article body text with source-traced
 
 ユーザーまたは呼び出し元から渡されたリード・見出し配下の本文を、新規作成（`new`）または推敲（`revise`）する文章専属スキル。対象は大人だが、中学生レベルの理解力でも意味を追える日本語にする。子ども向けの話題・幼い語り方・過度な単純化にはしない。
 
+## 同じブログの修正履歴・有効ルール
+
+対象が正規化後に`C:\AIフォルダ\ブログ\site`と一致する場合は、開始時に`$article-skill-feedback`の接続契約を読み、`target_skill: readable-article-style`、`stage: writing`の有効ルールを取得する。記事フィードバック台帳への定型追記は、この仕組みに対するユーザーの継続許可の範囲として扱い、依頼ごとの保存確認を追加しない。この許可を本文その他の保存へ広げない。親経由では渡された`parent_run_id`と有効ルール集合を再利用し、対象ルールを既存の`quality_profile.required/preferred/prohibited`へ意味を変えず対応付ける。単独利用では本スキルを`entry_skill`とする。修正依頼は編集前後で記録するが、記録・候補・承認待ちから文章上の好みを追加しない。現在のユーザー指示、根拠、保持対象、下記の文章裁量を維持し、適用結果は本文箇所と品質検査で示す。別プロジェクトには適用しない。
+
+同じ対象の依頼単位の詳細履歴は`$article-production-log`へ記録する。親経由では渡された`article_log_context.log_id`を使用して品質軸`readability | audience | structure | facts_freshness`の該当結果だけを返し、子で新規ログを作らない。本スキルを単独利用したユーザー発言では推敲前に`start-log`、文章品質ゲート後に`finish-log`を行う。未承認候補を文章上の好みへ加えない。
+
 ## 参照範囲
 
 - 通常実行では、同梱の `references/style-guide.md`、`references/template-guide.md`、`references/readability-quality-gate.md` を読む。
