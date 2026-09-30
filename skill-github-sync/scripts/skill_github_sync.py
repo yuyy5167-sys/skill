@@ -617,9 +617,9 @@ class Engine:
         path = self.turn_path(session, turn)
         td = read_json(path)
         if event == "UserPromptSubmit":
-            if td:
+            if td and "baseline" in td and "sources" in td:
                 return {}
-            td = {"session": session, "turn": turn, "send": "unset", "baseline": {}, "sources": {}, "issues": [], "continued": False}
+            td = {**(td or {}), "session": session, "turn": turn, "send": (td or {}).get("send", "unset"), "baseline": {}, "sources": {}, "issues": [], "continued": (td or {}).get("continued", False)}
             deadline = time.monotonic() + 7
             candidates = {canonical(x["source"]): x["source"] for x in discover(self.config["roots"])}
             candidates.update({canonical(m["source"]): m["source"] for m in self.config["mappings"].values()})
@@ -638,7 +638,7 @@ class Engine:
             return {}
         if payload.get("stop_hook_active") or (td and td.get("continued")):
             return {}
-        if not td:
+        if not td or "baseline" not in td or "sources" not in td:
             return {"systemMessage": "スキル同期の開始基準がありません。編集したスキルは手動経路で確認してください。"}
         relevant = [j for j in self.jobs() if j["session"] == session and j["turn"] == turn]
         changes, problems = [], list(td.get("issues", []))

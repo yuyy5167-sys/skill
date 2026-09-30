@@ -104,6 +104,22 @@ class SyncTests(unittest.TestCase):
         self.assertEqual(self.send()["jobs"][0]["state"], "SYNCED")
         self.assertEqual(self.bytes("new-skill/SKILL.md"), b"new\n")
 
+    def test_hook_preserves_early_policy_and_missing_baseline_is_json(self):
+        self.engine.turn_policy('early-session','early-turn','deny')
+        payload = {'hook_event_name':'Stop','session_id':'early-session','turn_id':'early-turn'}
+        self.assertIn('開始基準',self.engine.hook(payload)['systemMessage'])
+        payload['hook_event_name'] = 'UserPromptSubmit'
+        started = self.engine.hook(payload)
+        self.assertIn('additionalContext',started['hookSpecificOutput'])
+        self.assertEqual(mod.read_json(self.engine.turn_path('early-session','early-turn'))['send'],'deny')
+        job = self.engine.begin(self.source,session='early-session',turn='early-turn',local_only=True)
+        self.engine.ready(job['id'],'unchanged local-only runtime fixture')
+        payload['hook_event_name'] = 'Stop'
+        stopped = self.engine.hook(payload)
+        self.assertEqual(stopped['decision'],'block')
+        self.assertEqual(self.engine.hook(payload),{})
+        self.engine.acknowledge(job['id'],'early-session','early-turn')
+
     @unittest.skipUnless(os.name == 'nt', 'Windows hook command execution')
     def test_installer_migrates_and_executes_windows_hooks(self):
         shell = shutil.which('pwsh.exe') or shutil.which('powershell.exe')
