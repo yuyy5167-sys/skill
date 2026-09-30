@@ -84,19 +84,43 @@ if ($frontmatterMatch.Groups['frontmatter'].Value -notmatch '(?m)^draft:\s*true\
 }
 
 $tempBase = Get-NormalizedDirectoryPath -Path ([System.IO.Path]::GetTempPath())
+$temporaryWorkRoot = Join-Path $tempBase 'codex-article-work'
+[void](New-Item -ItemType Directory -Path $temporaryWorkRoot -Force)
 if ([string]::IsNullOrWhiteSpace($PreviewRoot)) {
-    $previewFull = Join-Path $tempBase "codex-article-preview\$RunId"
+    $previewFull = Join-Path $temporaryWorkRoot ("{0}--{1}" -f $RunId, $ArticleId)
 }
 else {
     $previewFull = Get-NormalizedDirectoryPath -Path $PreviewRoot
 }
 
-Assert-PathWithin -Candidate $previewFull -Parent $tempBase -Label 'プレビュー出力先'
+Assert-PathWithin -Candidate $previewFull -Parent $temporaryWorkRoot -Label 'プレビュー出力先'
 if (Test-Path -LiteralPath $previewFull) {
     throw "プレビュー出力先が既に存在します。上書きしません: $previewFull"
 }
 
 [void](New-Item -ItemType Directory -Path $previewFull)
+$verificationDirectory = Join-Path $previewFull 'verification'
+[void](New-Item -ItemType Directory -Path $verificationDirectory)
+
+$cleanupInfoPath = Join-Path $previewFull 'CLEANUP-INFO.txt'
+$cleanupInfo = @"
+これはローカル記事プレビュー用の一時フォルダです。
+
+作成日時: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
+実行ID: $RunId
+記事ID: $ArticleId
+正本記事: $sourceArticleFile
+
+このフォルダには、正本記事の隔離コピー、プレビュー用のdist、Astro・Viteキャッシュ、検証画像、ローカルログが入ります。
+正本記事、採用済み画像、公開済みサイト、正規プロジェクトのnode_modulesには影響しません。
+
+ローカル配信を停止し、この実行の検証記録が不要になった後は、この実行フォルダ全体を削除またはゴミ箱へ移動できます。
+"@
+[System.IO.File]::WriteAllText(
+    $cleanupInfoPath,
+    $cleanupInfo,
+    $utf8Encoding
+)
 
 $allowedDirectories = @('src', 'public', 'packages')
 foreach ($directoryName in $allowedDirectories) {
@@ -164,7 +188,7 @@ if ((Get-FileHash -LiteralPath $sourceArticleFile -Algorithm SHA256).Hash -ne $s
 }
 
 $result = [ordered]@{
-    schema_version = '1.0'
+    schema_version = '1.1'
     status = 'PREVIEW_WORKSPACE_READY'
     project_root = $projectFull
     source_article = $sourceArticleFile
@@ -176,6 +200,9 @@ $result = [ordered]@{
     preview_config = $wrapperConfigPath
     node_modules_source = $sourceNodeModules
     build_output = (Join-Path $previewFull 'dist')
+    temporary_work_root = $temporaryWorkRoot
+    verification_directory = $verificationDirectory
+    cleanup_info = $cleanupInfoPath
     article_id = $ArticleId
 }
 

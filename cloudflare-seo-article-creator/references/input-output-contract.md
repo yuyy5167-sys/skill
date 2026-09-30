@@ -5,13 +5,13 @@
 1記事の実行は次の状態で管理する。
 
 ```yaml
-schema_version: "2.6"
+schema_version: "2.7"
 run_id: "現在実行の一意な値"
 project_root: "C:\\AIフォルダ\\ブログ\\site"
 rulebook_path: "C:\\AIフォルダ\\ブログ\\クラウドフレア\\記事装飾ルールブック.md"
 authorization:
   mode: orchestrated_prepublication
-  source: keyword_and_create_instruction
+  source: keyword_create_and_confirmed_business_purpose
   bundled_approval:
     article_count: 1
     completion_point: final_preview_presented
@@ -28,6 +28,13 @@ authorization:
     may_edit_existing_articles: false
     may_publish: false
     may_deploy: false
+article_business_purpose:
+  status: pending_confirmation | confirmed
+  type: conversion | traffic | null
+  confirmation_text: "ユーザーの確認原文。未確認なら空文字"
+  confirmation_source_ref: "確認発言の追跡可能な参照。未確認なら空文字"
+  confirmed_by_user: false
+  primary_action: affiliate_conversion | internal_conversion_article_visit | null
 article:
   mode: new
   main_keyword: ""
@@ -40,6 +47,30 @@ article:
   search_reader: "検索して読む人"
   service_user: "教材・サービスを利用する人"
   primary_decision_axes: []
+article_profile:
+  type: conversion_review_price | conversion_other | traffic
+  classification_reason: "検索意図と扱う判断項目から分類した理由"
+review_evidence_plan:
+  applicability: required | not_applicable
+  positive_status: found | not_found_after_research | not_applicable
+  negative_status: found | not_found_after_research | not_applicable
+  minimum_context_elements: 3
+  searched_sources: []
+  entries: []
+  negative_search_summary: "悪い口コミを確認できなかった場合の調査範囲と結果"
+  source_presentation: plain_text_or_citation
+price_evidence_plan:
+  applicability: required | not_applicable
+  checked_at: "YYYY-MM-DDまたは空文字"
+  coverage: []
+  items: []
+cta_strategy:
+  default_count: 3
+  planned_count: null
+  count_mode: standard | decreased | increased | explicit_override | not_applicable
+  count_reason: "標準3件を採用または増減した理由"
+  explicit_user_count_override: null
+  official_confirmation_moments: []
 title_contract:
   outline_status: PASS
   candidates_count: 3
@@ -50,9 +81,10 @@ title_contract:
   all_candidate_gates_pass: true
   parent_first_read: pass
 affiliate:
-  disposition: eligible | not_applicable | deferred | blocked
-  provider: shinken_zemi | null
-  target_course: elementary | junior_high | high | null
+  required: true | false
+  disposition: eligible | not_applicable | blocked
+  provider: shinken_zemi | smile_zemi | null
+  target_course: preschool | elementary | junior_high | high | null
   affiliate_link_plan: null
   affiliate_link_manifest: null
   component_check: pending
@@ -60,13 +92,12 @@ affiliate:
   audit_status: pending
   reason_code: null
 external_link_policy:
-  mode: prohibit_generic_shinken_zemi_when_affiliate_eligible | allow_task_required_only | not_applicable
+  mode: allow_task_required_only
   classified_links: []
   allowed_external_links: []
 emphasis_plan:
   status: pending
-  items: []
-  not_emphasized: []
+  items: [] # 本文にある各H2・H3にrole: conclusionを少なくとも1件含める
 evidence_policy:
   required: true
   capture_mode: analyze_final_body
@@ -81,17 +112,155 @@ evidence_policy:
   require_attempt_when_visual_claim_exists: true
   no_allowed_asset_action: continue_without_assets
   placement_mode: automatic_when_accepted
+article_log_context:
+  log_root: "C:\\AIフォルダ\\.skill-improver-data\\article-quality-log"
+  log_id: ""
+  markdown_path: ""
+  article_id: ""
+  article_path: ""
+  request_type: initial_request | correction | review | clarification | approval | stop | resume
+  source_ref: ""
+  source_hook_event_id: null
+  run_id: "現在実行のrun_idと同一"
+  parent_run_id: "現在実行のrun_idと同一"
+  entry_skill: cloudflare-seo-article-creator
+  target_skills: []
+  quality_dimensions: []
+  article_business_purpose: pending_confirmation | conversion | traffic
+  business_purpose_confirmation_source_ref: ""
+  feedback_request_event_id: null
+article_feedback_context:
+  project_root: "C:\\AIフォルダ\\ブログ\\site"
+  article_id: ""
+  article_path: ""
+  run_id: "現在実行のrun_idと同一"
+  parent_run_id: "現在実行のrun_idと同一"
+  entry_skill: cloudflare-seo-article-creator
+  article_business_purpose: conversion | traffic
+  active_rule_set_id: ""
+  source_active_rule_set_id: ""
+  active_rules: []
+  correction_request_event_id: null
+  ledger_status: ok | empty | degraded
 ```
 
-`article.mode`が`new`以外、またはキーワードと新規記事作成指示がそろわない場合は本スキルの一括実行対象外とする。`authorization.scope.article_root`は`<project_root>\src\content\blog\<article_id>`へ正規化し、この外へ書き込まない。`project_root`と`rulebook_path`は実行時に存在確認し、移動していた場合は推測で置換しない。
+`article.mode`が`new`以外、またはキーワードと新規記事作成指示がそろわない場合は本スキルの一括実行対象外とする。事業目的が未確認ならログ記録と確認質問だけを行い、その他の工程を開始しない。`authorization.scope.article_root`は`<project_root>\src\content\blog\<article_id>`へ正規化し、この外へ書き込まない。`project_root`と`rulebook_path`は実行時に存在確認し、移動していた場合は推測で置換しない。
 
-メインキーワードと明示的な記事作成指示があり、対象が既存記事ではなく本スキルの新規記事範囲だと確認できれば、依頼文に「新規」という語がなくても、一括承認は調査から統合検査後の最終プレビュー表示まで有効とする。計画、タイトル、調査、執筆、権利条件を満たす画像、サムネイル、各H2見出し画像、保存、検査、修正、隔離プレビューについて途中承認を追加しない。ユーザーが停止を指示した場合は安全な区切りで止める。
+メインキーワード、明示的な記事作成指示、確認済み事業目的があり、対象が既存記事ではなく本スキルの新規記事範囲だと確認できれば、依頼文に「新規」という語がなくても、一括承認は調査から統合検査後の最終プレビュー表示まで有効とする。依頼文に`成約用`または`集客用`が明記されていれば、その原文を確認回答として扱う。キーワード、記事型、履歴から目的を推測せず、「任せる」など選択が確定しない回答では制作を始めない。計画、タイトル、調査、執筆、権利条件を満たす画像、サムネイル、各H2見出し画像、保存、検査、修正、隔離プレビューについて途中承認を追加しない。ユーザーが停止を指示した場合は安全な区切りで止める。
 
 同名記事ルート、既存ファイル、既存記事への統合・リライト推奨がある場合、`may_overwrite: false`を維持して`BLOCKED`にする。一括承認を公開、デプロイ、Git操作、共通CSS変更へ拡張しない。範囲外の権限またはユーザーにしか決められない判断が必要な場合も、推測で進めず`BLOCKED`にする。
 
+## 記事プロファイル・口コミ・料金・CTA戦略
+
+`article_profile.type`は調査後、本文設計前に確定する。`conversion_review_price`は、口コミ、評判、料金のいずれかが申込み判断の中心にある成約用記事を含む。お試し・キャンペーン、機能紹介、講座説明など、それ以外の成約用は`conversion_other`とする。集客用は`traffic`である。キーワードの単語だけでなく、主質問と主要判断項目で分類する。
+
+`conversion_review_price`では`review_evidence_plan`と`price_evidence_plan`を必須にする。口コミを扱わない料金専用記事では口コミ計画を`not_applicable`にできるが、料金計画は必須である。口コミを扱う場合は、良い口コミと悪い口コミを別々に調べ、各掲載項目を次の形で保持する。
+
+```yaml
+review_evidence_plan:
+  applicability: required
+  positive_status: found
+  negative_status: found | not_found_after_research
+  minimum_context_elements: 3
+  searched_sources:
+    - source_name: "確認した情報源"
+      source_url: "確認したURL"
+      checked_at: "YYYY-MM-DD"
+  entries:
+    - review_id: REV-01
+      sentiment: positive | negative | mixed
+      source_name: "情報源名"
+      source_url: "確認したURL"
+      checked_at: "YYYY-MM-DD"
+      quotation_mode: summary | short_excerpt
+      context_elements:
+        - "利用状況または前提"
+        - "評価対象となった機能・条件"
+        - "読者の判断への意味"
+      article_section_id: H2-01
+      summary_text: "記事へ掲載する、背景と理由が分かる要約"
+  negative_search_summary: "not_found_after_researchの場合だけ、探した範囲と結果"
+  source_presentation: plain_text_or_citation
+```
+
+`context_elements`は3件以上必要で、一言感想を行数だけ増やして代替しない。同じ体験・論点の言い換えを別口コミとして数えない。`negative_status: not_found_after_research`は、実際に悪い口コミを調べ、`searched_sources`と`negative_search_summary`を記録した場合だけ使える。公式仕様から導く注意点は口コミ項目へ入れず、事実と記事側の解釈として`answer_map`へ分ける。口コミ出典は既定で小さなプレーンテキストまたは出典注記として表示し、クリック可能な外部リンクはユーザーが当該記事のURL掲載を明示許可し、その原文・出典を`external_link_policy.allowed_external_links`へ記録した場合だけ使う。
+
+料金を扱う場合は次を保持する。
+
+```yaml
+price_evidence_plan:
+  applicability: required
+  checked_at: "YYYY-MM-DD"
+  coverage:
+    - topic: base_fee | payment_method | tablet_cost | continuation | withdrawal | campaign | option
+      status: supported | partially_supported | unverified | not_applicable
+      reason: "検索判断との関係または対象外理由"
+  items:
+    - price_id: PRICE-01
+      topic: base_fee
+      source_url: "公式情報URL"
+      checked_at: "YYYY-MM-DD"
+      applicable_scope: "学年・コース・支払方法・期間"
+      supported_fact: "確認できた料金または条件"
+      limitations: []
+```
+
+料金は公式情報を正本にし、月額だけでなく検索判断に影響する支払方法、タブレット代、継続・退会、キャンペーン条件を`coverage`で判定する。該当しない項目は理由付き`not_applicable`、確認できない項目は調査範囲と影響を持つ`unverified`とし、創作で埋めない。
+
+成約用のCTAは次の戦略を必須にする。
+
+```yaml
+cta_strategy:
+  default_count: 3
+  planned_count: 3
+  count_mode: standard # standard | decreased | increased | explicit_override
+  count_reason: "独立した公式確認場面が3つあるため"
+  explicit_user_count_override: null
+  official_confirmation_moments:
+    - placement_id: CTA-01
+      reader_question: "読者がここで確認したい疑問"
+      official_information_needed: "公式側で確認すべき内容"
+      section_id: H2-02
+      section_heading: "実際のH2見出し"
+      destination_purpose: "資料請求または公式条件確認の目的"
+      lead_copy: "直前本文に合う固有の案内文"
+```
+
+`default_count: 3`は設計開始値であり、必須数・上限ではない。短く狭い記事は1〜2件、独立した確認理由が多い記事は4件以上にできる。`planned_count`は`official_confirmation_moments`と`affiliate_link_plan.placements`と`affiliate_link_manifest.links`の件数に一致させる。増減は`count_reason`へ記録し、5件以上は各配置の確認目的が独立していることを具体的に説明する。文章量だけ、見出し数だけ、過去記事の件数だけを理由に増減しない。`traffic`は`planned_count: 0`、`count_mode: not_applicable`、確認場面とCTAマニフェストを空にする。
+
+候補位置は固定見出しではなく、本文の流れで決める。口コミ・料金記事では教材内容や良い口コミの後、料金・支払・端末条件の後、悪い口コミ・注意点・向き不向きの後が候補になる。お試し・キャンペーン記事では、試せる内容、対象・期間、費用・返却・継続条件の説明後が候補になる。各CTAは異なるリード文を持ち、本文説明の途中、同じ確認理由の反復、隣接配置にはしない。
+
+## 詳細品質ログ・修正履歴・承認済みルール契約
+
+`article_log_context`は`$article-production-log`が生成した一件のユーザー発言の識別子と保存先を保持する。初回指示と事業目的の確認回答、各修正依頼は別の`log_id`にし、同じ記事・`run_id`で履歴を結ぶ。確認前の発言は`pending_confirmation`、明示済みまたは確認回答は目的・原文・出典・主要行動を保存する。親経由の子は同じ`log_id`を再利用し、担当品質軸の観測と検証だけを親へ返す。rawフックは原文取りこぼし防止であり、記事へ関連付けられた完成ログではない。
+
+品質ログの詳細Markdownは、ユーザー原文、依頼文脈、明示要件、AI解釈、未確定、対象外、品質課題、変更前、実施内容、変更しなかった範囲、変更後、検証、学習分類、継続候補、ユーザー判断、未解決事項を別の章にする。正本記事が存在する場合は変更前後をハッシュ付き証拠へ保存する。ビルド全体、キャッシュ、全ツール出力は複製しない。
+
+`article_feedback_context`は`$article-skill-feedback`が生成した値を保持し、手作業で`active`ルールを追加しない。`article_business_purpose`を必須の解決条件に含める。`active_rules`の各要素には少なくとも`rule_id`、`revision`、`proposal_sha256`、`rule_text`、`scope`、`not_applicable_to`、`acceptance_criteria`、`release_id`、`release_sha256`を含める。旧ルールに`scope.business_purposes`がない場合だけ後方互換として`["*"]`と解釈し、新しい目的別ルールでは必ず明示する。
+
+子スキルへは、同じ`run_id`、`parent_run_id`、`entry_skill`、`active_rule_set_id`と、当該`target_skill`・`stage`に一致するルールだけを渡す。本文作成では`quality_profile`、UIでは`required_elements`・`forbidden_elements`・`preserve_elements`など、既存の受理可能な入力へ意味を変えず対応付ける。既存型に受け口がない場合は、任意フィールドを付けるだけで反映済みにせず、接続変更要求または`blocked`とする。
+
+各工程の結果には、適用対象だったルールごとに次を実行状態として持つ。これは記事本文へ出力しない。
+
+```yaml
+rule_applications:
+  - rule_id: ""
+    revision: ""
+    proposal_sha256: ""
+    target_skill: ""
+    stage: ""
+    result: applied | not_applicable | blocked
+    artifact_location: ""
+    verification: ""
+```
+
+`applied`は子への入力送信ではなく、成果物上の該当箇所と受入基準を検査できた場合だけ使う。記録・候補・承認待ち・却下・撤回済みの状態は`active_rules`へ含めない。空集合は通常実行を妨げない。索引・版・リリースが欠落または破損した場合は`ledger_status: degraded`とし、未確認履歴から復元せず、ルール依存範囲と通常工程の継続可否を分けて報告する。
+
+記事への修正依頼を扱う場合、編集前の`correction_request`と検証後の`correction_result`を同じ対象記事・`parent_run_id`へ結び付ける。両イベントIDは`article_log_context.log_id`へ関連付ける。親子は同じ`event_key`を再利用し、内容が異なる同一キーを別イベントへ変換しない。記事修正の承認は`article_feedback_context`の有効ルールを変更しない。
+
 ## 実装計画とTODO
 
-`schema_version: "2.6"`の新しい記事実行では、計画とTODOを次の形で実行状態に保持する。
+`schema_version: "2.7"`の新しい記事実行では、計画とTODOを次の形で実行状態に保持する。
 
 ```yaml
 orchestration:
@@ -123,7 +292,7 @@ orchestration:
 
 一つのTODOは、単独で検証できる一つの成果物または判定を持つ。強く依存する作業は実行前にまとめ、TODOは依存順に直接実行する。前回と同じ根本原因なら`same_root_cause_count`を増やす。原因が変わった場合は連続回数を1、構造的再設計回数を0とし、受入時は両方を0、`last_root_cause`を`null`へ戻す。構造的再設計は一つの根本原因につき`structural_redesign_count: 1`までとし、その後も同じ原因が残る場合は`blocked`にする。ユーザー判断が必要な場合は`blocker_type: needs_user_decision`を使い、新しい状態名を追加しない。
 
-更新前に完成した2.5以前の記事・成果物を自動変更・自動失格にしない。途中実行は影響する未完了工程から2.6の直接実行へ移行し、必要な設計を確定する。旧版の成果物は下記の影響判定で扱う。旧固定評価軸を併記せず、検索意図に基づく回答・条件・評価軸を保持する。公開権限・ファイル境界は変えない。最終プレビューが未表示なら統合検査後に表示する。
+更新前に完成した2.6以前の記事・成果物を自動変更・自動失格にしない。途中実行は影響する未完了工程から2.7の直接実行へ移行し、必要な設計を確定する。旧版の成果物は下記の影響判定で扱う。旧固定評価軸を併記せず、検索意図に基づく回答・条件・評価軸を保持する。公開権限・ファイル境界は変えない。最終プレビューが未表示なら統合検査後に表示する。
 
 ## 直接実行の記録と変更要求
 
@@ -260,7 +429,7 @@ outline:
 
 `reader_question`と`reader_outcome`は2.1以降、`reader_value_first_read`、`evidence_accuracy_review`、`reader_value_regression`は2.2以降の新しい見出し工程で必須とする。更新前に完成した記事や見出し構成を自動変更または自動失格にしない。2.1で受入済みの見出しを途中実行へ引き継ぐ場合は、見出し自体を理由なく作り直さず、二段階検収だけを追加して、不合格の場合に限り見出しTODOを再開する。2.1より前の構成を再利用する場合は見出し工程を新契約で再評価し、欠落項目を推測で補完しない。
 
-2.6では、見出しスキルの完全な出力に加えて`title_contract`を保持する。`recommended_title`と`selected_title`は同じ合格候補とし、`core_promise`は読者へ約束する中心価値を一つ記録する。タイトルへ入れない補足論点は`supporting_topics`へ分ける。`all_candidate_gates_pass: true`と`parent_first_read: pass`の両方がない構成を採用せず、frontmatter保存後に`selected_title`との完全一致を検査する。
+2.7では、見出しスキルの完全な出力に加えて`title_contract`を保持する。`recommended_title`と`selected_title`は同じ合格候補とし、`core_promise`は読者へ約束する中心価値を一つ記録する。タイトルへ入れない補足論点は`supporting_topics`へ分ける。`all_candidate_gates_pass: true`と`parent_first_read: pass`の両方がない構成を採用せず、frontmatter保存後に`selected_title`との完全一致を検査する。
 
 第1段階は設計理由を先に見ず、見出しだけで主質問への回答・読者価値・具体性・反復を確認する。第2段階は完全な調査と原資料で事実・数字・時点・条件を確認する。不合格なら見出し設計を修正して両段階を再確認する。同一実行者による確認を独立検証と呼ばない。
 
@@ -284,10 +453,13 @@ quality_profile:
   required:
     - "主要評価軸に沿って、約束した疑問に本文で答える"
     - "事実と解釈を分け、根拠のある範囲と不明点を保持する"
+    - "口コミを扱う節では、各口コミに利用状況・評価対象・判断への意味を含め、一言感想や同義の水増しにしない"
+    - "料金を扱う節では、金額と支払・端末・継続・退会等の条件を読者の判断へつなぐ"
   preferred: []
   prohibited:
     - "検索意図と無関係な保護者管理論への置き換え"
     - "教材評価で支援未調査のまま家庭の努力へ解決を委ねること"
+    - "確認できない悪い口コミの創作、または公式仕様上の注意点を口コミとして表現すること"
 input_format: markdown
 review_scope: section
 quality_report: summary
@@ -318,34 +490,33 @@ emphasis_plan:
       exact_text: "短い重要語句"
       role: conclusion | condition | deadline | caution | action
       reason: "流し読みでも判断に必要な理由"
-  not_emphasized:
-    - answer_id: A-02
-      reason: "本文全体の理解に必要だが、短い強調語句へ切り出すと誤解を招く"
 ```
 
 章IDは`lead`、`H2-01`、`H3-01-01`のように出現順で付け、表示用アンカーとは区別する。必要なら`heading_text`で見出し文を追加照合する。H2指定は配下のH3を含み、H3指定はそのH3の範囲に限定する。同じ語句が別章にあるだけでは満たさない。
 
-空の計画を`accepted`にしない。固定件数は設けない。主結論、重要条件、期限、注意、次の行動のうち流し読みで失われやすい語句を選び、段落全体、同一語句の反復、装飾目的の強調を禁止する。UI化後は各`exact_text`が対応章の短い`strong`要素にあり、意味・条件が変わっていないことを静的検査と実表示で確認する。
+空の計画を`accepted`にしない。本文中の各H2・H3には、見出しが答える結論を示す短い単語または句を`role: conclusion`で少なくとも1件置く。固定件数は設けず、見出し自体、段落全体、同一語句の反復、装飾目的の強調を禁止する。UI化後は各`exact_text`が対応章の本文中の短い`strong`要素にあり、見出し結論の計画漏れがなく、意味・条件が変わっていないことを静的検査と実表示で確認する。
 
 ## 内部リンク契約
 
 `$article-internal-linker`の`plan`、`insert`、`audit`を順に直接実行し、公開確認済み採用先を`approved_destination_id`へ固定する。正本情報源と承認契約は変更しない。本スキルは次を保持する。
 
 - 現在の一括承認に結び付いた`link_intents`
+- 各リンク先の`destination_role`と`presentation`
 - 挿入前本文
 - `body_with_internal_links`
 - `expected_link_manifest`
+- `cta_strategy`
 - `affiliate_link_plan`と`affiliate_link_manifest`
 - 現在実行で確認した`site_rendering_capabilities`
 - `result.status`と`blocks_draft`
 
-`blocked`または`blocks_draft: true`なら、内部リンク済み本文を採用しない。候補URLは、現在実行で公開確認済みの正本からだけ渡す。
+`blocked`または`blocks_draft: true`なら、内部リンク済み本文を採用しない。候補URLは、現在実行で公開確認済みの正本からだけ渡す。本文と直接関係する自サイト候補がある場合は、対応する`link_intent`と`expected_link_manifest.new_links`を必ず持つ。口コミ、料金紹介、比較、その他の成約へ直接つながる記事は`conversion_direct`かつ`image_card`、それ以外の関連記事は`related_support`かつ`text_link`とする。画像付きカードは最大2件とし、件数を理由に表示形式を変更しない。マニフェストが空であることを理由に無関係な内部リンクを追加しない。
 
-進研ゼミCTAは、タイトル、想定読者、結論、承認済み設計が同じ講座を指し、自然な配置章があり、`site_rendering_capabilities.affiliate_cta_component`が`supported: true`かつ`component_id: shinken_zemi_cta_v1`の場合だけ`eligible`とする。親は講座URLを複製せず、子スキルの正本契約と出力を使う。`not_applicable`ではCTAを追加せず、講座・URL・部品・監査の不一致は`blocked`として元本文を保持する。
+講座別CTAは、タイトル、想定読者、結論、承認済み設計が同じ講座を指し、`cta_strategy`の各公式確認場面に自然な配置章があり、プロバイダーに対応する`site_rendering_capabilities.affiliate_cta_component`が`supported: true`の場合だけ`eligible`とする。進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`を使う。親は講座URLを複製せず、子スキルの正本契約と出力を使う。スマイルゼミの記事では資料請求への誘導だけを許可する。`planned_count`、確認場面、計画、マニフェスト、実CTAの件数または配置IDが一致しない場合、同じ案内文・確認理由が反復する場合、講座・URL・部品・監査が一致しない場合は`blocked`として元本文を保持する。
 
 ## 公式・権威メディア画像収集契約
 
-`$official-site-evidence-capture`へ完成本文を読み取り専用で毎回渡す。新規2.6は依存スキルのスキーマ1.3、`authorization.mode: orchestrated_prepublication`を使用する。`capture_phase: discover / capture_mode: analyze_final_body`で候補を受け、選んだ完全候補レコードを`capture_phase: capture / capture_mode: explicit_requests`へ渡す。戦略・方法順・上限・試行条件は`capture_preferences`へ写す。本スキル固有の`required`・`no_allowed_asset_action`・`placement_mode`は渡さない。
+`$official-site-evidence-capture`へ完成本文を読み取り専用で毎回渡す。新規2.7は依存スキルのスキーマ1.3、`authorization.mode: orchestrated_prepublication`を使用する。`capture_phase: discover / capture_mode: analyze_final_body`で候補を受け、選んだ完全候補レコードを`capture_phase: capture / capture_mode: explicit_requests`へ渡す。戦略・方法順・上限・試行条件は`capture_preferences`へ写す。本スキル固有の`required`・`no_allowed_asset_action`・`placement_mode`は渡さない。
 
 本スキルの実行での保存は、候補が`authorization.scope.article_root\images\evidence`内にあり、権利状態が`allowed`で、`local_save_allowed`と`article_publication_allowed`がともに`true`の場合だけ認める。単独利用時の候補別承認は依存スキルの正本契約に従う。
 
@@ -397,7 +568,7 @@ evidence_capture:
 
 本スキルの実行では`READY`、`PARTIAL`、`READY_WITHOUT_ASSETS`、`NOT_APPLICABLE`を受理できる。単独利用では`SKIPPED_BY_USER`も受理できる。`BLOCKED`は入力・権限・依存機能を解決するまで受理しない。権利条件を満たす候補があるのに取得機能が使えない、または2回失敗した状態を`READY_WITHOUT_ASSETS`へ変換しない。画像が0件でも、それだけを理由に本文や記事全体を不合格にしない。
 
-旧1.1・1.2を読めるが、新規2.6は1.3を使用する。取得時は`capture_attempts`、選定ID、各assetの`candidate_id`、使用設計版を照合する。無画像のときは`evidence_discovery`を検収し、`evidence_result.source_phase: discover`に理由を残す。候補探索だけを取得完了とは報告しない。
+旧1.1・1.2を読めるが、新規2.7は1.3を使用する。取得時は`capture_attempts`、選定ID、各assetの`candidate_id`、使用設計版を照合する。無画像のときは`evidence_discovery`を検収し、`evidence_result.source_phase: discover`に理由を残す。候補探索だけを取得完了とは報告しない。
 
 次工程は、対応スキーマ、ファイル存在、SHA-256、`article_publication_allowed: true`、帰属表示、加工可否を再検証する。引継ぎデータを失った画像や、ファイル名からしか出典を判断できない画像を使用しない。この契約は記事編集・画像配置の権限を付与しない。
 
@@ -424,11 +595,14 @@ required_elements:
         reason: "流し読みでも判断に必要な理由"
 preserve_elements:
   - section: "承認済みCTA配置章"
-    element: "shinken_zemi_cta_v1"
+    element: "provider-specific affiliate CTA component"
     preserve: "固定DOM、対象講座、href、計測画像src、rel、表示文、配置"
+  - section: "承認済み内部リンク配置章"
+    element: "internal_link_presentation"
+    preserve: "destination_role、presentation、href、アンカーまたは紹介文、配置"
 forbidden_elements:
   - "検索意図と異なる固定の学習動作・保護者管理論への置き換え"
-  - "許可されていない進研ゼミ公式サイトへの単純誘導リンク"
+  - "許可されていない講座公式サイトへの単純誘導リンク"
 approved_internal_links: []
 approved_assets: []
 evidence_capture: null # 取得時は子の1.3出力全体。無画像時はnull
@@ -446,7 +620,7 @@ editing_mode: structure-light-edit
 publication_state: draft
 ```
 
-`audience`には検索者とサービス利用者の違いを、`article_goal`には主要評価軸と主質問を、`desired_reader_action`には読後の到達点を含める。`required_elements`・`forbidden_elements`は本文の意味保持条件とする。`emphasis_plan`は固定件数を持たず、短い完全一致語句、章、回答ID、役割、理由を渡す。CTA挿入済みの場合は`preserve_elements`で固定DOMと属性を保持する。旧固定評価軸を併記しない。本文とUIの両接続で、回答・出典・適用条件・不明点・評価軸、強調語句、CTAが失われていないか確認する。依存スキル自身の固定指示と競合する場合は接続を合格にせず、変更が必要な依存スキル箇所を提示して権限を確認する。
+`audience`には検索者とサービス利用者の違いを、`article_goal`には主要評価軸と主質問を、`desired_reader_action`には読後の到達点を含める。`required_elements`・`forbidden_elements`は本文の意味保持条件とする。`emphasis_plan`は固定件数を持たず、短い完全一致語句、章、回答ID、役割、理由を渡す。`preserve_elements`でCTAの固定DOMと属性、および内部リンクの`destination_role`、`presentation`、URL、配置を保持する。旧固定評価軸を併記しない。本文とUIの両接続で、回答・出典・適用条件・不明点・評価軸、強調語句、CTA、内部リンク表示形式が失われていないか確認する。依存スキル自身の固定指示と競合する場合は接続を合格にせず、変更が必要な依存スキル箇所を提示して権限を確認する。
 
 依存スキルはファイルを書かず、`coded_content`、`component_map`、`validation_report`、`unresolved_items`、`change_summary`を返す。採用画像は、パス・ハッシュ・掲載可否・加工可否・帰属表示・alt・対応見出しと主張・モバイル可読性が確認できる場合だけ配置する。条件を満たさない保存画像は`unresolved_items`へ`saved_unplaced`として理由を返す。受理済み`coded_content`だけを保存して差分を確認する。`autonomous`実行では子が返さない`used_design_version`を要求せず、親が保持する現行設計と`validation_report.emphasis`、本文、保持対象を照合する。`needs_parent_input`なら親が設計入力を補完する。`unsupported_component`は既存部品で再設計して直接再変換する。共通CSS変更が必要なら`design_migration_required`として停止する。
 
@@ -456,9 +630,10 @@ publication_state: draft
 
 ```yaml
 affiliate:
-  disposition: eligible | not_applicable | deferred | blocked
-  provider: shinken_zemi | null
-  target_course: elementary | junior_high | high | null
+  required: true | false
+  disposition: eligible | not_applicable | blocked
+  provider: shinken_zemi | smile_zemi | null
+  target_course: preschool | elementary | junior_high | high | null
   affiliate_link_plan: null
   affiliate_link_manifest: null
   component_check: pending
@@ -467,20 +642,17 @@ affiliate:
   reason_code: null
   placeholders_inserted: []
 external_link_policy:
-  mode: prohibit_generic_shinken_zemi_when_affiliate_eligible | allow_task_required_only | not_applicable
+  mode: allow_task_required_only
   classified_links:
     - href: ""
       kind: internal | affiliate_cta | generic_official_navigation | task_required_official | evidence_reference
       reason: ""
-  allowed_external_links:
-    - href: ""
-      reason: "読者が本文から直接移動する必要"
+  allowed_external_links: [] # 既定は空。ユーザーの当該URL掲載許可がある場合だけ別途記録
 ```
 
-- `eligible`は、子スキルの`affiliate_link_plan.status: eligible`、対象講座、配置章、共通部品確認がそろう場合だけ使用する。CTAを最大1件挿入し、HTML化後の`audit`合格を必要とする。
-- `not_applicable`は、複数学年、講座横断、対象不明、または進研ゼミへの次行動を案内しない場合に使い、CTA 0件と理由を記録する。
-- `deferred`と`affiliate_inventory_pending`は、記事に必要な承認済みアフィリエイト契約が実際に存在しない場合だけ使う。
-- `blocked`は、講座不一致、未承認URL、共通部品欠落、挿入・監査不合格に使う。`not_applicable`や`deferred`へ変換しない。
+- `conversion`では`required: true`とする。`eligible`は、子スキルの`affiliate_link_plan.status: eligible`、対象講座、`cta_strategy`の全配置章、プロバイダー対応の共通部品確認がそろう場合だけ使用する。標準3件を起点に意味から増減した全配置を、子の`affiliate_link_plan.placements`と`affiliate_link_manifest.links`へ列挙し、HTML化後の件数・教材・位置・意味別`audit`合格を必要とする。
+- `conversion`の`blocked`は、対象講座を一意に確定できない、承認済みアフィリエイトURLがない、自然な配置章がない、講座不一致、未承認URL、共通部品欠落、または挿入・監査不合格の場合に使う。記事範囲をCTAのために変更せず、CTAなしの完成状態へ変換しない。
+- `traffic`では`required: false`、`disposition: not_applicable`、`provider: null`、`target_course: null`、`affiliate_link_plan.status: not_applicable`、`affiliate_link_manifest.links: []`とする。本文・HTML・マニフェストにCTA、計測画像、ASP URLを残さない。主成約記事の画像付き内部リンクカードを必須にする。
 
 すべての状態で禁止する。
 
@@ -489,9 +661,10 @@ external_link_policy:
 - リンク先がないCTAや申込み誘導
 - 内部リンクへの計測URL混入
 - `eligible`で監査前に「アフィリエイト対応済み」と報告すること
-- `not_applicable`の理由がないままCTAを省略すること
+- `conversion`でCTAを省略したまま完成状態にすること
+- `traffic`へCTA、計測画像、ASP URLを混入させること
 
-`eligible`では、同じ公式講座トップへ単に誘導する非アフィリエイトリンクを`generic_official_navigation`として禁止する。公式FAQ・規約等は根拠記録へ保持し、手続き・交換・ログイン等のため本文から直接移動する必要がある場合だけ`task_required_official`として`allowed_external_links`へURLと理由を記録する。静的検査は許可外の進研ゼミ公式リンクを検出し、意味上の分類は親の設計検収で確定する。
+リンク掲載は [本文リンク制限と検査](article-link-policy.md) に従う。公式FAQ・規約・論文を含む外部URLは根拠記録へ保持し、本文へ出力しない。`allowed_external_links`は通常空配列であり、ユーザーの当該記事・URLの明示許可原文と出典がある場合だけ記入する。手続き上の必要性・情報の権威性を理由にAIが例外を作らない。`allow_task_required_only`という既存の引数名も、今後はこの明示許可の意味で扱う。
 
 ## サムネイル・H2見出し画像契約
 
@@ -602,39 +775,52 @@ section_images:
 
 根拠画像は、本スキルの実行では権利条件と一括承認範囲が合格した場合だけ作る。単独利用では候補ごとの保存承認を必要とする。記事のfrontmatterは実行時スキーマに合わせる。H1は本文へ入れない。画像パスは記事フォルダ内の実在ファイルを指す相対パスにする。
 
-リサーチレポート、記事設計書、TODO、品質レポートは既定でファイル保存せず、実行状態と最終報告だけに保持する。
+リサーチレポート、記事設計書、TODOは既定でファイル保存せず、実行状態と最終報告だけに保持する。例外として、ユーザーが継続的に許可した`$article-production-log`の依頼単位Markdown、構造化レコード、変更前後の限定証拠、記事別履歴、横断レポートはブログリポジトリ外の専用ルートへ保存する。
 
 ## 静的検査入力契約
 
-`scripts/validate-cloudflare-article.ps1`には中間ファイルを作らず、実行状態から次の名前付き引数を直接渡す。`basic`（既定）は簡易検査であり、本スキルの完成判定には必ず`parent`を使う。
+成約用のアフィリエイト期待マニフェストは`cta_strategy.planned_count`と同数にし、各`placement_id`・プロバイダー・講座・配置先H2の`section_heading`・意味情報を全件渡す。CTA外側DOMには対応する`data-placement-id`を付ける。複数配置では単独の`ExpectedAffiliateProvider`と`ExpectedAffiliateCourse`を全件の代用にせず、マニフェストの各項目を検証する。これら二つの単独指定は1件の親検査で必要、複数件では省略できる。集客用では`cta_strategy.planned_count: 0`、`affiliate_link_manifest.links`を空配列で渡し、内部リンク期待マニフェストに`required: true`の`conversion_direct`画像カードを1件置く。
+
+`scripts/validate-cloudflare-article.ps1`には中間ファイルを作らず、実行状態から次の名前付き引数を直接渡す。`basic`（既定）はビルド前の事前検査であり、本スキルの完成判定には、ビルド後に最終記事HTMLの`RenderedHtmlPath`を伴う`parent`を使う。HTMLパス未提供は完成検査の入力不足として失敗する。
 
 ```powershell
 -ValidationMode parent
+-ExpectedArticleBusinessPurpose <conversion | traffic>
 -ArticlePath <正本index.md>
 -ProjectRoot <project_root>
 -ExpectedTitle <title_contract.selected_title>
--ExpectedAffiliateDisposition <eligible | not_applicable | deferred | blocked>
--ExpectedAffiliateCourse <elementary | junior_high | high> # eligibleの場合だけ必須
--ExpectedEmphasisPlanJson <emphasis_plan.itemsを配列としてConvertTo-Json -Depth 8 -Compressした文字列>
--ExternalLinkPolicy <prohibit_generic_shinken_zemi_when_affiliate_eligible | allow_task_required_only | not_applicable>
+-ExpectedArticleProfileJson <article_profile全体のJSON文字列>
+-ExpectedCtaStrategyJson <cta_strategy全体のJSON文字列>
+-ExpectedReviewEvidencePlanJson <conversion_review_priceのreview_evidence_plan。扱わない場合もapplicability: not_applicableを渡す>
+-ExpectedPriceEvidencePlanJson <conversion_review_priceのprice_evidence_plan。扱わない場合もapplicability: not_applicableを渡す>
+-ExpectedAffiliateDisposition <conversionではeligible、trafficではnot_applicable>
+-ExpectedAffiliateProvider <conversionの単独CTAだけ: shinken_zemi | smile_zemi>
+-ExpectedAffiliateCourse <conversionの単独CTAだけ: preschool | elementary | junior_high | high>
+-ExpectedEmphasisPlanJson <emphasis_plan.itemsを配列JSONとして渡す文字列>
+-ExpectedInternalLinkManifestJson <expected_link_manifest全体のJSON文字列>
+-ExpectedAffiliateLinkManifestJson <affiliate_link_manifest全体のJSON文字列>
+-ExternalLinkPolicy allow_task_required_only
 -AllowedExternalHref <external_link_policy.allowed_external_links[].hrefの配列>
+-AllowedExternalApprovalJson <external_link_policy.allowed_external_linksのJSON配列。既定は[]>
+-RenderedHtmlPath <ビルド後の対象記事HTMLの絶対パス>
 ```
 
-JSONをシェルのコマンド文字列へ直接連結せず、同じPowerShell内の変数で渡す。単独`basic`の既存`-ExpectedEmphasisPhrase`は維持するが、`parent`の章付き計画を代替しない。
+JSONをシェルのコマンド文字列へ直接連結せず、同じPowerShell内の変数で渡す。強調計画は1件だけでも配列として直列化する。単独`basic`の既存`-ExpectedEmphasisPhrase`は維持するが、`parent`の章付き計画・内部リンク期待マニフェスト・アフィリエイト期待マニフェストを代替しない。
 
-親の受入条件は、`status: PASS`、`validation_mode: parent`、`parent_contract_pass: true`、`checks`の`input_contract`・`article_structure`・`title_contract`・`affiliate`・`external_links`・`emphasis`・`article_integrity`がすべて`pass`、`article_path`と`article_sha256`が最終正本と一致すること。未実施・項目欠落・`basic`の`PASS`を完成にしない。`rendered_emphasis: not_checked`は静的検査の範囲表示であり、実表示で別途全語句を確認する。
+親の受入条件は、`status: PASS`、`validation_mode: parent`、`article_business_purpose`が確認済み値と一致、`parent_contract_pass: true`、`checks`の`input_contract`・`article_profile`・`review_price_evidence`・`cta_strategy`・`article_structure`・`title_contract`・`internal_links`・`affiliate`・`external_links`・`emphasis`・`article_integrity`がすべて`pass`、`article_path`と`article_sha256`が最終正本と一致すること。成約用では`planned_count`とCTAマニフェストが1件以上で一致し、集客用では計画・マニフェスト・実CTAが0件かつ必須の主成約記事カード1件を必要とする。未実施・項目欠落・`basic`の`PASS`を完成にしない。`rendered_emphasis: not_checked`は静的検査の範囲表示であり、実表示で別途全語句を確認する。
 
 強調の静的検査は既存のNode.jsと対象プロジェクトのsatteriでMarkdown/HTMLを解析し、章と表示本文の`strong`を照合する。コメント・コード・明示的な非表示要素を除外し、解析に失敗した場合は正規表現だけで`PASS`へ切り替えない。
 
-静的検査は、タイトル完全一致、CTA件数と対象講座、計画済み強調語句のマークアップ、許可外の進研ゼミ公式リンクを確認する。タイトルの興味・詰め込み、強調語句を重要とする意味判断、公式リンクを本文に残す必要性は、見出し・記事設計・UIの各ゲートで判定する。CTAの正確なURL、計測画像、属性、固定DOM、5画面幅表示は`$article-internal-linker`の`audit`、H2画像の対応と実在は`check-h2-images.ps1`を正本とし、親検査へ重複実装しない。
+静的検査は、タイトル完全一致、記事プロファイル、口コミ・料金証拠計画、CTA戦略、各H2・H3の結論強調計画と指定章の`strong`、内部リンク期待マニフェストの`href`・テキストリンク／画像カード形式・画像カード上限、CTA期待マニフェストのプロバイダー・アフィリエイト`href`・計測画像・`rel`・対象講座・配置ID・意味情報、未承認外部誘導を確認する。内部リンク先の役割、口コミ要約の情報量、強調語句の意味は各専門ゲートで検収する。外部誘導は必要性を理由にAIが許可せず、ユーザー明示許可と照合する。原稿だけの検査では`rendered.status: NOT_CHECKED`となるため、ビルド後に最終HTMLを渡して両方`PASS`を必要とする。CTAのDOM復元URL、固定DOM、直前文脈、間隔、5画面幅表示は`$article-internal-linker`の`audit`、H2画像の対応と実在は`check-h2-images.ps1`を正本とし、親検査へ重複実装しない。
 
 ## 最終出力
 
 ```yaml
 result:
-  status: READY_FOR_HUMAN_REVIEW | READY_FOR_HUMAN_REVIEW_WITH_AFFILIATE_DEFERRED | BLOCKED
+  status: READY_FOR_HUMAN_REVIEW | BLOCKED
   publication_status: not_published
-  affiliate_disposition: eligible | not_applicable | deferred | blocked
+  article_business_purpose: conversion | traffic
+  affiliate_disposition: eligible | not_applicable | blocked
   affiliate_reason_code: null
 orchestration:
   plan_version: 1
@@ -653,12 +839,19 @@ checks:
   answer_evidence_review: pass
   outline: pass
   title_contract: pass
+  article_profile: pass
+  review_price_evidence: pass | not_applicable
+  cta_strategy: pass
   body: article_pass
   emphasis_plan: pass
   content_acceptance: pass # 本文の回答箇所と根拠で検収。ビルド・表示とは別
   internal_links: pass
-  affiliate_insert: pass | not_applicable | deferred
-  affiliate_audit: pass | not_applicable | deferred
+  internal_link_presentation: pass
+  image_card_count: 0 # 0〜2。成約直結記事の候補がある場合だけ使用
+  affiliate_insert: pass | not_applicable
+  affiliate_audit: pass
+  primary_conversion_article_card: pass | not_applicable
+  funnel_alignment: pass
   disallowed_external_links: 0
   evidence_capture: accepted_status # pass | partial | valid_no_assets | not_applicable。本スキルの実行でskipped_by_userは使わない
   evidence_capture_schema: "1.3"
@@ -684,4 +877,4 @@ human_review:
   publication_approved: false
 ```
 
-`eligible`はCTA挿入と最終監査の合格、`not_applicable`は理由とCTA 0件の確認後に`READY_FOR_HUMAN_REVIEW`へ進める。`deferred`だけが未完了で他の必須工程が合格した場合は`READY_FOR_HUMAN_REVIEW_WITH_AFFILIATE_DEFERRED`とする。`blocked`またはその他の必須工程不合格は`BLOCKED`にする。本文プレビューを開けたがサムネイルまたはH2見出し画像が未完了なら、`preview.status: opened_with_asset_pending`を返し、完成状態にはしない。統合検査後の最終記事画面をユーザーへ表示できない場合は`preview.status: display_blocked`、`preview.presented_to_user: false`とし、URL提示だけで完成扱いにしない。
+成約用は標準3件を起点に記事ごとの公式確認場面から増減したCTAが、計画・マニフェスト・本文・最終HTMLで一致し、挿入と最終監査が合格した場合だけ`READY_FOR_HUMAN_REVIEW`へ進める。集客用はアフィリエイトが0件で、主成約記事の画像付き内部リンクカード1件が計画どおりにあり、記事内で検索意図へ十分回答し、挿入と最終監査が合格した場合だけ進める。目的別主要導線がない、`blocked`、またはその他の必須工程不合格は`BLOCKED`にする。本文プレビューを開けたがサムネイルまたはH2見出し画像が未完了なら、`preview.status: opened_with_asset_pending`を返し、完成状態にはしない。統合検査後の最終記事画面をユーザーへ表示できない場合は`preview.status: display_blocked`、`preview.presented_to_user: false`とし、URL提示だけで完成扱いにしない。

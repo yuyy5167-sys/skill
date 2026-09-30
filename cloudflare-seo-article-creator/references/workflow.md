@@ -2,22 +2,47 @@
 
 ## 0. 実行前確認
 
-1. メインキーワードと、記事を作成する明示的な指示があることを確認する。「作成してください」「作ってください」など表現が異なり、依頼文に「新規」という語がなくても、既存記事ではなく本スキルの新規記事範囲だと確認できれば、この組合せを1記事分の`orchestrated_prepublication`承認とする。
-2. 対象が`C:\AIフォルダ\ブログ\site`の新規記事であることを確認する。既存記事のリライトなら本スキルを使用しない。
-3. `C:\AIフォルダ\ブログ\クラウドフレア\記事装飾ルールブック.md`を全文読む。
-4. 対象プロジェクトの`AGENTS.md`、`src\content.config.ts`、記事ルート、現在のfrontmatterを読み、実装時点のスキーマを確認する。
-5. 既存の未コミット変更を読み取り確認し、ユーザーの作業へ触れない。
-6. 必要な依存スキルと表示手段を確認し、現行`SKILL.md`と必要な参照文書を工程直前に読む。PowerShell 5.1以上、Node.js、Python、既存`node_modules`のsatteriとAstroを確認する。PS5.1ではUTF-8 BOM付きps1を`powershell.exe -NoProfile -ExecutionPolicy Bypass -File <script>`で実行できる。`Bypass`は当該子プロセスだけとし、永続ポリシー変更や依存関係の自動インストールをしない。
-7. `$article-internal-linker`の現行契約を読み、進研ゼミ講座別CTAの適用可否と共通CSSの有無を現在実行で判定する。承認済み契約が実際にない場合だけ`affiliate_inventory_pending`とし、仮リンクや仮CTAを作らない。
-8. 記事ID、`index.md`、サムネイルと各H2見出し画像を含む画像フォルダ、作成理由、`draft: true`、上書き・公開禁止を実行範囲通知として示す。これは返信待ちの承認ゲートではなく、通知後は最終プレビューのユーザー表示まで進める。
+1. メインキーワードと、記事を作成する明示的な指示があることを確認する。「作成してください」「作ってください」など表現が異なり、依頼文に「新規」という語がなくても、既存記事ではなく本スキルの新規記事範囲だと確認できれば対象にする。
+2. ユーザーへ`成約用`か`集客用`かを確認する。依頼文に明記されていれば再質問せず、その原文を確認回答として記録する。明記がなく、または「任せる」など選択が確定しない場合は、定義と推奨理由を示して選択を待つ。キーワード・記事型・履歴から推測しない。
+3. `article_business_purpose.status: confirmed`、`type: conversion | traffic`、`confirmed_by_user: true`、確認原文と出典、目的別`primary_action`がそろうまで、調査・タイトル・見出し・本文・リンク・画像・ファイル・プレビューへ進まない。依頼原文のログ記録だけは実行できる。
+4. 対象が`C:\AIフォルダ\ブログ\site`の新規記事であることを確認する。既存記事のリライトなら本スキルを使用しない。
+5. `C:\AIフォルダ\ブログ\クラウドフレア\記事装飾ルールブック.md`を全文読む。
+6. 対象プロジェクトの`AGENTS.md`、`src\content.config.ts`、記事ルート、現在のfrontmatterを読み、実装時点のスキーマを確認する。事業目的は実行状態とログへ保持し、未対応のfrontmatterフィールドを追加しない。
+7. 既存の未コミット変更を読み取り確認し、ユーザーの作業へ触れない。
+8. 必要な依存スキルと表示手段を確認し、現行`SKILL.md`と必要な参照文書を工程直前に読む。PowerShell 5.1以上、Node.js、Python、既存`node_modules`のsatteriとAstroを確認する。PS5.1ではUTF-8 BOM付きps1を`powershell.exe -NoProfile -ExecutionPolicy Bypass -File <script>`で実行できる。`Bypass`は当該子プロセスだけとし、永続ポリシー変更や依存関係の自動インストールをしない。
+9. `$article-internal-linker`の現行契約を読み、成約用では講座別アフィリエイトURLとCTA共通CSS、集客用では主リンク先が公開確認済み成約用記事である証拠と内部リンクカード機能を確認する。仮リンクや仮CTAを作らない。
+10. 確認済み事業目的、記事ID、`index.md`、サムネイルと各H2見出し画像を含む画像フォルダ、作成理由、主要導線、`draft: true`、上書き・公開禁止を実行範囲通知として示す。ここから1記事分の`orchestrated_prepublication`一括承認が成立し、通知後は最終プレビューのユーザー表示まで進める。
 
 一括承認の範囲内では、計画、タイトル選定、調査、見出し、本文、内部リンク、権利条件を満たす画像、サムネイル、各H2見出し画像、保存、検査、修正、隔離プレビューについて途中承認を追加しない。計画書、TODO、進捗、検収結果は進行共有として提示する。ユーザーが停止または区切りでの一時停止を指示した場合は、安全な区切りで止めて状態を保持し、再開指示を待つ。
 
-スキーマとルールブックが矛盾する場合は、記事ファイルへ未対応フィールドを追加せず、矛盾、影響、必要なサイト側変更を報告する。サイト側変更を記事作成へ便乗して実施しない。既存記事変更、上書き、公開、デプロイ、Git操作、ユーザーにしか決められない判断など、一括承認を超える権限が必要な場合だけ`BLOCKED`として停止する。
+スキーマとルールブックが矛盾する場合は、記事ファイルへ未対応フィールドを追加せず、矛盾、影響、必要なサイト側変更を報告する。サイト側変更を記事作成へ便乗して実施しない。既存記事変更、上書き、公開、デプロイ、Git操作、ユーザーにしか決められない判断など、一括承認を超える権限が必要な場合だけ`BLOCKED`として停止する。人間確認後の明示的な公開指示によるGitHub保存だけは、13の事前通知と限定承認がそろった場合に別工程として実行できる。
+
+## 0.25 依頼単位の詳細品質ログ
+
+`$article-production-log`の[接続契約](../../article-production-log/references/integration-contract.md)に従い、ユーザーの今回の発言を一件のログにする。
+
+1. 正規プロジェクト、記事ID、予定記事パス、依頼種別、`run_id`、`parent_run_id`を確定する。
+2. ユーザー原文を改変せず`start-log`へ渡し、文脈、明示要件、AI解釈、未確定事項、対象外、初期品質軸を分離する。事業目的確認前は`pending_confirmation`、明示済みまたは確認回答では`conversion | traffic`、確認原文・出典・主要行動を記録する。フックIDがあれば関連付けるが、フックがなくても直接記録する。
+3. 取得した`article_log_context`を全工程へ渡す。子は同じ発言の別ログを作らず、担当工程で確認した品質課題と検証だけを親へ返す。
+4. 統合検査後、実施内容、変更しなかった範囲、変更前後の証拠、変更ファイル、品質課題、検証、学習分類、継続候補、未解決事項を同じ`log_id`へ`finish-log`する。
+5. 記録の`verify-store`が失敗した場合は保存済みと報告せず、記事成果物の状態とは分けて未記録範囲と再実行条件を報告する。
+
+## 0.5 修正履歴と有効ルールの接続
+
+`$article-skill-feedback`の[親子スキル接続契約](../../article-skill-feedback/references/integration-contract.md)に従い、次を行う。修正依頼では品質ログの`log_id`と本台帳の依頼・結果イベントIDを相互参照する。
+
+1. 正規化した`project_root`が`C:\AIフォルダ\ブログ\site`と一致することを確認し、記事ID、予定記事パス、`run_id`、`parent_run_id`、`entry_skill: cloudflare-seo-article-creator`を固定する。
+2. `target_skill: cloudflare-seo-article-creator`、`stage: orchestration`で有効ルールを取得する。台帳全体や候補ファイルを直接読んでルールを再解釈しない。
+3. 初期の検証済み空集合なら通常工程へ進む。索引が欠落・破損している場合はルール依存の動作だけを止め、既存規約による記事作成を続けられるか判定し、異常と未適用範囲を残す。
+4. `article_business_purpose`を必須条件としてルールを取得する。調査後に`article_type`または`grade`が確定・変更された場合は、同じ実行IDと同じ事業目的で再取得する。取得した集合IDと版を全下流へ引き継ぐ。
+5. 子工程の直前に、対象スキル・工程に一致するルールだけを既存入力契約へ変換する。受け口がなければ、渡しただけで完了にせず接続変更または`BLOCKED`を記録する。
+6. 記事への修正依頼をこの実行で扱う場合は、編集前に原文を`record-request`、実物検証後に結果を`record-result`へ記録する。親子は同じ`event_key`を使う。
+
+継続ルールは`active`だけを使う。現在の明示指示、固定された安全・権限・事実保全規則、各専門スキルの通常裁量を置き換えない。記事修正への「はい」と継続ルール採用を同じ承認として扱わない。
 
 ## 1. 入力の固定
 
-メインキーワードは必須とする。次の不足が記事の意図、結論、記事分割、実体験表現、保存先を変える場合だけ質問する。
+メインキーワードと確認済み事業目的は必須とする。事業目的以外は、次の不足が記事の意図、結論、記事分割、実体験表現、保存先を変える場合だけ質問する。
 
 - 対象読者と記事の目的
 - 対象学年またはカテゴリー
@@ -28,6 +53,8 @@
 未指定事項を創作せず、影響しないものは既定値または未指定として進める。
 
 記事全体で検索者 `search_reader`、サービス利用者 `service_user`、主要評価軸 `primary_decision_axes`を分けて保持する。評価軸は主検索意図から決め、調査後に確定する。教材の操作・理解・復習・継続・管理は、教材の利用体験を評価するときに用いる。料金・契約・手続きが主質問なら、それを中心に答える。
+
+調査後に`article_profile.type`を`conversion_review_price | conversion_other | traffic`へ確定する。口コミ、評判、料金のいずれかが申込み判断の中心にある成約用記事は`conversion_review_price`とし、お試し・キャンペーンなどその他の成約用は`conversion_other`とする。単語だけでなく、主質問と主要判断項目で分類する。
 
 検索意図と関係のない保護者管理論へ置き換えず、教材側の支援を調べないまま家庭の努力に解決を委ねない。下流工程へ旧来の固定評価軸を併記せず、[入出力契約](input-output-contract.md)の変換規則で引き継ぐ。
 
@@ -53,6 +80,8 @@
 競合の論点整理と、記事が答えるための根拠収集を分ける。公式の商品ページ、FAQ、料金表、利用条件、教材見本、マニュアル等から主質問と判断条件に必要な情報を選ぶ。毎回すべて読むことや出典数の達成を目的にしない。
 
 本スキルは疑問ID、現在の回答、不足、結論への影響、確認済み出典を基に追加調査を直接実行し、事実・出典・確認日・適用条件・確認状態・未解決点を記録する。原資料を読み、回答を統合して記事方針を決定する。
+
+`conversion_review_price`で口コミを扱う場合は、良い口コミと悪い口コミを別々に調査する。各掲載候補には利用状況、評価対象、読者の判断への意味を持たせ、一言感想や同義の水増しを除外する。悪い口コミが見つからない場合は創作せず、確認した情報源と調査結果を記録する。公式仕様から導く注意点は口コミと分離する。料金を扱う場合は、公式情報から基本料金だけでなく、検索判断に関係する支払方法、タブレット代、継続・退会、キャンペーン条件を確認し、確認日と適用範囲を保持する。
 
 本スキルは次を別々に検収する。
 
@@ -86,7 +115,7 @@
 
 ## 4. 内部リンク計画と記事設計
 
-見出し構成と読者の疑問から`$article-internal-linker`の`plan`を直接実行し、目的と採用先を決める。公開確認済み候補だけを使い、`approved_destination_id`へ採用先を固定する。既存の候補情報源・承認契約を拡張せず、URLを推測しない。
+見出し構成と読者の疑問から、確認済み`article_business_purpose`、`article_profile`、成約用では標準3件を起点に作成した`cta_strategy`を付けて`$article-internal-linker`の`plan`を直接実行し、目的と採用先を決める。成約用ではアフィリエイトCTAを主導線、内部リンクを補助導線とする。集客用では、記事管理情報、対応する制作ログ、またはユーザー承認済み一覧により成約用と確認でき、現在実行で公開確認した自サイト記事1件を主導線に固定する。タイトルや記事トピックだけで成約用と推測しない。主リンクは`required: true`、`destination_role: conversion_direct`、`presentation: image_card`とし、画像付きカード機能とリンク先画像を確認する。適切な成約用記事がなければ本文作成前に停止する。
 
 実行状態の記事設計へ次をまとめる。
 
@@ -94,11 +123,12 @@
 - 推奨タイトル、H1、H2、H3
 - 各見出しの役割、各H2の`reader_question`と`reader_outcome`、`required_answer_ids`、必須要点、使用可能な根拠、未確認事項
 - `content_brief`、`question_coverage`、受理済み`answer_map`（条件と確認状態を含む）
-- 内部リンク意図と必須・任意の区分
-- 子スキルの`affiliate_link_plan`、対象講座、CTA共通部品の確認状態、外部リンク方針
+- `article_business_purpose`、主要行動、内部リンク意図、必須・任意の区分、`destination_role`、`presentation`
+- `article_profile`、適用時の`review_evidence_plan`と`price_evidence_plan`
+- 成約用では`cta_strategy`、子スキルの`affiliate_link_plan`、対象講座、CTA共通部品の確認状態。集客用では`planned_count: 0`、主成約記事の`approved_destination_id`、役割確認根拠、公開・カード機能の確認状態。両方で外部リンク方針
 - カテゴリー、タグ、記事ID、日付、サムネイル文言の候補、各H2画像で一目で伝える意味
 
-タイトル、構成、結論、内部リンク意図は一括承認の範囲内で自動確定する。記事の目的が変わる入力不足、既存記事への統合・リライト推奨、正本の競合がある場合だけ本文作成へ進まず`BLOCKED`にする。
+タイトル、構成、結論、内部リンク意図は一括承認の範囲内で自動確定する。記事の目的が変わる入力不足、既存記事への統合・リライト推奨、正本の競合、成約用で`affiliate_link_plan.status: eligible`を確定できない場合、または集客用で主成約記事カードを確定できない場合は本文作成へ進まず`BLOCKED`にする。
 
 ## 4.5 実装計画とTODOの直接実行
 
@@ -173,7 +203,7 @@ TODOは依存関係に従って順に直接実行する。同じ記事ファイ�
 
 本文完成後、本スキルは記事全体を読み、主要な疑問ごとに本文の回答箇所と根拠を対応づけてG3を検収する。`article_pass` や「具体的・読みやすい」という自己評価だけで受け入れない。文字数、出典数、表の数、表示・ビルド成功を内容品質の代替にしない。合格した本文だけをリンク・画像工程へ渡す。
 
-本文受理後に`emphasis_plan`を作る。主結論、重要条件、期限、注意、次の行動のうち、流し読みで判断を誤りやすい短い語句だけを、`emphasis_id`、`section_id`、`answer_id`、`exact_text`、`role`、`reason`へ対応づける。固定件数を設けず、主要回答を強調しない場合は`not_emphasized`へ理由を記録する。段落全体、同一語句の反復、単なる装飾の強調は不合格とする。空の計画は未選定として戻し、無関係な太字で主要回答の強調漏れを埋めない。章IDと語句をUIと最終検査へ同じ内容で渡す。
+本文受理後に`emphasis_plan`を作る。本文中の各H2・H3について、見出しが答える結論を示す短い単語または句を少なくとも1件、`emphasis_id`、`section_id`、`answer_id`、`exact_text`、`role: conclusion`、`reason`へ対応づける。そのほかに読者の判断を助ける独立した条件・期限・注意・行動がある場合は、検査で許可された`condition`、`deadline`、`caution`、`action`の役割で短い語句を追加できる。強調は単語または短い句を基本とし、実表示で原則1行以内、長くても2行以内に収める。重要な要点が複数ある記事では強調箇所を複数設けて拾いやすくするが、記事・節ごとの件数ノルマは置かず、同じ内容の重複や水増しもしない。長い文や段落をまとめて太字にせず、長くなった語句は伝えたい核だけに短縮する。空の計画、結論語句を持たない見出し、見出し自体、単なる装飾の強調は不合格とする。章IDと各語句をUIと最終検査へ同じ内容で渡す。
 
 ### 内容の差し戻し
 
@@ -190,12 +220,14 @@ TODOは依存関係に従って順に直接実行する。同じ記事ファイ�
 
 ## 6. 内部リンク挿入
 
-確定したリンク意図と`approved_destination_id`、完成Markdown、現在実行で公開確認した候補、`affiliate_link_plan.status: eligible`の場合は承認済み計画と現在確認した`site_rendering_capabilities`を`$article-internal-linker`の`insert`へ渡す。対象章・目的・採用先・対象講座を変更せず、許可範囲で段落と誘導文を調整する。
+確認済み`article_business_purpose`、`article_profile`、`cta_strategy`、確定したリンク意図と`approved_destination_id`、リンク先の`destination_role`と`presentation`、完成Markdown、現在実行で公開確認した候補、目的別の`affiliate_link_plan`、現在確認した`site_rendering_capabilities`を`$article-internal-linker`の`insert`へ渡す。対象章・目的・採用先・表示形式・対象講座を変更せず、許可範囲で段落と誘導文を調整する。
 
-- `pass`、`pass_zero_links`、理由が明確な任意リンクだけの`hold`を受理できる。
+- 成約用ではCTAと必要な内部リンクを含む`pass`だけを受理する。集客用ではアフィリエイトCTAが0件で、主成約記事カードを含む`pass`だけを受理する。
 - `blocked`または`blocks_draft: true`なら後工程へ進まない。
 - 挿入前本文、`expected_link_manifest`、`affiliate_link_manifest`を分けて保持する。
-- 内部リンクカードの共通変換機能を確認できない場合は、説明的なテキストリンクを使用する。
+- `expected_link_manifest.new_links`に確定した各リンクが、UI化後のMarkdownと最終HTMLの両方で同じ`href`と表示形式を保つまで、完成にしない。マニフェストが空の場合に内部リンク件数を作る目的でリンクを追加しない。
+- 通常の関連記事は本文中の語句へ設定する`text_link`、口コミ・料金紹介・比較・その他の成約へ直接つながる記事は`image_card`とする。画像付きカードは最大2件とし、件数に応じて表示形式を入れ替えない。
+- `image_card`の共通変換機能またはリンク先画像の解決を確認できない場合は、テキストリンクへ変更せず`blocked`とする。
 
 ## 6.5 公式・権威メディア画像収集
 
@@ -240,7 +272,7 @@ HTMLページのスクリーンショットでは、利用可能な`control-in-a
 
 依存スキルの`evidence_capture`出力を変更せず保持する。視覚化すべき主張がなければ`NOT_APPLICABLE`、権利条件を満たす候補がなければ`READY_WITHOUT_ASSETS`、一部取得なら`PARTIAL`、1件以上の保存・検査完了なら`READY`として次工程へ進める。単独利用では`SKIPPED_BY_USER`も受理できる。権利条件を満たす候補があるのに取得機能が使えない、または2回失敗した場合を`READY_WITHOUT_ASSETS`へ変換せず`BLOCKED`とする。適格な画像がないことだけで本文を不合格にしない。
 
-旧1.1・1.2も読めるが、新規2.6では1.3を使う。`CANDIDATES_READY`だけではG4.5を通さない。候補がある場合は選定と取得結果を対応づける。候補なし・視覚化不要なら実際の探索記録を確認して`evidence_result`で無画像を受理する。空の取得要求で候補ありや取得失敗を隠さない。
+旧1.1・1.2も読めるが、新規2.7では1.3を使う。`CANDIDATES_READY`だけではG4.5を通さない。候補がある場合は選定と取得結果を対応づける。候補なし・視覚化不要なら実際の探索記録を確認して`evidence_result`で無画像を受理する。空の取得要求で候補ありや取得失敗を隠さない。
 
 次工程が画像を使う場合は、スキーマ、ファイル存在、SHA-256、`article_publication_allowed`、帰属表示、加工可否、対応見出しと主張を再検証する。引継ぎデータを失った画像をファイル名だけで採用しない。この工程自体は画像を記事へ配置しない。
 
@@ -252,23 +284,32 @@ HTMLページのスクリーンショットでは、利用可能な`control-in-a
 
 ```yaml
 affiliate:
-  disposition: eligible | not_applicable | deferred | blocked
-  provider: shinken_zemi | null
-  target_course: elementary | junior_high | high | null
+  required: true | false
+  disposition: eligible | not_applicable | blocked
+  provider: shinken_zemi | smile_zemi | null
+  target_course: preschool | elementary | junior_high | high | null
   affiliate_link_plan: null
   affiliate_link_manifest: null
   component_check: pending
   insert_status: pending
   audit_status: pending
   reason_code: null
+cta_strategy:
+  default_count: 3
+  planned_count: 3
+  count_mode: standard
+  count_reason: "独立した公式確認場面に基づく理由"
+  explicit_user_count_override: null
+  official_confirmation_moments: []
 ```
 
-- タイトル、想定読者、結論、承認済み設計が同じ講座を示し、読者の自然な次行動と`shinken_zemi_cta_v1`の共通CSSを確認できた場合は`eligible`とする。CTAを最大1件挿入し、後続UIでDOMと属性を保持する。
-- 複数学年、講座横断、対象不明、または進研ゼミへの次行動を案内しない記事は`not_applicable`とし、CTAを0件にする。CTAのために記事範囲を変更しない。
-- 記事に必要な承認済みアフィリエイト契約が実際に存在しない場合だけ`deferred`と`affiliate_inventory_pending`を使う。この保留だけでは非アフィリエイト工程をブロックしない。
-- 講座不一致、未承認URL、共通部品欠落、挿入または監査不合格は`blocked`とする。
+- 成約用では`required: true`とする。CTAは3件を標準値として検討するが固定せず、検索意図、文章量、判断段階、独立した公式確認理由の数から1件以上へ増減する。`planned_count`と`official_confirmation_moments`へ採用数と全配置を記録し、各配置に異なる`reader_question`、`official_information_needed`、`destination_purpose`、`lead_copy`を持たせる。
+- 口コミ・料金記事では教材内容・良い口コミ、料金・支払・端末条件、悪い口コミ・注意点・向き不向きの説明後が候補になる。お試し・キャンペーン記事では、試せる内容、対象・期間、費用・返却・継続条件の説明後が候補になる。いずれも固定見出しではなく、本文を読んで公式情報を確認したくなる実際の場面だけを採用する。
+- 1〜2件へ減らす場合、4件以上へ増やす場合は`count_reason`を具体的に記録する。文章量だけ、見出し数だけ、過去記事の件数だけを理由に増やさない。5件以上は確認目的の独立性を全配置で説明する。
+- 成約用で対象講座が一意でない、承認済みアフィリエイト契約がない、自然な公式確認場面が1件もない、講座・URL・共通部品・計画件数が一致しない、または挿入・監査が不合格の場合は`blocked`とする。記事範囲をCTAのために変更せず、CTAなしの完成状態へ変換しない。
+- 集客用では`required: false`、`disposition: not_applicable`、`affiliate_link_manifest.links: []`とする。本文・最終HTML・期待マニフェストにアフィリエイトCTA、計測画像、ASP URLが1件でもあれば不合格にする。主導線は公開確認済み成約用記事の画像付き内部リンクカードとする。
 
-本文の外部リンクを`internal`、`affiliate_cta`、`generic_official_navigation`、`task_required_official`、`evidence_reference`へ分類する。進研ゼミCTAが`eligible`なら、同じ公式講座トップへ単に誘導する`generic_official_navigation`は削除する。根拠URLは`answer_map`と出典記録へ保持し、読者が手続き・交換・ログイン等を行うために本文リンクが必要な場合だけ、`allowed_external_links`へURLと理由を記録して残す。
+本文のリンクは [本文リンク制限と検査](article-link-policy.md) に従い、`internal`、`affiliate_cta`、ユーザーが記事別に明示許可した例外、禁止リンクへ分類する。根拠URLは`answer_map`と出典記録へ保持し、口コミ・論文出典は必要なら資料名をプレーンテキストで示す。手続き・交換・ログイン等の必要性をAIが判断しただけでは外部URLを掲載しない。例外配列`allowed_external_links`は通常空とし、実際のユーザー許可原文・発言出典・対象URLがある場合だけ記録する。
 
 ## 8. `study-article-ui-coder`によるAstro Markdown化
 
@@ -283,9 +324,12 @@ required_elements:
   - type: emphasis_plan
     items: [] # 確定したemphasis_plan.itemsを代入。空のまま渡さない
 preserve_elements:
-  - section: "承認済みCTA配置章"
+  - section: "承認済みCTA配置章ごとの全配置"
     element: "shinken_zemi_cta_v1"
-    preserve: "固定DOM、講座、href、計測画像src、rel、表示文、配置"
+    preserve: "placement_id、固定DOM、講座、href、計測画像src、rel、固有の表示文、配置、計画件数"
+  - section: "承認済み内部リンク配置章"
+    element: "internal_link_presentation"
+    preserve: "destination_role、presentation、href、アンカーまたは紹介文、配置"
 ```
 
 出典注記の対象情報・出典・確認日・配置を`preserve_elements`に追加する。
@@ -369,30 +413,56 @@ H2画像は全対象を生成・目視してから未使用名へ保存し、保
 ## 11. 検証
 
 1. `$education-blog-thumbnail-creator`の`scripts/check-h2-images.ps1`へ正本記事パスを渡し、全H2画像の構造・実在・形式検査を行う。
-2. `scripts/validate-cloudflare-article.ps1`へ、`-ValidationMode parent`、`-ArticlePath`、`-ProjectRoot`、`-ExpectedTitle`、`-ExpectedAffiliateDisposition`、必要な場合の`-ExpectedAffiliateCourse`、`-ExpectedEmphasisPlanJson`、明示した`-ExternalLinkPolicy`、`-AllowedExternalHref`を名前付き引数で渡す。強調計画はitems配列を同じPowerShell内でJSON変数にし、コマンド文字列へ直接埋め込まない。中間マニフェストは作らない。
-3. `npm run build`を実行し、既存ビルドを壊していないことを確認する。
-4. `scripts/prepare-local-preview.ps1`へプロジェクトルート、記事ID、一時出力先を渡し、許可リスト方式の隔離コピーを作る。正本の`draft: true`を変更しない。
-5. 隔離コピー内の記事だけを`draft: false`にし、元プロジェクトの`node_modules`を一時ジャンクションから再利用する。Astro・Viteのキャッシュとビルド出力は隔離コピー内に置き、依存関係を再インストールしない。
-6. 隔離コピーを`127.0.0.1`の空きポートで配信し、利用可能な`control-in-app-browser`で記事URLを開く。URL提示だけを表示済みにしない。
-7. 320px、375px、390px、768px、1280pxで、表以外の横はみ出し、画像、見出しID、アンカー、コンソールエラーを実査する。強調計画の全語句が指定章に表示され通常文字と見分けられること、Markdown記法が露出していないことも確認する。各H2画像では画像全体、文字、数字、矢印、主役、縦横比、不要な枠を記事本文幅で確認する。
-8. レンダリング済みHTMLを`$article-internal-linker`の`audit`へ`expected_link_manifest`、`affiliate_link_manifest`、5画面幅の表示記録とともに渡す。CTAがある場合はURL、計測画像、属性、固定DOM、対象講座、重複、表示を子スキルの正本契約で監査する。
+2. ビルド前は`basic`または共通`audit-article-links.mjs`で原稿の事前検査を行う。手順6の最終ビルド後、`scripts/validate-cloudflare-article.ps1`へ`-ValidationMode parent`、`-RenderedHtmlPath`、`-ExpectedArticleBusinessPurpose conversion|traffic`、`-ArticlePath`、`-ProjectRoot`、`-ExpectedTitle`、`-ExpectedArticleProfileJson`、`-ExpectedCtaStrategyJson`、適用時の`-ExpectedReviewEvidencePlanJson`と`-ExpectedPriceEvidencePlanJson`、目的別`-ExpectedAffiliateDisposition`、`-ExpectedEmphasisPlanJson`、`-ExpectedInternalLinkManifestJson`、`-ExpectedAffiliateLinkManifestJson`、`-ExternalLinkPolicy allow_task_required_only`を渡す。例外は通常空とし、明示許可がある場合だけ`-AllowedExternalApprovalJson`へ原文・出典付きで渡す。成約用の単独CTAでは`-ExpectedAffiliateProvider`と`-ExpectedAffiliateCourse`も渡す。JSONは同じPowerShell内の変数で渡し、コマンド文字列へ直接埋め込んだり中間ファイルを作成したりしない。原稿・最終HTMLの両方が合格するまで完成にしない。
+3. `npm run build`を実行し、既存ビルドを壊していないことを確認する。この通常ビルドの正規プロジェクト側`dist`は再生成可能だが、隔離プレビューの一時成果物には混ぜない。
+4. `scripts/prepare-local-preview.ps1`へプロジェクトルート、記事ID、`run-id`を渡し、既定の`%TEMP%\\codex-article-work\\<run-id>--<article-id>\\`へ許可リスト方式の隔離コピーを作る。`-PreviewRoot`を指定する場合も、この一時ルート配下の未使用実行フォルダに限定する。正本の`draft: true`を変更しない。
+5. 隔離コピー内の記事だけを`draft: false`にし、元プロジェクトの`node_modules`を一時ジャンクションから再利用する。Astro・Viteのキャッシュとビルド出力は隔離コピー内に置き、依存関係を再インストールしない。`CLEANUP-INFO.txt`の削除条件を確認し、`C:\\AIフォルダ\\previews`、正規プロジェクトの`.tmp`、`artifacts`には一時成果物を作らない。
+6. 隔離コピーをビルドし、手順2で用意した親完成検査へ最終記事HTMLを渡す。原稿とHTMLのリンク検査合格後、`127.0.0.1`の空きポートで配信し、利用可能な`control-in-app-browser`で記事URLを開く。URL提示だけを表示済みにしない。
+7. 320px、375px、390px、768px、1280pxで、表以外の横はみ出し、画像、見出しID、アンカー、コンソールエラーを実査する。保存する検証画像・ログは、隔離コピー内の`verification`配下へ置く。強調計画の全語句が指定章の表示本文で太字になり通常文字と見分けられること、Markdown記法が露出していないことを確認する。各強調箇所の実際の折返しも確認し、原則1行、最大2行に収める。3行以上になる場合は短い単語・句へ直して再検証する。各H2画像では画像全体、文字、数字、矢印、主役、縦横比、不要な枠を記事本文幅で確認する。
+8. レンダリング済みHTMLを`$article-internal-linker`の`audit`へ事業目的、`cta_strategy`、`expected_link_manifest`、`affiliate_link_manifest`、5画面幅の表示記録とともに渡す。成約用は計画件数どおりのCTA、集客用は主成約記事カードとアフィリエイト0件を、内部リンクの表示形式・画像読込み・URL・属性・重複・表示とともに子スキルの正本契約で監査する。
 9. 統合検査TODOを除く全必須TODOが一度`accepted`になった後、タイトル、導入、見出し、本文、結論、事実と出典、内部リンク、公式画像、サムネイルの表示文字、各H2画像の意味と配置、装飾の役割、スマートフォン表示を一つの記事として横断検査する。不合格なら原因となったTODOを`revision_requested`へ戻し、その成果物に依存するTODOを`revalidation_scope`へ追加する。必要な範囲の再検証と統合検査の再実行が終わるまで完成状態を返さない。
 10. 正本SHA-256を最終取得して静的検査結果と照合する。隔離コピーの`source_article_sha256`が同じ正本を指し、コピーのfrontmatterの`draft`以外が正本と一致することを確認する。記事・コピー・画像に変更があれば影響する検査を無効化して再確認する。統合検査が合格したら、最終操作として完成版の記事URLをユーザーが見えるアプリ内ブラウザへ開くか、既存タブをそのURLへ移動する。表示後に現在URLと記事画面を確認し、`preview.presented_to_user: true`、`preview.presentation_stage: after_final_audit`を記録する。URLの報告、スクリーンショット、検査中に開いた履歴だけで代替しない。
 11. 利用可能な表示手段がない、最終URLへ移動できない、または記事画面を確認できない場合は`preview.status: display_blocked`、`preview.presented_to_user: false`とし、完成状態を返さない。
+12. 実際に到達した状態で`$article-production-log`の`finish-log`へ目的別導線の`funnel_alignment`と検証根拠を記録し、`verify-store`を行う。表示できない場合は`preview_ready`や`verified`へ誇張せず、観測事実と未解決事項を残す。
 
 ## 12. 最終報告
 
-統合検査後の完成版プレビューをユーザーへ表示でき、`eligible`ならCTA挿入・監査、`not_applicable`なら理由とCTA 0件、`deferred`なら承認済み契約の実在不足を確認した場合に、状態表に従って最終結果を返す。最終報告はプレビュー表示の後に行う。
+統合検査後の完成版プレビューをユーザーへ表示でき、成約用はアフィリエイトCTA、集客用は主成約記事カードとアフィリエイト0件の挿入・監査、およびすべての品質ゲートが合格した場合に、状態表に従って最終結果を返す。最終報告はプレビュー表示の後に行う。
 
 - 記事ファイル、サムネイル、全H2見出し画像の絶対パス
-- キーワード、タイトル、カテゴリー、記事ID
+- キーワード、確認済み事業目的、主要行動、タイトル、カテゴリー、記事ID
 - リサーチ、見出し、本文、内部リンク、静的検査、ビルドの各状態
 - 内部リンク一覧
 - 根拠画像収集の状態、スクリーンショット試行一覧、希望方法と実際の方法、保存画像一覧、出典、権利、モバイル確認、未取得理由、保存済み・未配置の画像と理由
 - 使用した装飾部品とサムネイル参照画像
 - 画像スキルの`thumbnail`と`section_images`の状態、H2件数、生成・保存・挿入件数、各画像の最終プロンプトと検査結果、実際に確認した画面幅
 - メタディスクリプション案
-- `affiliate.disposition`、対象講座、CTA件数、共通部品確認、挿入・最終監査、許可外部リンクと理由。`deferred`の場合だけ`affiliate_inventory_pending`と再開条件
+- 成約用では`article_profile`、口コミ・料金証拠計画の適用結果、`cta_strategy`の標準数・採用数・増減理由・公式確認場面、対象講座、CTA件数、共通部品確認、挿入・最終監査。集客用では主成約記事、役割確認根拠、カード監査、アフィリエイト0件。両方で許可外部リンクと理由
 - 未実施の画面確認や人間確認
 - プレビューURL、表示状態、確認幅、`presented_to_user: true`、表示時点が統合検査後であること、正本が`draft: true`のままであること
 - 本番公開、commit、push、デプロイを行っていないこと
+- 品質ログの`log_id`、詳細Markdownの絶対パス、`verify-store`の結果。ログ未完了なら未記録範囲と再実行条件
+
+この新記事を後で公開する場合のGitHub保存について、保存理由、リポジトリ、remote、非`main`のpush先、対象記事ID、対象`index.md`の絶対パスを示す。既存運用で別の指定がなければpush先は`publish/<article-id>`とし、公開指示後に最新のリモート`main`から作成する。push先を一意に確定できなければ未確定と明記し、推測しない。ここではGit操作を実行せず、この通知後に同じ記事を指す「公開して」という指示が届いた場合だけ13へ進む。
+
+## 13. 明示的な公開指示後のGitHub保存
+
+この工程は通常の新記事作成とは別の後続工程である。次をすべて満たす場合だけ実行する。
+
+1. 対象記事が本スキルで`READY_FOR_HUMAN_REVIEW`まで到達し、統合検査後の最終プレビューをユーザーへ表示済みである。
+2. 12の最終報告後に、ユーザーが同じ記事を一意に指して明示的に「公開して」と指示した。
+3. 指示前に、保存理由、対象リポジトリ、remote、非`main`のpush先、記事ID、`index.md`の絶対パスを通知済みである。
+4. 現在の正本`index.md`が、ユーザーへ表示した最終版と同じである。変更されていれば影響する検査と人間確認へ戻る。
+
+実行手順:
+
+1. `C:\AIフォルダ\ブログ\site`が対象Gitリポジトリで、通知済みremoteとpush先が現在の設定に一致することを読み取り確認する。push先が`main`、未確定、または別リポジトリを指す場合は停止する。
+2. `git status --short`とステージ済み差分を確認する。ユーザーのdirty worktree、既存ステージ、別記事の変更を取り込まない。リモートを更新確認し、最新のリモート`main`から隔離した作業場所と通知済みの非`main`ブランチを作る。既存の同名リモートブランチがある場合は、最新のリモート`main`を基点とし、対象`index.md`以外の未マージ差分を含まない場合だけ再利用する。条件を満たさなければ上書き、force push、別名への自動変更をせず停止する。元の作業ツリーをcheckout、reset、stash、cleanしない。
+3. 同じ制作実行で確定した`src/content/blog/<article-id>/index.md`だけを隔離側の同一パスへ反映する。GitHub保存のために本文、frontmatter、`draft`、リンク、画像参照を変更しない。
+4. `git add -- src/content/blog/<article-id>/index.md`のように対象パスを明示してステージする。`git add .`、記事フォルダ全体、画像ディレクトリ、globを使わない。
+5. `git diff --cached --name-only`の結果が対象`index.md`の1件だけで、追加・更新の内容がユーザー確認済み最終版と一致し、`git diff --cached --check`が合格することを確認する。別パス、rename、削除、想定外差分があればcommitしない。
+6. 対象記事を識別できるメッセージでcommitし、通知済みの非`main`ブランチへforceなしでpushする。PR作成・マージ、`main`への直接pushは行わない。
+7. リモート上の対象ブランチがpushしたcommitを指すことを確認する。ローカルcommitだけ、push失敗、認証失敗、リモート不一致ではGitHub保存済みとしない。
+8. 対象`index.md`、commit SHA、push先、リモート確認結果、除外した範囲、Cloudflare公開を実施していないことを報告する。
+
+対象記事またはpush先が曖昧、最終確認後に正本が変化、既存push先に対象外の未マージ差分がある、リモート基点との競合、対象外パスの混入、認証・push・リモート確認の失敗、または`index.md`だけではGitHub側の必須検証を通せない場合は停止する。画像や共通ファイルを自動追加せず、観測した問題と再開条件を報告する。この工程はCloudflareへのデプロイや本番公開を実行しない。
