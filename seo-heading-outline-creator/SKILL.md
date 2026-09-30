@@ -17,6 +17,12 @@ description: "完了済みSEOリサーチを根拠に、読者に伝わるSEO記
 
 新規調査が必要な場合は、`seo-keyword-competitor-research` を先に実行する。本文作成や投稿は、ユーザーが別途明示的に依頼したスキルまたは工程で扱う。
 
+## 同じブログの修正履歴・有効ルール
+
+対象が正規化後に`C:\AIフォルダ\ブログ\site`と一致する場合は、開始時に`$article-skill-feedback`の接続契約を読み、`target_skill: seo-heading-outline-creator`、`stage: outline`の有効ルールを取得する。記事フィードバック台帳への定型追記は、この仕組みに対するユーザーの継続許可の範囲として扱い、依頼ごとの保存確認を追加しない。この許可を構成案その他の保存へ広げない。親経由では渡された`parent_run_id`と有効ルール集合を再利用し、独自に再解釈・二重記録しない。単独利用では本スキルを`entry_skill`とする。修正依頼は編集前後で記録するが、記録・候補・承認待ちを見出し要件へ追加しない。現在のユーザー指示、現在の`content_source`、下記の設計裁量を維持し、適用結果は見出しID・受入基準と照合する。別プロジェクトには適用しない。
+
+同じ対象の依頼単位の詳細履歴は`$article-production-log`へ記録する。親経由では渡された`article_log_context.log_id`を使用して品質軸`search_intent | structure | audience | comparison | workflow`の該当結果だけを返し、子で新規ログを作らない。本スキルを単独利用したユーザー発言では作業前に`start-log`、構成ゲート後に`finish-log`を行う。未承認候補を見出し要件へ加えない。
+
 ## 最初に読むファイル
 
 作業の開始時に、次の順で必ず読む。
