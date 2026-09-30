@@ -12,6 +12,8 @@
 
 [assets/standalone-article-template.html](../assets/standalone-article-template.html) を基礎にする。
 
+ファイルとして保存する場合は、`%TEMP%\\codex-article-work\\<run-id>--<preview名>\\`を未使用の実行フォルダとして作成し、その中へHTML、検証画像、レンダリング用`dist`、キャッシュ、ログを置く。`CLEANUP-INFO.txt`へ正本の有無、用途、ローカル配信停止後に実行フォルダ全体を削除またはゴミ箱へ移動できることを明記する。`C:\\AIフォルダ\\previews`や対象プロジェクトの`.tmp`、`artifacts`へプレビュー専用ファイルを保存しない。応答内だけで返す場合は、ファイルを作らない。
+
 このファイルは部品カタログでもあり、全要素を記事へコピーする完成原稿ではない。必要な部品だけを残す。短い太字、比較軸保全、自然改行を適用し、枠の余白は同テンプレートのCSSで管理・検査する。
 
 必須:
