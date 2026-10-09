@@ -1,0 +1,39 @@
+{
+  "character_id": null,
+  "display_name": null,
+  "selection_status": "候補",
+  "selection_evidence": null,
+  "visual_identity": {
+    "face_outline": null,
+    "eyes_shape_and_spacing": null,
+    "eyebrows": null,
+    "nose_and_mouth": null,
+    "facial_feature_positions": null,
+    "hair_silhouette": null,
+    "hair_length_and_fringe": null,
+    "hair_monochrome_tone": null,
+    "head_body_proportion": null,
+    "shoulders_and_limbs": null,
+    "default_posture": null,
+    "base_outfit": null,
+    "distinctive_features": [],
+    "handedness_if_relevant": null,
+    "side_specific_features": []
+  },
+  "expressions": {
+    "neutral": null,
+    "troubled": null,
+    "happy": null,
+    "surprised": null,
+    "identity_invariants": []
+  },
+  "story_traits": {
+    "age_or_stage": null,
+    "personality": null,
+    "speaking_style": null,
+    "relationships": []
+  },
+  "references": [],
+  "user_constraints": [],
+  "unresolved_choices": []
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "勉強記事の漫画制作"
+  short_description: "勉強記事を漫画に構成し、人物の差し替えとページごとの品質確認に対応"
+  default_prompt: "$study-article-manga-creator を使い、指定記事をもとにキャラクターを差し替えられる漫画を制作してください。"
