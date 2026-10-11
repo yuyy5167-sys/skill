@@ -14,7 +14,7 @@ description: 記事自動化実験用コピー。/Users/yudaikato/Documents/AI�
 
 ## 目的
 
-動画制作ログのように一件ごとの経緯を読める形で残しつつ、ブログ固有の品質軸で再発問題と改善候補を追跡する。保存先はブログリポジトリ外の`/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/data/article-quality-log`とし、記事や公開物へログを混ぜない。
+動画制作ログのように一件ごとの経緯を読める形で残しつつ、ブログ固有の品質軸で再発問題と改善候補を追跡する。保存先はブログリポジトリ外の`/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/記事制作ログ`とし、記事や公開物へログを混ぜない。
 
 ## 実行時に読むファイル
 
@@ -37,6 +37,8 @@ description: 記事自動化実験用コピー。/Users/yudaikato/Documents/AI�
 - 継続候補は候補として残すだけにする。提案、明示承認、検証済み有効化、撤回は`$trial-article-skill-feedback`を正本とする。
 - ログ保存に失敗した場合は保存済みと報告しない。記事作業を安全に続行できる場合は続け、最終報告に未記録の範囲と再実行条件を含める。
 
+- 詳細Markdown、構造化正本、記事別履歴、レポート、証拠はすべて上記の保存先内へ置く。再描画では保存済みの絶対パスを出力先として信用せず、現在の `userLog/` と `artifacts/` 内へ再配置する。既知の旧保存先は新保存先へ対応付け、Macで未知のWindows形式パスを使わない。
+
 ## 標準手順
 
 1. 作業前に`start-log`を実行し、`log_id`と詳細Markdownのパスを取得する。初回指示も修正依頼も記録対象である。
@@ -52,7 +54,7 @@ description: 記事自動化実験用コピー。/Users/yudaikato/Documents/AI�
 
 ```powershell
 python "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/skills/trial-article-production-log/scripts/article_production_log.py" start-log `
-  --root "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/data/article-quality-log" `
+  --root "/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/記事制作ログ" `
   --project-root "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ" `
   --article-id "example-slug" `
   --article-path "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/example.md" `
@@ -73,7 +75,7 @@ python "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツ�
 
 ```powershell
 python "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/skills/trial-article-production-log/scripts/article_production_log.py" finish-log `
-  --root "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/data/article-quality-log" `
+  --root "/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/記事制作ログ" `
   --log-id "UUID" `
   --status "verified" `
   --result-text "実施結果" `

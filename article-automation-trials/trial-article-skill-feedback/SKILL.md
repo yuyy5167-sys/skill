@@ -39,7 +39,9 @@ description: 記事自動化実験用コピー。/Users/yudaikato/Documents/AI�
 
 ## 保存先と正本
 
-- 台帳ルート: `/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/data/article-feedback`
+台帳はブログ改善ログ内へまとめる。ブログ直下・サイト直下へ個別ファイルを生成しない。既知の旧保存先は新保存先へ対応付け、Macで未知のWindows形式パスを使わない。
+
+- 台帳ルート: `/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/スキル改善ログ`
 - 追記イベント: `events.jsonl`
 - 版付き候補: `rules\<rule-id>\<revision>.json`
 - 検証済みリリース: `releases\<release-id>\release.json`

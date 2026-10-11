@@ -126,7 +126,7 @@ evidence_policy:
   no_allowed_asset_action: continue_without_assets
   placement_mode: automatic_when_accepted
 article_log_context:
-  log_root: "C:\\AIフォルダ\\.skill-improver-data\\article-quality-log"
+  log_root: "/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/記事制作ログ"
   log_id: ""
   markdown_path: ""
   article_id: ""

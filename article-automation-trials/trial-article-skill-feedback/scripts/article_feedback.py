@@ -8,6 +8,7 @@ import contextlib
 import hashlib
 import json
 import os
+import re
 import tempfile
 import uuid
 import unicodedata
@@ -27,10 +28,32 @@ CLASSIFICATIONS = {
 }
 IMPROVEMENT_DECISIONS = {"not_needed", "candidate", "explicit_skill_change_request", "pending_evidence", "unassessed"}
 INTENT_SCOPES = {"article_only", "standing_explicit", "unclear"}
+LOG_ROOT = Path("/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/スキル改善ログ")
 
 
 class LedgerError(RuntimeError):
     pass
+
+
+def log_root_path(value: str | Path) -> Path:
+    raw = re.sub(r"/+", "/", unicodedata.normalize("NFC", str(value)).replace("\\", "/")).rstrip("/")
+    aliases = {
+        "C:/AIフォルダ/.skill-improver-data/article-feedback",
+        "C:/AIフォルダ/ブログ/記事自動化実験/data/article-feedback",
+        "/Users/yudaikato/Documents/AIフォルダ/ブログ/記事自動化実験/data/article-feedback",
+        "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/data/article-feedback",
+    }
+    if raw in aliases:
+        return LOG_ROOT.resolve()
+    if os.name != "nt" and re.match(r"^[A-Za-z]:", raw):
+        raise LedgerError("この環境ではWindows形式のログ保存先を使用できません")
+    root = Path(value).expanduser().resolve()
+    if normalized_path(str(root)) in {
+        normalized_path(str(LOG_ROOT.parent.parent)),
+        normalized_path(str(LOG_ROOT.parent.parent / "公開サイト・教材/勉強ブログ")),
+    }:
+        raise LedgerError("メインフォルダ直下ではなくブログ改善ログ内を指定してください")
+    return root
 
 
 def utc_now() -> str:
@@ -114,7 +137,7 @@ class FileLock:
 
 class FeedbackStore:
     def __init__(self, root: str | Path):
-        self.root = Path(root)
+        self.root = log_root_path(root)
         self.events_path = self.root / "events.jsonl"
         self.rules_dir = self.root / "rules"
         self.releases_dir = self.root / "releases"
@@ -733,7 +756,7 @@ class FeedbackStore:
 
 
 def add_common(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--root", required=True)
+    parser.add_argument("--root", default=str(LOG_ROOT))
 
 
 def add_rule_identity(parser: argparse.ArgumentParser) -> None:
@@ -866,9 +889,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    store = FeedbackStore(args.root)
     data = vars(args)
     try:
+        store = FeedbackStore(args.root)
         if args.command == "init":
             result = store.init()
         elif args.command == "verify-store":

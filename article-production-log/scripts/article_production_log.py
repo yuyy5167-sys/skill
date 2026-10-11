@@ -102,6 +102,27 @@ def norm_path(value: str | Path) -> str:
     return unicodedata.normalize("NFC", os.path.normcase(str(Path(raw).expanduser().resolve())))
 
 
+LOG_ROOT = Path("/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/記事制作ログ")
+
+
+def log_root_path(value: str | Path) -> Path:
+    raw = re.sub(r"/+", "/", unicodedata.normalize("NFC", str(value)).replace("\\", "/")).rstrip("/")
+    aliases = {
+        "C:/AIフォルダ/.skill-improver-data/article-quality-log",
+        "C:/AIフォルダ/ブログ/記事自動化実験/data/article-quality-log",
+        "/Users/yudaikato/Documents/AIフォルダ/ブログ/記事自動化実験/data/article-quality-log",
+        "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/data/article-quality-log",
+    }
+    if raw in aliases:
+        return LOG_ROOT.resolve()
+    if os.name != "nt" and re.match(r"^[A-Za-z]:", raw):
+        raise ValueError("この環境ではWindows形式のログ保存先を使用できません")
+    root = Path(value).expanduser().resolve()
+    if same_path(root, CANONICAL_PROJECT) or same_path(root, LOG_ROOT.parent.parent):
+        raise ValueError("メインフォルダ直下ではなくブログ改善ログ内を指定してください")
+    return root
+
+
 def same_path(left: str | Path, right: str | Path) -> bool:
     return os.path.normcase(norm_path(left)) == os.path.normcase(norm_path(right))
 
@@ -193,7 +214,7 @@ class FileLock:
 
 class QualityLogStore:
     def __init__(self, root: str | Path) -> None:
-        self.root = Path(root).expanduser().resolve()
+        self.root = log_root_path(root)
         self.events_path = self.root / "events.jsonl"
         self.records_dir = self.root / "records"
         self.user_log_dir = self.root / "userLog"
@@ -231,9 +252,12 @@ class QualityLogStore:
         return {"ok": True, "root": str(self.root), "schema_version": SCHEMA_VERSION}
 
     def _atomic_text(self, path: Path, text: str) -> None:
+        if not path.resolve().is_relative_to(self.root):
+            raise ValueError(f"ログ保存先の外へは書き込めません: {path}")
         path.parent.mkdir(parents=True, exist_ok=True)
         temp = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
-        temp.write_text(text, encoding="utf-8", newline="\n")
+        with temp.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
         os.replace(temp, path)
 
     def _atomic_json(self, path: Path, value: Any) -> None:
@@ -826,7 +850,25 @@ class QualityLogStore:
     def render_all(self) -> None:
         records = self.read_records()
         for record in records:
-            markdown_path = Path(record["markdown_path"])
+            # A stored Windows path is provenance, not an output destination.
+            name = record["markdown_path"].replace("\\", "/").rsplit("/", 1)[-1]
+            if not name.endswith(".md") or ":" in name or name in {".md", "..md"}:
+                raise ValueError(f"詳細ログのファイル名が不正です: {record['log_id']}")
+            markdown_path = self.user_log_dir / name
+            changed = record["markdown_path"] != str(markdown_path)
+            record["markdown_path"] = str(markdown_path)
+            for phase in ("before", "after"):
+                for item in record["evidence"].get(phase, []):
+                    raw = re.sub(r"/+", "/", item["stored_path"].replace("\\", "/"))
+                    if "/artifacts/" not in raw:
+                        raise ValueError(f"証拠の保存先が不正です: {item['stored_path']}")
+                    stored = self.artifacts_dir / raw.split("/artifacts/", 1)[1]
+                    if not stored.resolve().is_relative_to(self.artifacts_dir):
+                        raise ValueError(f"証拠の保存先が範囲外です: {item['stored_path']}")
+                    changed = changed or item["stored_path"] != str(stored)
+                    item["stored_path"] = str(stored)
+            if changed:
+                self._atomic_json(self.records_dir / f"{record['log_id']}.json", record)
             self._atomic_text(markdown_path, self.render_record(record))
         self._render_article_histories(records)
         self._render_reports(records)
@@ -1016,7 +1058,7 @@ class QualityLogStore:
 
 
 def add_root(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--root", required=True)
+    parser.add_argument("--root", default=str(LOG_ROOT))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1138,8 +1180,8 @@ def print_json(value: Any) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    store = QualityLogStore(args.root)
     try:
+        store = QualityLogStore(args.root)
         if args.command == "init":
             result = store.init(render=True)
         elif args.command == "hook-event":

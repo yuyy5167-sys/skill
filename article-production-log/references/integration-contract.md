@@ -17,7 +17,7 @@
 
 ```yaml
 article_log_context:
-  log_root: "C:\\AIフォルダ\\.skill-improver-data\\article-quality-log"
+  log_root: "/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/記事制作ログ"
   log_id: ""
   markdown_path: ""
   article_id: ""

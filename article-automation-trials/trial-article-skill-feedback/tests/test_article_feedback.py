@@ -2,11 +2,13 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from article_feedback import FeedbackStore, LedgerError, sha256_file  # noqa: E402
+import article_feedback  # noqa: E402
 
 
 BLOG_ROOT = r"/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ"
@@ -21,6 +23,21 @@ class FeedbackAcceptanceTests(unittest.TestCase):
 
     def tearDown(self):
         self.temp.cleanup()
+
+    def test_legacy_roots_share_the_consolidated_folder(self):
+        with patch.object(article_feedback, "LOG_ROOT", self.root):
+            for value in [
+                r"C:\AIフォルダ\.skill-improver-data\article-feedback",
+                r"C:\AIフォルダ\ブログ\記事自動化実験\data\article-feedback",
+                r"C:\\AIフォルダ\\ブログ\\記事自動化実験\\data\\article-feedback",
+                "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/data/article-feedback",
+            ]:
+                self.assertEqual(FeedbackStore(value).root, self.root.resolve())
+
+    @unittest.skipIf(sys.platform == "win32", "Windows paths are valid on Windows")
+    def test_unknown_windows_root_is_rejected(self):
+        with self.assertRaises(LedgerError):
+            FeedbackStore(r"Z:\unmapped\logs")
 
     def request(self, key="req-1", candidate_key="candidate-a", article_id="article-1", intent_scope="unclear"):
         return self.store.record_request(

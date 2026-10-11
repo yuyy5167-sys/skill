@@ -32,7 +32,9 @@ description: /Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト
 
 ## 保存先と正本
 
-- 台帳ルート: `C:\AIフォルダ\.skill-improver-data\article-feedback`
+台帳はブログ改善ログ内へまとめる。ブログ直下・サイト直下へ個別ファイルを生成しない。既知の旧保存先は新保存先へ対応付け、Macで未知のWindows形式パスを使わない。
+
+- 台帳ルート: `/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/スキル改善ログ`
 - 追記イベント: `events.jsonl`
 - 版付き候補: `rules\<rule-id>\<revision>.json`
 - 検証済みリリース: `releases\<release-id>\release.json`

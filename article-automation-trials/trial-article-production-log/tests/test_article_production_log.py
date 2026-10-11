@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).parents[1] / "scripts" / "article_production_log.py"
@@ -78,6 +80,64 @@ class ArticleProductionLogCliTests(unittest.TestCase):
         self.assertTrue((self.root / "events.jsonl").is_file())
         for name in ("品質傾向.md", "再発問題.md", "スキル別問題.md", "継続ルール候補.md"):
             self.assertTrue((self.root / "reports" / name).is_file())
+
+    def test_relocated_store_rebases_windows_paths_without_changing_history(self) -> None:
+        started = self.start("--snapshot-before")
+        record_path = Path(started["record_path"])
+        record = json.loads(record_path.read_text(encoding="utf-8"))
+        name = Path(record["markdown_path"]).name
+        artifact = Path(record["evidence"]["before"][0]["stored_path"]).relative_to(self.root.resolve())
+        legacy = r"C:\AIフォルダ\ブログ\記事自動化実験\data\article-quality-log"
+        record["markdown_path"] = legacy + "\\userLog\\" + name
+        record["evidence"]["before"][0]["stored_path"] = legacy + "\\" + str(artifact).replace("/", "\\")
+        record_path.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        events_before = (self.root / "events.jsonl").read_bytes()
+        old_root = self.root
+        self.root = (self.base / "ブログ改善ログ" / "記事制作ログ").resolve()
+        self.root.parent.mkdir()
+        old_root.rename(self.root)
+
+        self.run_cli("render", "--root", str(self.root))
+        self.assertTrue(self.run_cli("verify-store", "--root", str(self.root))["ok"])
+        rebased = json.loads((self.root / "records" / record_path.name).read_text())
+        self.assertEqual(rebased["request"], record["request"])
+        self.assertEqual(rebased["source"], record["source"])
+        self.assertEqual((self.root / "events.jsonl").read_bytes(), events_before)
+        self.assertEqual(rebased["markdown_path"], str(self.root / "userLog" / name))
+        self.assertEqual(rebased["evidence"]["before"][0]["stored_path"], str(self.root / artifact))
+        self.assertFalse(old_root.exists())
+        self.assertFalse(Path(record["markdown_path"]).exists())
+        history = next((self.root / "articles").glob("*/制作履歴.md")).read_text()
+        self.assertIn("../../userLog/" + name, history)
+
+    def test_render_anchors_absolute_output_inside_user_log(self) -> None:
+        started = self.start()
+        record_path = Path(started["record_path"])
+        record = json.loads(record_path.read_text())
+        outside = self.base / "outside.md"
+        record["markdown_path"] = str(outside)
+        record_path.write_text(json.dumps(record, ensure_ascii=False))
+        self.run_cli("render", "--root", str(self.root))
+        self.assertFalse(outside.exists())
+        self.assertTrue((self.root / "userLog" / outside.name).is_file())
+
+    def test_known_legacy_roots_resolve_to_one_folder(self) -> None:
+        spec = importlib.util.spec_from_file_location("quality_log_root_test", SCRIPT)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with patch.object(module, "LOG_ROOT", self.root):
+            for value in [
+                r"C:\AIフォルダ\.skill-improver-data\article-quality-log",
+                r"C:\AIフォルダ\ブログ\記事自動化実験\data\article-quality-log",
+                r"C:\\AIフォルダ\\ブログ\\記事自動化実験\\data\\article-quality-log",
+                "/Users/yudaikato/Documents/AIフォルダ/ブログ/制作・管理ツール/記事制作の実験/data/article-quality-log",
+            ]:
+                self.assertEqual(module.QualityLogStore(value).root, self.root.resolve())
+
+    @unittest.skipIf(sys.platform == "win32", "Windows paths are valid on Windows")
+    def test_unknown_windows_root_is_rejected_before_writing(self) -> None:
+        result = self.run_cli("init", "--root", r"Z:\unmapped\logs", expected=2)
+        self.assertIn("Windows", result["error"])
 
     def test_start_preserves_verbatim_and_renders_sections(self) -> None:
         result = self.start()

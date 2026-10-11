@@ -43,7 +43,7 @@ article_feedback_context:
 
 ```powershell
 python "/Users/yudaikato/.codex/skills/article-skill-feedback/scripts/article_feedback.py" resolve-rules `
-  --root "C:\AIフォルダ\.skill-improver-data\article-feedback" `
+  --root "/Users/yudaikato/Documents/AIフォルダ/ブログ/ブログ改善ログ/スキル改善ログ" `
   --project-root "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ" `
   --entry-skill "cloudflare-seo-article-creator" `
   --target-skill "study-article-ui-coder" `
