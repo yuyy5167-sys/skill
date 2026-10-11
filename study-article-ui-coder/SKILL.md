@@ -17,6 +17,8 @@ description: 提供された教育・勉強系の記事本文を、キーワー�
 
 ## 最初に読むもの
 
+対象ブログの今後の新規記事では、2026-10-12のユーザー指定により記事タイトルより上の左側へ「この記事にはプロモーションを含む場合があります」を12pxで1回表示する。Astroでは共通レイアウトの`ArticlePromotionDisclosure`を使い、親へ`promotionDisclosure: true`のfrontmatter設定を引き継ぐ。standaloneでは同じ文言を記事冒頭に左寄せで1回置く。本文へ表示を重複追加せず、H1・H2・H3、CTA枠タイトルへ「（広告）」を付けない。公開済み記事・既存下書きへ自動で遡及適用せず、別プロジェクトへ一般化しない。
+
 毎回、次を全文読む。
 
 1. [references/programming-rulebook.md](references/programming-rulebook.md)
