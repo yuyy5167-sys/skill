@@ -67,6 +67,7 @@ change_request:
 | `required_elements` | 必須の部品・内容 |
 | `forbidden_elements` | 禁止する部品・表現 |
 | `publication_state` | 既定はpreviewまたはdraft |
+| `temporary_workspace` | 親が確定した`run_root`、`preview_root`、`scratch_directory`、`verification_directory`、`process_temp_directory`、`process_environment`、`cleanup_info`。一時ファイルはこの同じ実行フォルダへ保存。単独利用では作業フォルダ直下の既存tmp/TMPを再利用し、なければtmpを作る |
 
 結果が大きく変わる情報だけ質問し、安全な既定値で進められる場合は止めない。
 

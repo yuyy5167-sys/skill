@@ -8,6 +8,17 @@
 schema_version: "2.7"
 run_id: "現在実行の一意な値"
 project_root: "C:\\AIフォルダ\\ブログ\\site"
+temporary_workspace:
+  work_root: "現在の作業フォルダの絶対パス"
+  temporary_root: "作業フォルダ直下の既存tmp/TMP。なければtmp"
+  run_root: "<temporary_root>/codex-article-work/<run-id>--<article-id>"
+  preview_root: "<run_root>/preview"
+  scratch_directory: "<run_root>/scratch"
+  verification_directory: "<run_root>/verification"
+  process_temp_directory: "<run_root>/process-tmp"
+  process_environment: {} # 準備スクリプトの返り値を今回の作業プロセスにだけ渡す
+  cleanup_info: "<run_root>/CLEANUP-INFO.txt"
+  disposable_after: user_review_finished_and_processes_stopped
 rulebook_path: "C:\\AIフォルダ\\ブログ\\クラウドフレア\\記事装飾ルールブック.md"
 authorization:
   mode: orchestrated_prepublication
@@ -20,6 +31,8 @@ authorization:
   scope:
     article_count: 1
     article_root: ""
+    temporary_run_root: "temporary_workspace.run_rootと同じ確定パス"
+    may_write_disposable_temporary_files: true
     may_create_new_article_files: true
     may_save_rights_cleared_assets: true
     may_insert_h2_heading_image_references: true
@@ -144,7 +157,7 @@ article_feedback_context:
   ledger_status: ok | empty | degraded
 ```
 
-`article.mode`が`new`以外、またはキーワードと新規記事作成指示がそろわない場合は本スキルの一括実行対象外とする。事業目的が未確認ならログ記録と確認質問だけを行い、その他の工程を開始しない。`authorization.scope.article_root`は`<project_root>\src\content\blog\<article_id>`へ正規化し、この外へ書き込まない。`project_root`と`rulebook_path`は実行時に存在確認し、移動していた場合は推測で置換しない。
+`article.mode`が`new`以外、またはキーワードと新規記事作成指示がそろわない場合は本スキルの一括実行対象外とする。事業目的が未確認ならログ記録と確認質問だけを行い、その他の工程を開始しない。`authorization.scope.article_root`は`<project_root>\src\content\blog\<article_id>`へ正規化し、永続成果物はこの内へ保存する。表示確認後に不要になるファイルは、別に確定した`authorization.scope.temporary_run_root`（`temporary_workspace.run_root`と同じパス）内へ保存する。この二つの書込み範囲を混在・拡張しない。`project_root`と`rulebook_path`は実行時に存在確認し、移動していた場合は推測で置換しない。
 
 メインキーワード、明示的な記事作成指示、確認済み事業目的があり、対象が既存記事ではなく本スキルの新規記事範囲だと確認できれば、依頼文に「新規」という語がなくても、一括承認は調査から統合検査後の最終プレビュー表示まで有効とする。依頼文に`成約用`または`集客用`が明記されていれば、その原文を確認回答として扱う。キーワード、記事型、履歴から目的を推測せず、「任せる」など選択が確定しない回答では制作を始めない。計画、タイトル、調査、執筆、権利条件を満たす画像、サムネイル、各H2見出し画像、保存、検査、修正、隔離プレビューについて途中承認を追加しない。ユーザーが停止を指示した場合は安全な区切りで止める。
 
@@ -867,6 +880,9 @@ checks:
 preview:
   status: opened_verified
   url: "http://127.0.0.1:<port>/<article-route>/"
+  run_root: "作業フォルダ直下のtmp/TMP内にある削除可能な実行フォルダ"
+  cleanup_info: "<run_root>/CLEANUP-INFO.txt"
+  disposable_after: user_review_finished_and_processes_stopped
   checked_widths: [320, 375, 390, 768, 1280]
   source_draft_preserved: true
   presented_to_user: true

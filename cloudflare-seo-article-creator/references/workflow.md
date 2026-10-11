@@ -414,16 +414,18 @@ H2画像は全対象を生成・目視してから未使用名へ保存し、保
 
 1. `$education-blog-thumbnail-creator`の`scripts/check-h2-images.ps1`へ正本記事パスを渡し、全H2画像の構造・実在・形式検査を行う。
 2. ビルド前は`basic`または共通`audit-article-links.mjs`で原稿の事前検査を行う。手順6の最終ビルド後、`scripts/validate-cloudflare-article.ps1`へ`-ValidationMode parent`、`-RenderedHtmlPath`、`-ExpectedArticleBusinessPurpose conversion|traffic`、`-ArticlePath`、`-ProjectRoot`、`-ExpectedTitle`、`-ExpectedArticleProfileJson`、`-ExpectedCtaStrategyJson`、適用時の`-ExpectedReviewEvidencePlanJson`と`-ExpectedPriceEvidencePlanJson`、目的別`-ExpectedAffiliateDisposition`、`-ExpectedEmphasisPlanJson`、`-ExpectedInternalLinkManifestJson`、`-ExpectedAffiliateLinkManifestJson`、`-ExternalLinkPolicy allow_task_required_only`を渡す。例外は通常空とし、明示許可がある場合だけ`-AllowedExternalApprovalJson`へ原文・出典付きで渡す。成約用の単独CTAでは`-ExpectedAffiliateProvider`と`-ExpectedAffiliateCourse`も渡す。JSONは同じPowerShell内の変数で渡し、コマンド文字列へ直接埋め込んだり中間ファイルを作成したりしない。原稿・最終HTMLの両方が合格するまで完成にしない。
-3. `npm run build`を実行し、既存ビルドを壊していないことを確認する。この通常ビルドの正規プロジェクト側`dist`は再生成可能だが、隔離プレビューの一時成果物には混ぜない。
-4. `scripts/prepare-local-preview.ps1`へプロジェクトルート、記事ID、`run-id`を渡し、既定の`%TEMP%\\codex-article-work\\<run-id>--<article-id>\\`へ許可リスト方式の隔離コピーを作る。`-PreviewRoot`を指定する場合も、この一時ルート配下の未使用実行フォルダに限定する。正本の`draft: true`を変更しない。
-5. 隔離コピー内の記事だけを`draft: false`にし、元プロジェクトの`node_modules`を一時ジャンクションから再利用する。Astro・Viteのキャッシュとビルド出力は隔離コピー内に置き、依存関係を再インストールしない。`CLEANUP-INFO.txt`の削除条件を確認し、`C:\\AIフォルダ\\previews`、正規プロジェクトの`.tmp`、`artifacts`には一時成果物を作らない。
-6. 隔離コピーをビルドし、手順2で用意した親完成検査へ最終記事HTMLを渡す。原稿とHTMLのリンク検査合格後、`127.0.0.1`の空きポートで配信し、利用可能な`control-in-app-browser`で記事URLを開く。URL提示だけを表示済みにしない。
-7. 320px、375px、390px、768px、1280pxで、表以外の横はみ出し、画像、見出しID、アンカー、コンソールエラーを実査する。保存する検証画像・ログは、隔離コピー内の`verification`配下へ置く。強調計画の全語句が指定章の表示本文で太字になり通常文字と見分けられること、Markdown記法が露出していないことを確認する。各強調箇所の実際の折返しも確認し、原則1行、最大2行に収める。3行以上になる場合は短い単語・句へ直して再検証する。各H2画像では画像全体、文字、数字、矢印、主役、縦横比、不要な枠を記事本文幅で確認する。
+3. 一時ファイルを初めて作る前に、`scripts/prepare-local-preview.py --project-root <正規プロジェクト> --work-root <現在の作業フォルダ> --article-id <記事ID> --run-id <同じrun-id> --initialize-only`を実行する。PowerShellでは同名の`.ps1`へ`-ProjectRoot`、`-WorkRoot`、`-ArticleId`、`-RunId`、`-InitializeOnly`を渡す。既存`tmp/`・`TMP/`を再利用し、なければ作業フォルダ直下へ`tmp/`を作る。別名の確認済み一時フォルダは`--temporary-root`（`-TemporaryRoot`）で作業フォルダ直下の実フォルダを指定する。`WorkRoot`省略時は`ProjectRoot`が既定なので、親経由では現在の作業フォルダを明示する。このMac環境ではブログ直下の既存`TMP/`を再利用する。出力の`run_root`、`scratch_directory`、`verification_directory`、`process_temp_directory`を実行状態と子工程へ渡す。記事ファイルや画像が未完成でも一時フォルダの準備はできる。
+4. 記事・画像の保存後、同じ引数から`--initialize-only`（`-InitializeOnly`）を外して通常実行し、`<一時フォルダ>/codex-article-work/<run-id>--<article-id>/preview/`へ許可リスト方式の隔離コピーを作る。`.git`、既存`dist`、`node_modules`、キャッシュ、一時フォルダ、`.env`をコピーしない。`--preview-root`（`-PreviewRoot`）を指定する場合もこの`preview/`だけに限定する。正本の`draft: true`を変更せず、表示用の変更はコピー内の記事だけに行う。既存記事修正でも同じ一時保存契約を使い、正本frontmatterを維持する。
+5. 元プロジェクトの`node_modules`をWindowsではジャンクション、macOS/Linuxではシンボリックリンクから再利用し、再インストールしない。出力`process_environment`にある`TMPDIR`、`TEMP`、`TMP`、`npm_config_cache`を、ビルド・配信・検証など今回の作業プロセスにだけ渡す。ユーザー環境の永続設定は変えない。作業ディレクトリを`preview_root`へ変更し、設定ファイル名`preview_config_argument`（`codex-preview.config.mjs`）を指定して`npm run build -- --config codex-preview.config.mjs`を実行する。設定の絶対パス`preview_config`は検証記録に残し、CLIには作業ディレクトリからの相対ファイル名を渡す。サイト全体のビルド確認とプレビュー用ビルドをこの1回で行い、プレビュー確認だけのために正規プロジェクト側へ新しい`dist`やキャッシュを作らない。既存の通常ビルド出力には触れない。
+6. 隔離コピーのビルド結果から手順2の親完成検査へ最終記事HTMLを渡す。原稿とHTMLのリンク検査合格後、同じ作業ディレクトリ・環境で`npm run preview -- --config codex-preview.config.mjs --host 127.0.0.1 --port <空きポート>`を実行し、利用可能なブラウザで記事URLを開く。配信に必要なコピー・ビルド結果・キャッシュ・補助ファイルはすべて同じ`run_root`内に置く。URL提示だけを表示済みにしない。
+7. 320px、375px、390px、768px、1280pxで、表以外の横はみ出し、画像、見出しID、アンカー、コンソールエラーを実査する。保存する検証画像・ログは、同じ一時実行フォルダの`verification_directory`配下へ置く。強調計画の全語句が指定章の表示本文で太字になり通常文字と見分けられること、Markdown記法が露出していないことを確認する。各強調箇所の実際の折返しも確認し、原則1行、最大2行に収める。3行以上になる場合は短い単語・句へ直して再検証する。各H2画像では画像全体、文字、数字、矢印、主役、縦横比、不要な枠を記事本文幅で確認する。
 8. レンダリング済みHTMLを`$article-internal-linker`の`audit`へ事業目的、`cta_strategy`、`expected_link_manifest`、`affiliate_link_manifest`、5画面幅の表示記録とともに渡す。成約用は計画件数どおりのCTA、集客用は主成約記事カードとアフィリエイト0件を、内部リンクの表示形式・画像読込み・URL・属性・重複・表示とともに子スキルの正本契約で監査する。
 9. 統合検査TODOを除く全必須TODOが一度`accepted`になった後、タイトル、導入、見出し、本文、結論、事実と出典、内部リンク、公式画像、サムネイルの表示文字、各H2画像の意味と配置、装飾の役割、スマートフォン表示を一つの記事として横断検査する。不合格なら原因となったTODOを`revision_requested`へ戻し、その成果物に依存するTODOを`revalidation_scope`へ追加する。必要な範囲の再検証と統合検査の再実行が終わるまで完成状態を返さない。
 10. 正本SHA-256を最終取得して静的検査結果と照合する。隔離コピーの`source_article_sha256`が同じ正本を指し、コピーのfrontmatterの`draft`以外が正本と一致することを確認する。記事・コピー・画像に変更があれば影響する検査を無効化して再確認する。統合検査が合格したら、最終操作として完成版の記事URLをユーザーが見えるアプリ内ブラウザへ開くか、既存タブをそのURLへ移動する。表示後に現在URLと記事画面を確認し、`preview.presented_to_user: true`、`preview.presentation_stage: after_final_audit`を記録する。URLの報告、スクリーンショット、検査中に開いた履歴だけで代替しない。
 11. 利用可能な表示手段がない、最終URLへ移動できない、または記事画面を確認できない場合は`preview.status: display_blocked`、`preview.presented_to_user: false`とし、完成状態を返さない。
 12. 実際に到達した状態で`$article-production-log`の`finish-log`へ目的別導線の`funnel_alignment`と検証根拠を記録し、`verify-store`を行う。表示できない場合は`preview_ready`や`verified`へ誇張せず、観測事実と未解決事項を残す。
+
+一時実行フォルダの`CLEANUP-INFO.txt`には、`preview/`、`scratch/`、`verification/`、`process-tmp/`の用途と、ユーザーの閲覧・確認後に配信・作業プロセスを停止すれば実行フォルダ全体を削除できることを記す。共有`node_modules`は実体をコピーせずリンクで参照するため、削除時はリンクだけを外して共有先をたどらない。ユーザーに見せる直前やブラウザを開いた直後には消さない。最終報告には実行フォルダの絶対パスを含める。継続利用する記事原本・採用画像・制作履歴・検証要約を一時フォルダへ移さず、逆に一時スクリーンショットやビルド全体を恒久ログへ複製しない。
 
 ## 12. 最終報告
 
@@ -440,6 +442,7 @@ H2画像は全対象を生成・目視してから未使用名へ保存し、保
 - 成約用では`article_profile`、口コミ・料金証拠計画の適用結果、`cta_strategy`の標準数・採用数・増減理由・公式確認場面、対象講座、CTA件数、共通部品確認、挿入・最終監査。集客用では主成約記事、役割確認根拠、カード監査、アフィリエイト0件。両方で許可外部リンクと理由
 - 未実施の画面確認や人間確認
 - プレビューURL、表示状態、確認幅、`presented_to_user: true`、表示時点が統合検査後であること、正本が`draft: true`のままであること
+- 削除可能な一時実行フォルダと`CLEANUP-INFO.txt`の絶対パス、閲覧・確認後に配信・作業プロセスを停止すれば実行フォルダ全体を削除できること
 - 本番公開、commit、push、デプロイを行っていないこと
 - 品質ログの`log_id`、詳細Markdownの絶対パス、`verify-store`の結果。ログ未完了なら未記録範囲と再実行条件
 
