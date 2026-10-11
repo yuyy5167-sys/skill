@@ -13,6 +13,7 @@ import shutil
 import sys
 import time
 import uuid
+import unicodedata
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,7 +21,7 @@ from typing import Any, Iterable
 
 
 SCHEMA_VERSION = "1.0"
-CANONICAL_PROJECT = Path(r"C:\AIフォルダ\ブログ\site")
+CANONICAL_PROJECT = Path(r"/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ")
 QUALITY_DIMENSIONS = {
     "search_intent",
     "facts_freshness",
@@ -94,7 +95,11 @@ def safe_component(value: str, fallback: str = "item", limit: int = 64) -> str:
 
 
 def norm_path(value: str | Path) -> str:
-    return str(Path(value).expanduser().resolve())
+    raw = unicodedata.normalize("NFC", str(value)).replace("\\", "/")
+    legacy = "C:/AIフォルダ/ブログ/site"
+    if raw == legacy or raw.startswith(legacy + "/"):
+        raw = "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ" + raw[len(legacy):]
+    return unicodedata.normalize("NFC", os.path.normcase(str(Path(raw).expanduser().resolve())))
 
 
 def same_path(left: str | Path, right: str | Path) -> bool:

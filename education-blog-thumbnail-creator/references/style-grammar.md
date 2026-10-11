@@ -6,7 +6,7 @@
 
 ## 原資料
 
-フォルダ: `C:\AIフォルダ\ブログ\クラウドフレア\サムネイル画像\サムネイル例`
+フォルダ: `/Users/yudaikato/Documents/AIフォルダ/ブログ/記事の企画・素材/画像・見本/教育ブログのキャラクターとサムネイル/サムネイル例`
 
 2026-08-30確認時の目録:
 
@@ -119,8 +119,8 @@ H2画像では `profile_id: h2_style_profile_v1`、`revision: 2` を使う。次
 
 | ID | 実在パス | 寸法 | 容量 | 期待SHA-256 | 状態 | 採用根拠 | 継承する特徴 | 固定しない特徴 |
 | --- | --- | --- | ---: | --- | --- | --- | --- | --- |
-| tablet-six | `C:\AIフォルダ\ブログ\site\src\content\blog\小学生のタブレット学習おすすめ7選。それぞれの\images\elementary-tablet-learning-6-thumbnail.png` | 1536×864 | 1,981,003 bytes | `01968C9146EE9FE413217C488651C0DD36E6055FB832877AC5AEF14739204F0D` | active | ユーザーが画風・デザインの参考として提示 | 自然な丸み、白縁の軽さ、文字と絵の釣り合い、線と色面 | 男子、右配置、タブレット、色、3段の文字組み |
-| entrance-exam | `C:\AIフォルダ\ブログ\site\src\content\blog\shinkenzemi-chugaku-juken-rewrite-draft\images\shinkenzemi-chugaku-juken-guide-thumbnail-v2.webp` | 1536×864 | 104,102 bytes | `B9DA6E8F08FDB134819B60E92BC0F8A6F6A8AEF29095E7F43C4B130F1E81DDBF` | active | ユーザーが「良くなりました。これで反映してください」と採用。2026-09-11の同役割差し替えを目視確認 | 柔らかな輪郭、文字の階層、一つの学習風景、余白 | 女子、右配置、紙教材、疑問形、コーラル見出し |
+| tablet-six | `/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/小学生のタブレット学習おすすめ7選。それぞれの/images/elementary-tablet-learning-6-thumbnail.png` | 1536×864 | 1,981,003 bytes | `01968C9146EE9FE413217C488651C0DD36E6055FB832877AC5AEF14739204F0D` | active | ユーザーが画風・デザインの参考として提示 | 自然な丸み、白縁の軽さ、文字と絵の釣り合い、線と色面 | 男子、右配置、タブレット、色、3段の文字組み |
+| entrance-exam | `/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/shinkenzemi-chugaku-juken-rewrite-draft/images/shinkenzemi-chugaku-juken-guide-thumbnail-v2.webp` | 1536×864 | 104,102 bytes | `B9DA6E8F08FDB134819B60E92BC0F8A6F6A8AEF29095E7F43C4B130F1E81DDBF` | active | ユーザーが「良くなりました。これで反映してください」と採用。2026-09-11の同役割差し替えを目視確認 | 柔らかな輪郭、文字の階層、一つの学習風景、余白 | 女子、右配置、紙教材、疑問形、コーラル見出し |
 
 採用は画像内の全要素の普遍的な承認ではない。追加はユーザーが採用または基準指定した画像だけとし、自己評価だけで増やさない。画像をスキル内へ複製せず、上の実在パスを確認する。
 
@@ -137,10 +137,10 @@ H2画像では `profile_id: h2_style_profile_v1`、`revision: 2` を使う。次
 
 | ID | 実在パス | 寸法 | 容量 | 期待SHA-256 | 状態 | 用途 |
 | --- | --- | --- | ---: | --- | --- | --- |
-| generic-layouts | `C:\AIフォルダ\ブログ\クラウドフレア\サムネイル画像\サムネイル見本.png` | 1536×1024 | 2,591,705 bytes | `2EBA398EA367D3C15DA7B36D16AC9756667FE58E9981D855C0CE78FF0F0D9477` | active | 見出し、補足、比較、手順などの情報構造 |
-| elementary-scenes | `C:\AIフォルダ\ブログ\クラウドフレア\サムネイル画像\小学生キャラクターシート\小学生サムネイル見本.png` | 1491×1055 | 2,515,259 bytes | `990A87A7F32887782DC1A8AB390863E75EE3A556AB5AB40EF62E301292FDA420` | active | 小学生の学習行動、悩み、理解、成長 |
-| junior-high-scenes | `C:\AIフォルダ\ブログ\クラウドフレア\サムネイル画像\中学生キャラクターシート\中学生サムネイル見本.png` | 1536×1024 | 2,880,704 bytes | `850948C4A0F04C6C2498D0FC335EFB385037445DDABAA9E1E89238E2D4460815` | active | 中学生の家庭学習、学校、計画、進路 |
-| high-school-scenes | `C:\AIフォルダ\ブログ\クラウドフレア\サムネイル画像\高校生キャラクターシート\高校生サムネイル見本.png` | 1536×1024 | 2,995,386 bytes | `C9AE8E3005976EF3390977B66FEF78CBC793BF8854D6CEC6412CB1944A0888C7` | active | 高校学習、模試、受験、進路、自習 |
+| generic-layouts | `/Users/yudaikato/Documents/AIフォルダ/ブログ/記事の企画・素材/画像・見本/教育ブログのキャラクターとサムネイル/サムネイル見本.png` | 1536×1024 | 2,591,705 bytes | `2EBA398EA367D3C15DA7B36D16AC9756667FE58E9981D855C0CE78FF0F0D9477` | active | 見出し、補足、比較、手順などの情報構造 |
+| elementary-scenes | `/Users/yudaikato/Documents/AIフォルダ/ブログ/記事の企画・素材/画像・見本/教育ブログのキャラクターとサムネイル/小学生キャラクターシート/小学生サムネイル見本.png` | 1491×1055 | 2,515,259 bytes | `990A87A7F32887782DC1A8AB390863E75EE3A556AB5AB40EF62E301292FDA420` | active | 小学生の学習行動、悩み、理解、成長 |
+| junior-high-scenes | `/Users/yudaikato/Documents/AIフォルダ/ブログ/記事の企画・素材/画像・見本/教育ブログのキャラクターとサムネイル/中学生キャラクターシート/中学生サムネイル見本.png` | 1536×1024 | 2,880,704 bytes | `850948C4A0F04C6C2498D0FC335EFB385037445DDABAA9E1E89238E2D4460815` | active | 中学生の家庭学習、学校、計画、進路 |
+| high-school-scenes | `/Users/yudaikato/Documents/AIフォルダ/ブログ/記事の企画・素材/画像・見本/教育ブログのキャラクターとサムネイル/高校生キャラクターシート/高校生サムネイル見本.png` | 1536×1024 | 2,995,386 bytes | `C9AE8E3005976EF3390977B66FEF78CBC793BF8854D6CEC6412CB1944A0888C7` | active | 高校学習、模試、受験、進路、自習 |
 
 - 構図見本は画像生成へ直接渡さず、Codexが目視した必要な構造だけを指示へ変換し、`confirmation_status: viewed_and_transcribed` と記録する。
 - 汎用見本と対象学年見本は必要な場合だけ各1枚、合計2枚以内を使う。記事から十分な構図を設計できる場合は使わない。

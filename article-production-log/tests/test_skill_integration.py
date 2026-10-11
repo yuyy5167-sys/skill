@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 
-SKILLS = Path(r"C:\Users\yuyy2\.codex\skills")
+SKILLS = Path(r"/Users/yudaikato/.codex/skills")
 PROJECT_HOOKS = Path(r"C:\AIフォルダ\.codex\hooks.json")
 SCRIPT = SKILLS / "article-production-log" / "scripts" / "article_production_log.py"
 

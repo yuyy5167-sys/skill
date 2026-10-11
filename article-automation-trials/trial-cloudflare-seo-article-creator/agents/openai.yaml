@@ -1,0 +1,4 @@
+interface:
+  display_name: "実験用：Cloudflare SEO記事作成"
+  short_description: "成約用／集客用を確認し、画像とプレビューまで新規記事を作成"
+  default_prompt: "$trial-cloudflare-seo-article-creator を使い、成約用か集客用かを確認してから、サムネイルと各H2画像を含む新規記事を作成してプレビュー画面まで表示してください。"

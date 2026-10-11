@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { auditText } from './audit-article-links.mjs';
 
-const projectRoot = process.env.ARTICLE_LINK_TEST_PROJECT_ROOT ?? 'C:\\AIフォルダ\\ブログ\\site';
+const projectRoot = process.env.ARTICLE_LINK_TEST_PROJECT_ROOT ?? '/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ';
 const origin = 'https://xn--5ckip8c4fq970ahbya2o7acu2a.com';
 const affiliate = 'https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=3613518&pid=892693444';
 const input = { project_root: projectRoot, affiliate_manifest: { links: [{ href: affiliate }] } };

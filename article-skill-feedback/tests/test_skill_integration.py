@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 
-SKILLS = Path(r"C:\Users\yuyy2\.codex\skills")
-SITE_BLOG = Path(r"C:\AIフォルダ\ブログ\site\src\content\blog")
+SKILLS = Path(r"/Users/yudaikato/.codex/skills")
+SITE_BLOG = Path(r"/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog")
 
 
 class SkillIntegrationTests(unittest.TestCase):
@@ -43,7 +43,7 @@ class SkillIntegrationTests(unittest.TestCase):
             with self.subTest(skill=skill):
                 text = self.read(relative)
                 self.assertIn("$article-skill-feedback", text)
-                self.assertIn(r"C:\AIフォルダ\ブログ\site", text)
+                self.assertIn(r"/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ", text)
                 self.assertIn(f"target_skill: {skill}", text)
                 self.assertIn(f"stage: {stage}", text)
                 self.assertIn("別プロジェクトには適用しない", text)

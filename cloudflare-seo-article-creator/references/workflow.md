@@ -5,8 +5,8 @@
 1. メインキーワードと、記事を作成する明示的な指示があることを確認する。「作成してください」「作ってください」など表現が異なり、依頼文に「新規」という語がなくても、既存記事ではなく本スキルの新規記事範囲だと確認できれば対象にする。
 2. ユーザーへ`成約用`か`集客用`かを確認する。依頼文に明記されていれば再質問せず、その原文を確認回答として記録する。明記がなく、または「任せる」など選択が確定しない場合は、定義と推奨理由を示して選択を待つ。キーワード・記事型・履歴から推測しない。
 3. `article_business_purpose.status: confirmed`、`type: conversion | traffic`、`confirmed_by_user: true`、確認原文と出典、目的別`primary_action`がそろうまで、調査・タイトル・見出し・本文・リンク・画像・ファイル・プレビューへ進まない。依頼原文のログ記録だけは実行できる。
-4. 対象が`C:\AIフォルダ\ブログ\site`の新規記事であることを確認する。既存記事のリライトなら本スキルを使用しない。
-5. `C:\AIフォルダ\ブログ\クラウドフレア\記事装飾ルールブック.md`を全文読む。
+4. 対象が`/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ`の新規記事であることを確認する。既存記事のリライトなら本スキルを使用しない。
+5. `/Users/yudaikato/Documents/AIフォルダ/ブログ/運用資料/デザイン・制作ルール/記事装飾ルールブック.md`を全文読む。
 6. 対象プロジェクトの`AGENTS.md`、`src\content.config.ts`、記事ルート、現在のfrontmatterを読み、実装時点のスキーマを確認する。事業目的は実行状態とログへ保持し、未対応のfrontmatterフィールドを追加しない。
 7. 既存の未コミット変更を読み取り確認し、ユーザーの作業へ触れない。
 8. 必要な依存スキルと表示手段を確認し、現行`SKILL.md`と必要な参照文書を工程直前に読む。PowerShell 5.1以上、Node.js、Python、既存`node_modules`のsatteriとAstroを確認する。PS5.1ではUTF-8 BOM付きps1を`powershell.exe -NoProfile -ExecutionPolicy Bypass -File <script>`で実行できる。`Bypass`は当該子プロセスだけとし、永続ポリシー変更や依存関係の自動インストールをしない。
@@ -31,7 +31,7 @@
 
 `$article-skill-feedback`の[親子スキル接続契約](../../article-skill-feedback/references/integration-contract.md)に従い、次を行う。修正依頼では品質ログの`log_id`と本台帳の依頼・結果イベントIDを相互参照する。
 
-1. 正規化した`project_root`が`C:\AIフォルダ\ブログ\site`と一致することを確認し、記事ID、予定記事パス、`run_id`、`parent_run_id`、`entry_skill: cloudflare-seo-article-creator`を固定する。
+1. 正規化した`project_root`が`/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ`と一致することを確認し、記事ID、予定記事パス、`run_id`、`parent_run_id`、`entry_skill: cloudflare-seo-article-creator`を固定する。
 2. `target_skill: cloudflare-seo-article-creator`、`stage: orchestration`で有効ルールを取得する。台帳全体や候補ファイルを直接読んでルールを再解釈しない。
 3. 初期の検証済み空集合なら通常工程へ進む。索引が欠落・破損している場合はルール依存の動作だけを止め、既存規約による記事作成を続けられるか判定し、異常と未適用範囲を残す。
 4. `article_business_purpose`を必須条件としてルールを取得する。調査後に`article_type`または`grade`が確定・変更された場合は、同じ実行IDと同じ事業目的で再取得する。取得した集合IDと版を全下流へ引き継ぐ。
@@ -363,9 +363,9 @@ draft: true
 実行開始時に通知した記事ID、`index.md`、画像フォルダ、作成理由と一致する場合だけ次へ作成する。
 
 ```text
-C:\AIフォルダ\ブログ\site\src\content\blog\<article-id>\index.md
-C:\AIフォルダ\ブログ\site\src\content\blog\<article-id>\images\<approved-thumbnail-name>.webp
-C:\AIフォルダ\ブログ\site\src\content\blog\<article-id>\images\h2-<section-image-name>.webp
+/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ\src\content\blog\<article-id>\index.md
+/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ\src\content\blog\<article-id>\images\<approved-thumbnail-name>.webp
+/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ\src\content\blog\<article-id>\images\h2-<section-image-name>.webp
 ```
 
 根拠画像は6.5で権利・保存範囲が合格した場合だけ、同じ記事フォルダの`images\evidence\`へ保存できる。既存の同名記事・画像を上書きしない。競合時は自動改名や上書きをせず`BLOCKED`にする。
@@ -459,7 +459,7 @@ H2画像は全対象を生成・目視してから未使用名へ保存し、保
 
 実行手順:
 
-1. `C:\AIフォルダ\ブログ\site`が対象Gitリポジトリで、通知済みremoteとpush先が現在の設定に一致することを読み取り確認する。push先が`main`、未確定、または別リポジトリを指す場合は停止する。
+1. `/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ`が対象Gitリポジトリで、通知済みremoteとpush先が現在の設定に一致することを読み取り確認する。push先が`main`、未確定、または別リポジトリを指す場合は停止する。
 2. `git status --short`とステージ済み差分を確認する。ユーザーのdirty worktree、既存ステージ、別記事の変更を取り込まない。リモートを更新確認し、最新のリモート`main`から隔離した作業場所と通知済みの非`main`ブランチを作る。既存の同名リモートブランチがある場合は、最新のリモート`main`を基点とし、対象`index.md`以外の未マージ差分を含まない場合だけ再利用する。条件を満たさなければ上書き、force push、別名への自動変更をせず停止する。元の作業ツリーをcheckout、reset、stash、cleanしない。
 3. 同じ制作実行で確定した`src/content/blog/<article-id>/index.md`だけを隔離側の同一パスへ反映する。GitHub保存のために本文、frontmatter、`draft`、リンク、画像参照を変更しない。
 4. `git add -- src/content/blog/<article-id>/index.md`のように対象パスを明示してステージする。`git add .`、記事フォルダ全体、画像ディレクトリ、globを使わない。

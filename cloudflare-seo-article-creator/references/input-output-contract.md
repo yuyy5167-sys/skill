@@ -7,7 +7,7 @@
 ```yaml
 schema_version: "2.7"
 run_id: "現在実行の一意な値"
-project_root: "C:\\AIフォルダ\\ブログ\\site"
+project_root: "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ"
 temporary_workspace:
   work_root: "現在の作業フォルダの絶対パス"
   temporary_root: "作業フォルダ直下の既存tmp/TMP。なければtmp"
@@ -19,7 +19,7 @@ temporary_workspace:
   process_environment: {} # 準備スクリプトの返り値を今回の作業プロセスにだけ渡す
   cleanup_info: "<run_root>/CLEANUP-INFO.txt"
   disposable_after: user_review_finished_and_processes_stopped
-rulebook_path: "C:\\AIフォルダ\\ブログ\\クラウドフレア\\記事装飾ルールブック.md"
+rulebook_path: "/Users/yudaikato/Documents/AIフォルダ/ブログ/運用資料/デザイン・制作ルール/記事装飾ルールブック.md"
 authorization:
   mode: orchestrated_prepublication
   source: keyword_create_and_confirmed_business_purpose
@@ -143,7 +143,7 @@ article_log_context:
   business_purpose_confirmation_source_ref: ""
   feedback_request_event_id: null
 article_feedback_context:
-  project_root: "C:\\AIフォルダ\\ブログ\\site"
+  project_root: "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ"
   article_id: ""
   article_path: ""
   run_id: "現在実行のrun_idと同一"

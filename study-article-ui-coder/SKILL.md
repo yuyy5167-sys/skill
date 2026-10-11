@@ -11,7 +11,7 @@ description: 提供された教育・勉強系の記事本文を、キーワー�
 
 ## 同じブログの修正履歴・有効ルール
 
-対象が正規化後に`C:\AIフォルダ\ブログ\site`と一致する場合は、開始時に`$article-skill-feedback`の接続契約を読み、`target_skill: study-article-ui-coder`、`stage: ui`の有効ルールを取得する。記事フィードバック台帳への定型追記は、この仕組みに対するユーザーの継続許可の範囲として扱い、依頼ごとの保存確認を追加しない。この許可を記事・共通CSSその他の書込みへ広げない。親経由では渡された`parent_run_id`と有効ルール集合を再利用し、対象ルールを既存の`required_elements`、`forbidden_elements`、`preserve_elements`等へ意味を変えず対応付ける。単独利用では本スキルを`entry_skill`とする。修正依頼は編集前後で記録するが、履歴から部品、CSS、画像、リンク、装飾数を追加しない。現在のユーザー指示、原文、対象プロジェクトの正本、下記のUI裁量を維持し、適用結果は実コードと全幅表示で検査する。別プロジェクトには適用しない。
+対象が正規化後に`/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ`と一致する場合は、開始時に`$article-skill-feedback`の接続契約を読み、`target_skill: study-article-ui-coder`、`stage: ui`の有効ルールを取得する。記事フィードバック台帳への定型追記は、この仕組みに対するユーザーの継続許可の範囲として扱い、依頼ごとの保存確認を追加しない。この許可を記事・共通CSSその他の書込みへ広げない。親経由では渡された`parent_run_id`と有効ルール集合を再利用し、対象ルールを既存の`required_elements`、`forbidden_elements`、`preserve_elements`等へ意味を変えず対応付ける。単独利用では本スキルを`entry_skill`とする。修正依頼は編集前後で記録するが、履歴から部品、CSS、画像、リンク、装飾数を追加しない。現在のユーザー指示、原文、対象プロジェクトの正本、下記のUI裁量を維持し、適用結果は実コードと全幅表示で検査する。別プロジェクトには適用しない。
 
 同じ対象の依頼単位の詳細履歴は`$article-production-log`へ記録する。親経由では渡された`article_log_context.log_id`を使用して品質軸`ui_mobile | structure | images | internal_links | cta`の該当結果だけを返し、子で新規ログを作らない。本スキルを単独利用したユーザー発言では編集前に`start-log`、全幅実表示後に`finish-log`を行う。未承認候補から部品、CSS、装飾数を変更しない。
 

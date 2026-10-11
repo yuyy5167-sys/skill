@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 SCRIPT = Path(__file__).parents[1] / "scripts" / "article_production_log.py"
-PROJECT = r"C:\AIフォルダ\ブログ\site"
+PROJECT = r"/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ"
 
 
 class ArticleProductionLogCliTests(unittest.TestCase):

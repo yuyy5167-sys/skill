@@ -1,6 +1,6 @@
 # 記事本文のリンク制限と検査
 
-対象は `C:\AIフォルダ\ブログ\site` の新規記事と既存記事修正。成約用・集客用の両方に適用する。
+対象は `/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ` の新規記事と既存記事修正。成約用・集客用の両方に適用する。
 
 - 読者向け本文へ配置できる誘導は、確認済みの自サイト内部リンクと、その記事で承認済みのアフィリエイトCTAだけである。CTAを追加できるか・件数・講座は既存の目的別契約に従う。
 - 公式トップ、FAQ、規約、購入窓口、ログイン、研究論文、参考文献、脚注も、外部URLを本文へ置く理由にはならない。AIが「手続きに必要」「根拠として有用」と判断して例外を作らない。
@@ -23,7 +23,7 @@ $auditInput = @{
   affiliate_manifest = $approvedAffiliateManifest # links配列。CTAなしは @{ links = @() }
   allowed_external_links = @() # 通常は空
 } | ConvertTo-Json -Depth 30 -Compress
-$auditInput | node 'C:\Users\yuyy2\.codex\skills\cloudflare-seo-article-creator\scripts\audit-article-links.mjs'
+$auditInput | node '/Users/yudaikato/.codex/skills/cloudflare-seo-article-creator/scripts/audit-article-links.mjs'
 if ($LASTEXITCODE -ne 0) { throw '本文リンク検査が不合格です。該当リンクを修正して再検査してください。' }
 ```
 

@@ -2,7 +2,7 @@
 
 ## 対象と役割
 
-正規プロジェクトは`C:\AIフォルダ\ブログ\site`だけである。
+正規プロジェクトは`/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ`だけである。
 
 - `$article-production-log`: 一件ごとの詳細記録、証拠、記事別履歴、横断傾向
 - `$article-skill-feedback`: 修正イベント、継続候補の提案、明示承認、検証済み有効化、撤回

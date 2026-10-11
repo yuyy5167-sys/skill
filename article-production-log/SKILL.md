@@ -1,6 +1,6 @@
 ---
 name: article-production-log
-description: C:\AIフォルダ\ブログ\site の記事制作・修正依頼を、ユーザー原文、解釈、変更前後、検証、品質課題、改善候補まで依頼単位の詳細Markdownへ記録し、記事別履歴と横断レポートへ集約する。ブログ品質の継続改善、制作ログの作成・更新・監査に使用する。記事本文の編集、継続ルールの承認・有効化、本番公開には使用しない。
+description: /Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ の記事制作・修正依頼を、ユーザー原文、解釈、変更前後、検証、品質課題、改善候補まで依頼単位の詳細Markdownへ記録し、記事別履歴と横断レポートへ集約する。ブログ品質の継続改善、制作ログの作成・更新・監査に使用する。記事本文の編集、継続ルールの承認・有効化、本番公開には使用しない。
 ---
 
 # ブログ記事制作ログ
@@ -16,7 +16,7 @@ description: C:\AIフォルダ\ブログ\site の記事制作・修正依頼を�
 
 ## 必須原則
 
-- 対象は正規プロジェクト`C:\AIフォルダ\ブログ\site`の記事制作・記事修正だけとする。一般質問、スキル設計、動画制作、ブログ外の文章は記事ログへ関連付けない。
+- 対象は正規プロジェクト`/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ`の記事制作・記事修正だけとする。一般質問、スキル設計、動画制作、ブログ外の文章は記事ログへ関連付けない。
 - ユーザーの各発言を一件の依頼として扱う。原文は要約や整文で置き換えず、Markdownの`ユーザー原文`へ全文保存する。
 - 明示要件、AIの解釈、未確定事項、対象外を分離する。推測をユーザー指示として記録しない。
 - 記録だけで作業完了、品質合格、継続ルール承認を意味しない。結果は実物確認後に追記する。
@@ -44,11 +44,11 @@ description: C:\AIフォルダ\ブログ\site の記事制作・修正依頼を�
 ## コマンド
 
 ```powershell
-python "C:\Users\yuyy2\.codex\skills\article-production-log\scripts\article_production_log.py" start-log `
+python "/Users/yudaikato/.codex/skills/article-production-log/scripts/article_production_log.py" start-log `
   --root "C:\AIフォルダ\.skill-improver-data\article-quality-log" `
-  --project-root "C:\AIフォルダ\ブログ\site" `
+  --project-root "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ" `
   --article-id "example-slug" `
-  --article-path "C:\AIフォルダ\ブログ\site\src\content\blog\example.md" `
+  --article-path "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/example.md" `
   --request-type "correction" `
   --request-text "ユーザー原文" `
   --source-ref "current-thread:turn" `
@@ -65,7 +65,7 @@ python "C:\Users\yuyy2\.codex\skills\article-production-log\scripts\article_prod
 ```
 
 ```powershell
-python "C:\Users\yuyy2\.codex\skills\article-production-log\scripts\article_production_log.py" finish-log `
+python "/Users/yudaikato/.codex/skills/article-production-log/scripts/article_production_log.py" finish-log `
   --root "C:\AIフォルダ\.skill-improver-data\article-quality-log" `
   --log-id "UUID" `
   --status "verified" `

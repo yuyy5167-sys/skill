@@ -1,0 +1,4 @@
+interface:
+  display_name: "実験用：記事内部リンク設計"
+  short_description: "目的別にCTAまたは成約記事カードを計画・挿入・監査"
+  default_prompt: "$trial-article-internal-linker を使い、確認済みの事業目的に従って、成約用では承認済み講座別CTA、集客用では公開確認済み成約記事カードを計画・挿入・監査してください。"

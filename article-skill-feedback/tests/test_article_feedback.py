@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from article_feedback import FeedbackStore, LedgerError, sha256_file  # noqa: E402
 
 
-BLOG_ROOT = r"C:\AIフォルダ\ブログ\site"
+BLOG_ROOT = r"/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ"
 
 
 class FeedbackAcceptanceTests(unittest.TestCase):

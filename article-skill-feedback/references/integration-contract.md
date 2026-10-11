@@ -2,7 +2,7 @@
 
 ## 対象
 
-この接続を有効にする正規プロジェクトルートは`C:\AIフォルダ\ブログ\site`だけである。現在の作業ディレクトリが`C:\AIフォルダ`であること、ブラウザに対象記事が開いていること、過去会話にブログ名があることだけでは対象と判定しない。
+この接続を有効にする正規プロジェクトルートは`/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ`だけである。現在の作業ディレクトリが`C:\AIフォルダ`であること、ブラウザに対象記事が開いていること、過去会話にブログ名があることだけでは対象と判定しない。
 
 対象スキルと工程は次のとおり。
 
@@ -23,7 +23,7 @@
 
 ```yaml
 article_feedback_context:
-  project_root: "C:\\AIフォルダ\\ブログ\\site"
+  project_root: "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ"
   article_id: ""
   article_path: ""
   run_id: ""
@@ -42,9 +42,9 @@ article_feedback_context:
 ## 取得と適用
 
 ```powershell
-python "C:\Users\yuyy2\.codex\skills\article-skill-feedback\scripts\article_feedback.py" resolve-rules `
+python "/Users/yudaikato/.codex/skills/article-skill-feedback/scripts/article_feedback.py" resolve-rules `
   --root "C:\AIフォルダ\.skill-improver-data\article-feedback" `
-  --project-root "C:\AIフォルダ\ブログ\site" `
+  --project-root "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ" `
   --entry-skill "cloudflare-seo-article-creator" `
   --target-skill "study-article-ui-coder" `
   --stage "ui" `

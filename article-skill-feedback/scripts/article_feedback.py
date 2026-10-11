@@ -10,6 +10,7 @@ import json
 import os
 import tempfile
 import uuid
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -53,7 +54,11 @@ def sha256_file(path: Path) -> str:
 
 
 def normalized_path(value: str) -> str:
-    return os.path.normcase(os.path.abspath(os.path.realpath(value)))
+    raw = unicodedata.normalize("NFC", str(value)).replace("\\", "/")
+    legacy = "C:/AIフォルダ/ブログ/site"
+    if raw == legacy or raw.startswith(legacy + "/"):
+        raw = "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ" + raw[len(legacy):]
+    return unicodedata.normalize("NFC", os.path.normcase(str(Path(raw).expanduser().resolve())))
 
 
 def nonempty(value: str, name: str) -> str:
