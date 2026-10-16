@@ -395,6 +395,8 @@ answer_map:
 
 `interpretation` を公式発表と混同しない。空欄を推測で補わず、根拠・条件は回答IDで参照する。重要候補がなければ除外一覧は空でよい。検収のために不要な疑問を捏造しない。
 
+書き方のお手本は`answer_map.evidence`へ入れない。調査の`writing_method`は、保存分析の再利用／今回の本文確認／一部確認の区別、参照資料、採用する方法、適用範囲と限界を保持する任意の方法資料とする。商品事実の不足を補う欄ではない。見出しへは`method_source`、文章へは`writing_method`として渡し、本文へ方法の研究報告を掲載しない。必要な判断理由は既存の`interpretation`・`limitations`を使い、別の評価台帳を作らない。
+
 ### 追加調査の入出力と反映責任
 
 本スキルは疑問ID、現時点の回答、不足情報、結論への影響、確認済み出典を入力に追加調査を直接実行し、事実・出典・確認日・適用条件・確認状態・未解決事項を記録する。
@@ -448,10 +450,11 @@ outline:
 
 ### 本文
 
-以下は本文の依存スキルへ渡す入力例である。`content_brief`と該当する`answer_map`を、下記の既存項目へ変換して渡す。
+標準担当は`$yomiyasu`。以下はその親接続モードへ渡す入力例である。`content_brief`と該当する`answer_map`を、下記の項目へ変換して渡す。正式な受理項目と返却形式はyomiyasuの`SKILL.md`「親記事スキルとの接続」を使う。通常の単独利用を構造化出力へ変えない。
 
 ```yaml
-mode: new
+mode: new # 承認済み既存記事の改稿はrefine。原文も渡す
+output_mode: parent_contract
 section_id: H2-01
 section_type: heading
 heading: "見出し"
@@ -462,25 +465,31 @@ connection: "前後のつながり"
 required_points: [] # 確定した回答・説明順・比較/具体例・必要条件・限界
 allowed_evidence: [] # 確認した事実、出典、確認日、適用範囲、確認状態
 reader_profile: "検索者、前提知識、サービス利用者、読後の到達点"
+preserve_elements: [] # 指定見出し、事実条件、表、画像、リンク、CTA等
+writing_method: null # 任意。保存済み分析等の方法資料。商品根拠とは別
 quality_profile:
   required:
     - "主要評価軸に沿って、約束した疑問に本文で答える"
     - "事実と解釈を分け、根拠のある範囲と不明点を保持する"
     - "口コミを扱う節では、各口コミに利用状況・評価対象・判断への意味を含め、一言感想や同義の水増しにしない"
     - "料金を扱う節では、金額と支払・端末・継続・退会等の条件を読者の判断へつなぐ"
+    - "紹介・評価・比較の箇所で、特徴と使う場面、選ぶ理由や適用条件を自然につなぐ"
   preferred: []
   prohibited:
     - "検索意図と無関係な保護者管理論への置き換え"
     - "教材評価で支援未調査のまま家庭の努力へ解決を委ねること"
     - "確認できない悪い口コミの創作、または公式仕様上の注意点を口コミとして表現すること"
+    - "不自然な評価宣言の後付け、同義反復、お手本サイトの紹介や体験・商品評価の転用"
 input_format: markdown
 review_scope: section
 quality_report: summary
 ```
 
-最終全文検査では`review_scope: article`、`article_complete: true`とする。`article_pass`以外は完成本文として使用しない。
+最終全文検査では`mode: refine`、`review_scope: article`、`article_complete: true`とし、`body`へ全本文、`outline`へ設計された全単位のID・見出し・必要回答IDを渡す。全範囲の根拠・保持対象も渡す。返却する`status`は`section_pass | article_pass | needs_execution_input`、掲載対象は`body`のみ。`checked_sections`、`answer_checks`（回答ID・本文箇所・入力根拠参照・判定）、`preservation_check`、`unresolved_items`、`change_requests`を親が検収する。必須回答の脱落、未読の単位、具体的な未解決問題があれば合格として使わない。`article_pass`以外は完成本文として使用しない。
 
 `scope`と`required_points`へ主要評価軸と担当回答を、`allowed_evidence`へ根拠・条件・確認状態を写す。`interpretation`は事実ではなく解釈として区別する。依存スキルに独自の調査や事実補完を求めない。`quality_profile`にはG3の適用基準を追加し、主要疑問ごとの回答箇所・根拠を確認して受け入れる。欠落・競合で`needs_execution_input`なら原因工程へ戻す。
+
+すべての見出しの役割と回答を点検するが、評価文・長所短所・同じ説明順を全節へ強制しない。既に十分な段落は維持できる。UIへは受理本文の判断理由と条件を既存の保持項目へ写し、短文化で失わせない。旧担当向けの有効ルールを名前だけでyomiyasuへ移さず、`article-skill-feedback`の対象範囲を守る。この接続更新だけで過去の受理済み記事を変更しない。
 
 ### 調査日・出典注記の統合
 

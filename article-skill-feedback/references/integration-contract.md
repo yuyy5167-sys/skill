@@ -11,11 +11,14 @@
 | `cloudflare-seo-article-creator` | `orchestration` |
 | `seo-keyword-competitor-research` | `research` |
 | `seo-heading-outline-creator` | `outline` |
+| `yomiyasu` | `writing` |
 | `readable-article-style` | `writing` |
 | `article-internal-linker` | `links` |
 | `official-site-evidence-capture` | `evidence` |
 | `study-article-ui-coder` | `ui` |
 | `education-blog-thumbnail-creator` | `images` |
+
+新記事作成の標準文章担当はyomiyasu。`readable-article-style`は既存利用の接続を残すが、自動で両方を同じ本文へ適用しない。取得する`target_skill`は実際の担当に合わせる。旧担当だけを対象に承認されたルールを名前の読み替えでyomiyasuへ自動継承させない。両者に適用する明示済みの対象条件があれば、その範囲だけ使う。範囲の拡張が必要な候補は既存の提案・承認・検証手順で扱い、今回の担当切替を候補全体の自動有効化にしない。
 
 ## 実行コンテキスト
 

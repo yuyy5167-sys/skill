@@ -13,6 +13,7 @@ nanaism/yomiyasu（導入元コミット `602a3690dadd5d620bb21524353b8d192914ea
 ## 参照と優先関係
 
 - 記事の新規作成・説明改善・構成検討では [blog-writing.md](references/blog-writing.md) を読む。
+- 教材紹介・比較・選び方など、特徴の意味や適性を説明するときは [third-party-writing.md](references/third-party-writing.md) を読む。保存済みのお手本分析から、自然な第三者視点の説明を組み立てる。
 - 出力前に [blog-review.md](references/blog-review.md) の「通常の文章確認」を使う。そこにある実装検証用の全ケースを、記事を書くたびに実行しない。
 - 表現だけの小さな修正は本書と通常の文章確認で進め、説明技法が必要な場合に該当箇所を読む。
 - この入口と上記2資料がブログ用の規則。既存の `references/domains/`、`gemini-syntax.md`、`slop-catalog.md` は導入元の詳細を調べる保守用資料として残す。通常のブログ執筆で自動読込せず、旧来の短見出し・数値目安・修正回数・汎用出力形式を再適用しない。
@@ -63,6 +64,8 @@ nanaism/yomiyasu（導入元コミット `602a3690dadd5d620bb21524353b8d192914ea
 
 各節は一つの主な疑問を目安に、答え、意味・理由、区別、具体例、条件・例外、確認・行動から必要な要素を選ぶ。全要素やPREP等の固定順を毎節へ強制しない。料金・手続きの主回答を引き延ばさない。知識紹介や体験へ行動案を強制しない。
 
+教材を評価する箇所では、確認済みの特徴が読者の使い方にどう関わり、何を理由に選べるかを本文へ織り込む。「筆者が評価したいのは」などの宣言を後付けしただけで第三者視点を満たしたとしない。すでに説明した利点を繰り返さず、目的により利点と注意点が変わるなら条件を示す。手順・定義・単独のFAQへ評価文を無理に追加しない。
+
 - 一段落は一つの理解のまとまり。答えと理由、説明と短い例は同居できる。
 - 前の文と次の文の関係を確かめ、理由・条件・対比・順序に合う言葉でつなぐ。滑らかにするための因果を作らない。
 - 用語は正式名称を保ち、必要なら普通の言葉で意味を添える。定義しただけで操作も分かるとみなさない。
@@ -101,3 +104,38 @@ nanaism/yomiyasu（導入元コミット `602a3690dadd5d620bb21524353b8d192914ea
 - 改善点や比較を求められた場合だけ、必要な理由と差を添える。通常の完成本文へ定型の長い検査報告を付けない。
 - 根拠不足で答えを確定できない場合は、本文へ編集注記を混ぜず、必要な確認を短く行う。
 - 使った規則や検査を問われたら、読んだ資料、実際の修正例、実行した検査と未実施の範囲を正確に答える。新しい常設ログや追加の出力欄は作らない。
+
+## 7. 親記事スキルとの接続
+
+親が `output_mode: parent_contract` を明示した場合だけ、以下の構造化結果を工程内で返す。通常の単独利用・「本文のみ」では6の出力を守り、検査欄を本文に印字しない。これは親による検収用であり、記事への掲載内容ではない。
+
+入力は `mode: new | refine`、`input_format: markdown`、`review_scope: section | article`、対象の本文または新規執筆素材とする。節では `section_id`、`section_type`、`heading`、`heading_level`、`parent_heading`、`scope`、`connection`、`required_points`、`allowed_evidence`、`reader_profile`、`quality_profile.required/preferred/prohibited` を受け取る。改稿は原文も受け取る。`section_type` は `intro | heading | conclusion | faq` を用途に合わせて使う。見出しがない単位は見出し関連項目を省略できる。
+
+改稿・検査する本文は`body`に受け取る。全文検査では`mode: refine`で全文の`body`と、予定する全単位の`section_id`・見出し・`required_answer_ids`を持つ`outline`も受け取る。導入・結論など見出しのない単位も識別し、本文と照合する。本文や予定範囲の不足を`article_complete: true`だけで補わない。
+
+- `required_points` には回答ID、読者の疑問、回答、必要な説明順、解釈、条件・限界を文字列またはレコードで受け取り、解釈を事実へ変えない。`allowed_evidence` は対象主張・出典・確認日・適用範囲・確認状態を保持する。
+- お手本分析を渡す場合の `writing_method` は方法資料だけを受け取る任意項目。確認した範囲・採用する説明方法・適用限界を使い、商品事実の根拠に数えない。未指定なら本スキルの保存済み分析を使える。
+- 保持対象は `preserve_elements` に受け取れる。親から渡された実行ID・フィードバック文脈は保持し、親のログやルール集合を二重作成しない。承認済みルールは `quality_profile` へ対応づける。
+- 対象が `/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ` の親実行なら、`$article-skill-feedback`の接続契約に従い、親が取得した`target_skill: yomiyasu`、`stage: writing`の有効ルールと文脈を使う。旧担当だけを対象にしたルールを名前の置換で取り込まない。この接続を別プロジェクトには適用しない。
+- 根拠不足は親の調査工程、見出しの矛盾・不足は見出し工程へ必要な変更を返す。指定外の調査・見出し変更や、同種の別文章スキルの自動併用で埋めない。
+
+```yaml
+status: section_pass # section_pass | article_pass | needs_execution_input
+review_scope: section
+body: "検収対象のMarkdown本文"
+checked_sections: [H2-01]
+answer_checks:
+  - answer_id: A-01
+    body_location: "見出しIDと回答箇所を識別できる短い記述"
+    evidence_refs: [] # 入力中の出典URLまたは根拠識別子。未確認の出典を作らない
+    result: pass # pass | fail
+preservation_check:
+  result: pass # pass | fail | not_applicable
+  details: "指定見出し・事実条件・リンク等の実際の照合結果"
+unresolved_items: []
+change_requests: [] # 必要時は原因工程・不足・影響箇所・必要な対応を記す
+```
+
+`quality_report: summary` では必要な確認結果だけを返し、本文外へ長い自己採点を付けない。適用される必須回答と保持条件を満たし、具体的な未解決問題がない節だけ `section_pass` とする。回答IDがない導入等は `answer_checks: []` とできるが、疑問への答えと担当範囲は確認する。
+
+`article_pass` は `review_scope: article`、`article_complete: true` で、導入・全見出し配下・FAQ・結論など設計された全文と必要な根拠が提供され、実際に全文を確認した場合だけ返す。節の合格数や部分入力から推定しない。全文では `checked_sections` と必須回答の照合を全対象に広げる。満たせない場合は `needs_execution_input` と理由を返し、作成できた本文も未検収として扱う。合格フラグだけで読みやすさ・正確性を証明したことにしない。

@@ -34,7 +34,7 @@ description: Cloudflare/Astro教育ブログの新規記事と、ユーザーが
 - 修正履歴と承認済み継続ルール: `$article-skill-feedback`
 - 競合調査: `$seo-keyword-competitor-research`
 - 見出し構成: `$seo-heading-outline-creator`
-- 本文作成・推敲: `$readable-article-style`
+- 本文作成・推敲: `$yomiyasu`（`output_mode: parent_contract`）。保存済みのお手本分析を使い、特徴・使い方・選ぶ理由を丁寧な第三者視点で説明する
 - 目的別の内部リンクとアフィリエイト導線: `$article-internal-linker`の`plan`、`insert`、`audit`を順に直接実行する。成約用では承認済み講座別CTA、集客用では公開確認済み成約用記事への主画像カードを必須にする
 - 公式・権威メディア画像収集: `$official-site-evidence-capture`
 - 教育記事のスマホ優先UI化・Astro Markdown化: `$study-article-ui-coder`
@@ -44,6 +44,8 @@ description: Cloudflare/Astro教育ブログの新規記事と、ユーザーが
 各工程の直前に、子スキルの現行`SKILL.md`と必要な参照文書を読み、途中で切れた場合は未読部分を取得する。同じ実行で全文を読んだ同一版は再利用できる。使用ファイルのパス・SHA-256・読了状態を、その工程の出力・検査結果と結び付ける。読了だけで実行済み・検証済みにせず、子の専門基準を親の古い要約や独自プロンプトで置き換えない。
 
 依存スキルが存在しない、読めない、または必須入出力を接続できない場合は、代替手順を創作せず該当工程を止める。互換性を保つ子スキルの改善は現行基準で適用し、変更の影響する工程を再確認する。
+
+2026-10-16以降に開始する本文工程の標準担当はyomiyasuとする。`readable-article-style`は他用途のスキルとして残し、同じ本文へ自動で重ねない。受理済みの過去記事をこの変更だけで作り直さない。お手本は書き方の方法資料として扱い、商品情報の根拠や完成記事で紹介するサイトにしない。自然な判断の伝え方はyomiyasuの [第三者視点の指針](../yomiyasu/references/third-party-writing.md) を使い、手順・定義等へ無関係な評価を強制しない。
 
 ## 実行時に読むファイル
 
