@@ -24,7 +24,7 @@ param(
     [ValidateSet('preschool', 'elementary', 'junior_high', 'high')]
     [string]$ExpectedAffiliateCourse,
 
-    [ValidateSet('shinken_zemi', 'smile_zemi')]
+    [ValidateSet('shinken_zemi', 'smile_zemi', 'zkai')]
     [string]$ExpectedAffiliateProvider,
 
     [string[]]$ExpectedEmphasisPhrase = @(),
@@ -92,10 +92,10 @@ $matchedEmphasisCount = 0
 $disallowedExternalLinks = [System.Collections.Generic.List[string]]::new()
 $externalLinkAudit = $null
 $effectiveAffiliateProvider = if ([string]::IsNullOrWhiteSpace($ExpectedAffiliateProvider)) { 'shinken_zemi' } else { $ExpectedAffiliateProvider }
-$affiliateComponentId = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'smile_zemi_cta_v1' } else { 'shinken_zemi_cta_v1' }
+$affiliateComponentId = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'smile_zemi_cta_v1' } elseif ($effectiveAffiliateProvider -eq 'zkai') { 'zkai_cta_v1' } else { 'shinken_zemi_cta_v1' }
 $affiliateRootClass = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'smile-zemi-cta' } else { 'shinken-zemi-cta' }
 $affiliateButtonClass = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'smile-zemi-cta__button' } else { 'shinken-zemi-cta__button' }
-$affiliateLabel = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'スマイルゼミ' } else { '進研ゼミ' }
+$affiliateLabel = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'スマイルゼミ' } elseif ($effectiveAffiliateProvider -eq 'zkai') { 'Z会' } else { '進研ゼミ' }
 
 function Add-ValidationError {
     param([string]$Message)
@@ -474,7 +474,7 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedAffiliateLinkManifestJson)) {
         $multiPlacementIds = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
         $manifestLeadTexts = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
         foreach ($link in $affiliateManifestLinks) {
-            $expectedComponent = if ($link.provider -ceq 'smile_zemi') { 'smile_zemi_cta_v1' } elseif ($link.provider -ceq 'shinken_zemi') { 'shinken_zemi_cta_v1' } else { '' }
+            $expectedComponent = if ($link.provider -ceq 'smile_zemi') { 'smile_zemi_cta_v1' } elseif ($link.provider -ceq 'shinken_zemi') { 'shinken_zemi_cta_v1' } elseif ($link.provider -ceq 'zkai') { 'zkai_cta_v1' } else { '' }
             if ($null -eq $link -or [string]::IsNullOrWhiteSpace($expectedComponent) -or
                 ($affiliateManifestLinks.Count -eq 1 -and $link.provider -cne $effectiveAffiliateProvider) -or
                 $link.presentation -cne 'cta_button' -or $link.component_id -cne $expectedComponent -or $link.target_course -isnot [string] -or
@@ -482,6 +482,17 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedAffiliateLinkManifestJson)) {
                 $link.tracking_image_src -isnot [string] -or [string]::IsNullOrWhiteSpace($link.tracking_image_src) -or
                 $link.rel -cne 'nofollow') {
                 throw 'アフィリエイト期待マニフェストには講座別のプロバイダー、部品、講座、href、計測画像、nofollowが必要です。'
+            }
+            if ($link.provider -ceq 'zkai') {
+                # Z会の承認URLは子スキル内の正本データ1か所から読む。
+                $registryPath = Join-Path $PSScriptRoot '../../article-internal-linker/references/zkai-affiliate-links.json'
+                $registry = Get-Content -Raw -LiteralPath $registryPath -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+                $approved = @($registry.links | Where-Object { $_.target_course -ceq $link.target_course })
+                if ($approved.Count -ne 1 -or
+                    -not (Test-ExactHref $approved[0].href $link.href) -or
+                    -not (Test-ExactHref $approved[0].tracking_image_src $link.tracking_image_src)) {
+                    throw 'Z会の講座・リンクURL・計測画像がユーザー提供の正本と一致しません。'
+                }
             }
             if ($affiliateManifestLinks.Count -eq 1 -and -not [string]::IsNullOrWhiteSpace($ExpectedAffiliateCourse) -and $link.target_course -cne $ExpectedAffiliateCourse) {
                 throw "アフィリエイト期待マニフェストの対象講座がExpectedAffiliateCourseと一致しません: $ExpectedAffiliateCourse"
@@ -551,7 +562,7 @@ try {
     else {
         $frontmatter = $frontmatterMatch.Groups['frontmatter'].Value
         $body = $content.Substring($frontmatterMatch.Length)
-        $allowedKeys = @('title', 'description', 'date', 'categories', 'tags', 'coverImage', 'draft')
+        $allowedKeys = @('title', 'description', 'date', 'updatedDate', 'categories', 'tags', 'coverImage', 'promotionDisclosure', 'promotionDisclosureText', 'compactBody', 'draft')
         $topLevelKeys = [regex]::Matches($frontmatter, '(?m)^(?<key>[A-Za-z][A-Za-z0-9_-]*):') | ForEach-Object { $_.Groups['key'].Value }
 
         foreach ($key in $topLevelKeys) {

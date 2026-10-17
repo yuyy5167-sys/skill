@@ -24,7 +24,7 @@ site_rendering_capabilities:
     style_source: "現在実行で確認した内部リンクカード変換と共通CSSの識別子"
   affiliate_cta_component:
     supported: true
-    component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1"
+    component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
     style_source: "現在実行で確認した共通CSSまたはコンポーネントの識別子"
   affiliate_cta_components: [] # 複数プロバイダーが明示された記事では各provider・component_id・supported・style_sourceを記録
 ```
@@ -88,21 +88,21 @@ cta_strategy:
       lead_copy: "本文に合う固有の案内文"
 ```
 
-`site_rendering_capabilities` は `plan` では省略できる。`image_card`を`insert`する場合は`internal_link_card.supported: true`とリンク先画像を解決できることを、承認済みの講座別CTAを`insert`する場合はプロバイダーに対応する`supported: true`と`component_id`（進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`）を現在実行で確認する。確認できなければ、それぞれ`internal_link_card_component_missing`または`affiliate_cta_component_missing`で停止する。成約直結記事をカード非対応のため`text_link`へ変更してはならない。
+`site_rendering_capabilities` は `plan` では省略できる。`image_card`を`insert`する場合は`internal_link_card.supported: true`とリンク先画像を解決できることを、承認済みの講座別CTAを`insert`する場合はプロバイダーに対応する`supported: true`と`component_id`（進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`、Z会は専用契約の`zkai_cta_v1`）を現在実行で確認する。確認できなければ、それぞれ`internal_link_card_component_missing`または`affiliate_cta_component_missing`で停止する。成約直結記事をカード非対応のため`text_link`へ変更してはならない。
 
-`conversion`で進研ゼミまたはスマイルゼミの記事を扱い、タイトル・想定読者・結論・承認済み設計から対象講座を一意に確認できる場合は、`plan` 出力に次を加える。`cta_strategy.default_count`は3だが固定件数ではなく、`planned_count`は独立した公式確認場面の数と一致させる。対象講座、承認済みURL、各配置の意味と自然な配置章を確定できなければ`conversion_affiliate_unresolved`で停止する。`traffic`は常に`status: "not_applicable"`、`planned_count: 0`とし、CTAを計画しない。
+`conversion`で進研ゼミ・スマイルゼミ・Z会の記事を扱い、タイトル・想定読者・結論・承認済み設計から対象講座を一意に確認できる場合は、`plan` 出力に次を加える。`cta_strategy.default_count`は3だが固定件数ではなく、`planned_count`は独立した公式確認場面の数と一致させる。対象講座、承認済みURL、各配置の意味と自然な配置章を確定できなければ`conversion_affiliate_unresolved`で停止する。`traffic`は常に`status: "not_applicable"`、`planned_count: 0`とし、CTAを計画しない。
 
 ```yaml
 affiliate_link_plan:
   status: "eligible | not_applicable"
-  provider: "shinken_zemi | smile_zemi"
+  provider: "shinken_zemi | smile_zemi | zkai"
   target_course: "preschool | elementary | junior_high | high | null"
   presentation: "cta_button | null"
   planned_count: 3
   rationale: "対象講座と件数を判断した根拠"
   placements:
     - placement_id: "CTA-01"
-      provider: "shinken_zemi | smile_zemi"
+      provider: "shinken_zemi | smile_zemi | zkai"
       target_course: "preschool | elementary | junior_high | high"
       section_id: "h2-1"
       section_heading: "実際のH2見出し"
@@ -159,7 +159,7 @@ approved_link_intents:
     approved_destination_id: "候補IDまたはnull"
 approved_affiliate_link_plan:
   status: "eligible"
-  provider: "shinken_zemi | smile_zemi"
+  provider: "shinken_zemi | smile_zemi | zkai"
   target_course: "preschool | elementary | junior_high | high"
   presentation: "cta_button"
   planned_count: 3
@@ -222,7 +222,7 @@ expected_link_manifest:
   existing_links: []
   new_links: [] # destination_roleとpresentationを含める
 affiliate_link_manifest:
-  links: [] # 進研ゼミまたはスマイルゼミの承認済み講座別リンクだけ。内部リンクとは別に記録する
+  links: [] # 進研ゼミ・スマイルゼミ・Z会の承認済み講座別リンクだけ。内部リンクとは別に記録する
 body_with_internal_links: "合格時の本文。blocked時は元本文と同一"
 unresolved_intents: []
 ```
@@ -241,11 +241,11 @@ unresolved_intents: []
 `conversion`では`approved_affiliate_link_plan.status: eligible`を必須とする。対象講座、承認済みURL、`cta_strategy`、自然な全配置章、共通部品のいずれかが欠ける場合は`conversion_affiliate_unresolved`で停止する。`planned_count`と計画の全配置に従い、`affiliate_link_manifest.links` に次を記録する。
 
 ```yaml
-- provider: "shinken_zemi | smile_zemi"
+- provider: "shinken_zemi | smile_zemi | zkai"
   placement_id: "承認済み配置の一意なID。件数にかかわらず必須"
   target_course: "preschool | elementary | junior_high | high"
   presentation: "cta_button"
-  component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1"
+  component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
   href: "ユーザー提供値をそのまま使う"
   tracking_image_src: "ユーザー提供値をそのまま使う"
   rel: "nofollow"
@@ -280,7 +280,7 @@ affiliate_link_manifest:
   links: []
 verified_candidates: []
 rendered_page_checks:
-  component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1"
+  component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
   internal_link_cards:
     actual_count: 0
     images_loaded: true
@@ -365,3 +365,5 @@ checks:
 - `image_card_limit_reached`
 
 理由コードを追加する場合は、本ファイルの契約を更新してから使用する。
+
+Z会の3講座・固定URL・既存CSSの再利用条件は [Z会専用CTA契約](zkai-cta.md)と [承認済みリンクデータ](zkai-affiliate-links.json)を参照する。`preschool`等の未提供講座はZ会へ適用しない。

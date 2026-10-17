@@ -1,0 +1,26 @@
+{
+  "provider": "zkai",
+  "component_id": "zkai_cta_v1",
+  "root_class": "shinken-zemi-cta",
+  "source_ref": "current-thread:user-provided-zkai-a8-links-and-20261017-compatibility-approval",
+  "links": [
+    {
+      "target_course": "elementary",
+      "course_name": "Z会 小学生コース",
+      "href": "https://px.a8.net/svt/ejp?a8mat=3HG23U+A3S676+E0Q+CUBIQ",
+      "tracking_image_src": "https://www16.a8.net/0.gif?a8mat=3HG23U+A3S676+E0Q+CUBIQ"
+    },
+    {
+      "target_course": "junior_high",
+      "course_name": "Z会 中学生コース",
+      "href": "https://px.a8.net/svt/ejp?a8mat=3HG23U+A3S676+E0Q+DDE8Y",
+      "tracking_image_src": "https://www19.a8.net/0.gif?a8mat=3HG23U+A3S676+E0Q+DDE8Y"
+    },
+    {
+      "target_course": "high",
+      "course_name": "Z会 高校生・大学受験生向け",
+      "href": "https://px.a8.net/svt/ejp?a8mat=3HG23U+A3S676+E0Q+C88RM",
+      "tracking_image_src": "https://www12.a8.net/0.gif?a8mat=3HG23U+A3S676+E0Q+C88RM"
+    }
+  ]
+}

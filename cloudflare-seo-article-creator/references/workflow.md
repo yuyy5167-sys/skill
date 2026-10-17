@@ -295,7 +295,7 @@ HTMLページのスクリーンショットでは、利用可能な`control-in-a
 affiliate:
   required: true | false
   disposition: eligible | not_applicable | blocked
-  provider: shinken_zemi | smile_zemi | null
+  provider: shinken_zemi | smile_zemi | zkai | null
   target_course: preschool | elementary | junior_high | high | null
   affiliate_link_plan: null
   affiliate_link_manifest: null

@@ -96,7 +96,7 @@ title_contract:
 affiliate:
   required: true | false
   disposition: eligible | not_applicable | blocked
-  provider: shinken_zemi | smile_zemi | null
+  provider: shinken_zemi | smile_zemi | zkai | null
   target_course: preschool | elementary | junior_high | high | null
   affiliate_link_plan: null
   affiliate_link_manifest: null
@@ -534,7 +534,7 @@ emphasis_plan:
 
 `blocked`または`blocks_draft: true`なら、内部リンク済み本文を採用しない。候補URLは、現在実行で公開確認済みの正本からだけ渡す。本文と直接関係する自サイト候補がある場合は、対応する`link_intent`と`expected_link_manifest.new_links`を必ず持つ。口コミ、料金紹介、比較、その他の成約へ直接つながる記事は`conversion_direct`かつ`image_card`、それ以外の関連記事は`related_support`かつ`text_link`とする。画像付きカードは最大2件とし、件数を理由に表示形式を変更しない。マニフェストが空であることを理由に無関係な内部リンクを追加しない。
 
-講座別CTAは、タイトル、想定読者、結論、承認済み設計が同じ講座を指し、`cta_strategy`の各公式確認場面に自然な配置章があり、プロバイダーに対応する`site_rendering_capabilities.affiliate_cta_component`が`supported: true`の場合だけ`eligible`とする。進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`を使う。親は講座URLを複製せず、子スキルの正本契約と出力を使う。スマイルゼミの記事では資料請求への誘導だけを許可する。`planned_count`、確認場面、計画、マニフェスト、実CTAの件数または配置IDが一致しない場合、同じ案内文・確認理由が反復する場合、講座・URL・部品・監査が一致しない場合は`blocked`として元本文を保持する。
+講座別CTAは、タイトル、想定読者、結論、承認済み設計が同じ講座を指し、`cta_strategy`の各公式確認場面に自然な配置章があり、プロバイダーに対応する`site_rendering_capabilities.affiliate_cta_component`が`supported: true`の場合だけ`eligible`とする。進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`、Z会は子スキルの専用契約にある`zkai_cta_v1`を使う。親は講座URLを複製せず、子スキルの正本契約と出力を使う。スマイルゼミの記事では資料請求への誘導だけを許可する。`planned_count`、確認場面、計画、マニフェスト、実CTAの件数または配置IDが一致しない場合、同じ案内文・確認理由が反復する場合、講座・URL・部品・監査が一致しない場合は`blocked`として元本文を保持する。
 
 ## 公式・権威メディア画像収集契約
 
@@ -654,7 +654,7 @@ publication_state: draft
 affiliate:
   required: true | false
   disposition: eligible | not_applicable | blocked
-  provider: shinken_zemi | smile_zemi | null
+  provider: shinken_zemi | smile_zemi | zkai | null
   target_course: preschool | elementary | junior_high | high | null
   affiliate_link_plan: null
   affiliate_link_manifest: null
@@ -816,7 +816,7 @@ section_images:
 -ExpectedReviewEvidencePlanJson <conversion_review_priceのreview_evidence_plan。扱わない場合もapplicability: not_applicableを渡す>
 -ExpectedPriceEvidencePlanJson <conversion_review_priceのprice_evidence_plan。扱わない場合もapplicability: not_applicableを渡す>
 -ExpectedAffiliateDisposition <conversionではeligible、trafficではnot_applicable>
--ExpectedAffiliateProvider <conversionの単独CTAだけ: shinken_zemi | smile_zemi>
+-ExpectedAffiliateProvider <conversionの単独CTAだけ: shinken_zemi | smile_zemi | zkai>
 -ExpectedAffiliateCourse <conversionの単独CTAだけ: preschool | elementary | junior_high | high>
 -ExpectedEmphasisPlanJson <emphasis_plan.itemsを配列JSONとして渡す文字列>
 -ExpectedInternalLinkManifestJson <expected_link_manifest全体のJSON文字列>
