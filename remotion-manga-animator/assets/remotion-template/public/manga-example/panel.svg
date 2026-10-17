@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+<rect width="800" height="450" fill="white"/><rect x="6" y="6" width="788" height="438" fill="none" stroke="#222" stroke-width="4"/>
+<path d="M50 300H750M100 60V300M700 300V410" fill="none" stroke="#ccc" stroke-width="3"/>
+<path d="M230 409L270 280Q350 247 440 280L480 409" fill="#bbb" stroke="#222" stroke-width="4"/>
+<path d="M260 165Q245 78 350 78Q465 80 454 187L440 254L274 254Z" fill="#777" stroke="#222" stroke-width="4"/>
+<path d="M270 165Q280 125 310 140L350 113Q388 157 438 155L439 209Q430 263 351 270Q277 264 270 211Z" fill="#fff" stroke="#222" stroke-width="4"/>
+<ellipse cx="317" cy="199" rx="6" ry="10" fill="#222"/><ellipse cx="395" cy="199" rx="6" ry="10" fill="#222"/>
+<path d="M340 235Q356 248 370 231M295 280L350 311L407 278" fill="none" stroke="#222" stroke-width="3"/>
+<ellipse cx="632" cy="170" rx="114" ry="99" fill="white" stroke="#222" stroke-width="4"/><path d="M526 210L504 239L543 230" fill="white" stroke="#222" stroke-width="4"/>
+<text x="632" y="165" text-anchor="middle" font-family="sans-serif" font-size="32" fill="#222">HELLO</text>
+<text x="32" y="430" font-family="sans-serif" font-size="15" fill="#888">SAMPLE / replace with original manga</text></svg>

@@ -1,0 +1,9 @@
+{
+ "id":"MangaAnimation","width":1920,"height":1080,"fps":24,"poseHz":8,"background":"#fff","timingMode":"extend",
+ "panels":[{
+  "id":"example","image":"manga-example/panel.svg","size":[800,450],"seconds":4,"mode":"mesh",
+  "parts":[{"id":"head","polygon":[[260,90],[370,75],[430,105],[455,205],[420,270],[300,270],[250,200]],"feather":18,"pivot":[350,260],"keys":[{"at":0},{"at":0.375},{"at":1,"dx":3,"dy":-2,"angle":1},{"at":1.75,"dx":2,"dy":-1,"angle":0.5}]}],
+  "fixed":[{"polygon":[[510,65],[750,65],[750,285],[510,285]],"feather":10}],
+  "dialogues":[{"id":"reply","at":0.25,"readSeconds":2,"mask":[[560,128],[710,128],[710,182],[560,182]],"cover":{"color":"#fff"}}]
+ }],"audio":[]
+}

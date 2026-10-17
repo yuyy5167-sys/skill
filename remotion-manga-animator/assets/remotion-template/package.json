@@ -1,0 +1,6 @@
+{
+ "name":"remotion-manga-animation","private":true,"version":"1.0.0","type":"module","engines":{"node":">=24"},
+ "scripts":{"studio":"remotion studio src/manga-animation/index.tsx","prepare":"node scripts/manga/prepare.mjs","validate":"node scripts/manga/validate.mjs","render":"node scripts/manga/render.mjs","review":"node scripts/manga/review.mjs","check":"tsc --noEmit"},
+ "dependencies":{"remotion":"4.0.535","@remotion/cli":"4.0.535","@remotion/renderer":"4.0.535","@remotion/bundler":"4.0.535","react":"19.2.0","react-dom":"19.2.0","sharp":"0.35.5"},
+ "devDependencies":{"typescript":"5.9.3","@types/react":"19.2.2","@types/node":"24.9.1"}
+}

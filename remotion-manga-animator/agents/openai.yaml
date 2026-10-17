@@ -1,0 +1,4 @@
+interface:
+  display_name: "漫画をRemotionでアニメーション化"
+  short_description: "原画の顔と文字を保ち、漫画の各コマへ小さな動きを付けて動画にする"
+  default_prompt: "$remotion-manga-animator を使い、この漫画を原画を保ったコマ撮り風の動画にしてください。"

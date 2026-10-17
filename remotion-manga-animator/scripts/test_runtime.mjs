@@ -1,0 +1,24 @@
+// Node 24; no packages, original manga, browser or network needed for these checks.
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import {resolveConfig,poseTime,cueTime,meshGrid} from '../assets/remotion-template/src/manga-animation/model.ts';
+const source=JSON.parse(await fs.readFile(new URL('../assets/remotion-template/src/manga-animation/manga.config.json',import.meta.url),'utf8'));
+const copy=()=>structuredClone(source);
+let c=resolveConfig(copy());
+assert.equal(c.panels[0].dialogues[0].at,.25);
+assert.equal(c.frames,96);
+assert.deepEqual([0,1,2,3].map(f=>poseTime(f,24,8)),[0,0,0,.125]);
+assert.equal(cueTime(.3,8),.375);
+const short=copy();short.panels[0].seconds=.5;
+c=resolveConfig(short);assert.equal(c.panels[0].seconds,2.25);
+short.timingMode='strict';assert.throws(()=>resolveConfig(short),/too short/);
+const outside=copy();outside.panels[0].parts[0].polygon[0]=[801,100];assert.throws(()=>resolveConfig(outside),/outside/);
+const badfps=copy();badfps.poseHz=7;assert.throws(()=>resolveConfig(badfps),/integer multiple/);
+const layers=copy();layers.panels[0].mode='layers';assert.throws(()=>resolveConfig(layers),/cleaned baseImage/);
+const badtime=copy();badtime.panels[0].parts[0].keys[1].at=-1;assert.throws(()=>resolveConfig(badtime),/times/);
+const strictFraction=copy();strictFraction.timingMode='strict';strictFraction.panels[0].seconds=4.01;assert.throws(()=>resolveConfig(strictFraction),/whole pose interval/);
+const missingReading=copy();delete missingReading.panels[0].dialogues[0].readSeconds;assert.throws(()=>resolveConfig(missingReading),/actual dialogue text/);
+for(const [w,h] of [[800,450],[2048,1536],[8192,4096]])assert.ok(meshGrid(w,h).vertices<=60000);
+const multiple=copy();multiple.panels.push({...structuredClone(multiple.panels[0]),id:'second',seconds:5});
+c=resolveConfig(multiple);assert.equal(c.frames,216);assert.equal(c.panels[1].startFrame,96);
+console.log('Passed: early dialogue cue, frame holds, reading extension, strict timing, coordinate bounds, fps, layers, key ordering, high-resolution grid and multiple panels.');
