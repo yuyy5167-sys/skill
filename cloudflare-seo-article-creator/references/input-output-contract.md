@@ -4,6 +4,8 @@
 
 1記事の実行は次の状態で管理する。
 
+複数の新規記事を依頼された場合も、この状態と`authorization.bundled_approval.article_count: 1`、`authorization.scope.article_count: 1`を記事ごとに維持する。[複数記事の制作手順](workflow.md#02-複数の新規記事を順番に制作する)に従い、制作順と各記事の状態・完了根拠を既存の実行状態と品質ログへ保持する。先行記事が全必須品質ゲート、最終プレビューのユーザー表示、制作ログ検証を完了して`READY_FOR_HUMAN_REVIEW`になるまで、後続記事の制作状態を開始しない。依頼原文のログ登録は既存の依頼単位の契約に従い、同じ発言を記事数分重複登録しない。新しい管理台帳やfrontmatter項目は作らない。
+
 ```yaml
 schema_version: "2.7"
 run_id: "現在実行の一意な値"
