@@ -238,7 +238,7 @@ unresolved_intents: []
 
 `insert`は`approved_link_intents`と`verified_candidates`の`destination_role`が一致することを確認し、`related_support`は本文中の語句へ設定するMarkdownテキストリンク、`conversion_direct`はサイト既定の画像付き内部リンクカード記法として挿入する。`expected_link_manifest.new_links`には`destination_role`と`presentation`を記録する。`image_card`が2件を超える場合は`image_card_limit_reached`で停止し、テキストリンクへの変更で回避しない。
 
-`conversion`では`approved_affiliate_link_plan.status: eligible`を必須とする。対象講座、承認済みURL、`cta_strategy`、自然な全配置章、共通部品のいずれかが欠ける場合は`conversion_affiliate_unresolved`で停止する。`planned_count`と計画の全配置に従い、`affiliate_link_manifest.links` に次を記録する。
+`conversion`では`approved_affiliate_link_plan.status: eligible`を必須とする。対象講座、承認済みURL、`cta_strategy`、自然な全配置章、共通部品のいずれかが欠ける場合は`conversion_affiliate_unresolved`で停止する。[CTA補足表記の方針](cta-caption-policy.md)に従い、`destination_text`は新規出力せず、旧フィールドがあっても表示しない。`planned_count`と計画の全配置に従い、`affiliate_link_manifest.links` に次を記録する。
 
 ```yaml
 - provider: "shinken_zemi | smile_zemi | zkai"
@@ -251,7 +251,6 @@ unresolved_intents: []
   rel: "nofollow"
   lead_text: "公式サイトで確認できる内容を示す短い案内文"
   button_text: "本文の文脈に合う、読者に見える具体的な案内文"
-  destination_text: "リンク先が公式サイトだと明示する文"
   section_id: "h2-1"
   section_heading: "配置先H2の実際の見出し文字列"
   reader_question: "この位置で読者が確認したいこと"

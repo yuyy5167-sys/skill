@@ -14,6 +14,39 @@ const input = { project_root: projectRoot, affiliate_manifest: { links: [{ href:
 const official = 'https://sho.benesse.co.jp/';
 const research = 'https://www.jstage.jst.go.jp/article/example/';
 
+test('補足行なしのCTAはボタン・計測画像を保持して合格する', async () => {
+  const body = `<div class="shinken-zemi-cta"><p class="shinken-zemi-cta__lead">対象講座の教材を確認できます。</p><a href="${affiliate}" rel="nofollow"><img src="https://ad.jp.ap.valuecommerce.com/pixel" width="1" height="1">公式サイトで確認する</a></div>`;
+  const result = await auditText(input, body, `<article data-article-content>${body}</article>`);
+  assert.equal(result.status, 'PASS');
+  assert.equal(result.cta_destination_label_count, 0);
+  assert.equal(result.source.affiliate, 1);
+  assert.equal(result.rendered.affiliate, 1);
+});
+
+for (const caption of [
+  '<p class="shinken-zemi-cta__destination">リンク先：公式サイト</p>',
+  '<p class="smile-zemi-cta__destination">公式サイト</p>',
+  '<p>リンク先：<span>対象講座公式サイト</span></p>',
+  '<small>リンク先: 対象講座公式サイト</small>',
+]) {
+  test(`CTAの補足行を原稿と最終HTMLで検出する: ${caption}`, async () => {
+    const block = `<div class="shinken-zemi-cta"><a href="${affiliate}">資料を請求する</a>${caption}</div>`;
+    const source = await auditText(input, block);
+    assert.equal(source.status, 'FAIL');
+    assert.equal(source.disallowed_external_link_count, 0);
+    assert.equal(source.cta_destination_label_count, 1);
+    const rendered = await auditText(input, '本文', `<article data-article-content>${block}</article>`);
+    assert.equal(rendered.source.status, 'PASS');
+    assert.equal(rendered.rendered.status, 'FAIL');
+    assert.equal(rendered.cta_destination_violations[0].phase, 'rendered');
+  });
+}
+
+test('通常の公式説明・内部カードの説明・コード例を補足行と誤認しない', async () => {
+  const body = '公式サイトでは対象講座を確認できます。\n\n内部リンク先の記事では料金を解説しています。\n\n```html\n<div class="shinken-zemi-cta"><p class="shinken-zemi-cta__destination">リンク先：公式サイト</p></div>\n```';
+  assert.equal((await auditText(input, body)).cta_destination_label_count, 0);
+});
+
 for (const [name, body] of [
   ['公式通常リンク', `[公式](${official})`],
   ['研究出典リンク', `[研究](${research})`],

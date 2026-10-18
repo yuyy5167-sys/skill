@@ -41,6 +41,11 @@ function policySets(input) {
 function inspectRoots(roots, policy, phase) {
   const links = [];
   const violations = [];
+  const ctaLabels = [];
+  const visibleText = node => {
+    if (node.type === 'comment' || excluded.has(node.tagName)) return '';
+    return node.type === 'text' ? node.value : (node.children ?? []).map(visibleText).join('');
+  };
   const inspectHref = (href, kind = 'link') => {
     if (!href?.trim()) return;
     let url;
@@ -53,8 +58,17 @@ function inspectRoots(roots, policy, phase) {
     if (kind === 'link' || kind === 'card') links.push({ href, classification });
     if (classification === 'disallowed') violations.push({ phase, href, kind, reason: 'unapproved_external_destination' });
   };
-  function walk(node, insideLink = false) {
+  function walk(node, insideLink = false, insideCta = false, insideCaption = false) {
     if (node.type === 'comment' || excluded.has(node.tagName)) return;
+    const value = node.properties?.className ?? [];
+    const classes = Array.isArray(value) ? value : String(value).split(/\s+/);
+    insideCta ||= classes.some(name => ['shinken-zemi-cta', 'smile-zemi-cta', 'edu-cta'].includes(name));
+    const legacyCaption = classes.some(name => /^(?:shinken-zemi-cta|smile-zemi-cta)__destination$/.test(name));
+    const plainCaption = insideCta && ['p', 'small', 'span'].includes(node.tagName) && /^リンク先\s*[:：]/u.test(visibleText(node).trim());
+    if (!insideCaption && (legacyCaption || plainCaption)) {
+      ctaLabels.push({ phase, reason: 'cta_destination_label_forbidden', text: visibleText(node).trim() });
+      insideCaption = true;
+    }
     if (node.tagName === 'a' || node.tagName === 'area') {
       inspectHref(String(node.properties?.href ?? ''));
       insideLink = true;
@@ -65,10 +79,10 @@ function inspectRoots(roots, policy, phase) {
         inspectHref(match[0], 'visible_url');
       }
     }
-    for (const child of node.children ?? []) walk(child, insideLink);
+    for (const child of node.children ?? []) walk(child, insideLink, insideCta, insideCaption);
   }
   for (const root of roots) walk(root);
-  return { links, violations, inspectHref };
+  return { links, violations, ctaLabels, inspectHref };
 }
 
 export async function auditText(input, source, renderedHtml) {
@@ -98,15 +112,17 @@ export async function auditText(input, source, renderedHtml) {
     renderedAudit = inspectRoots(roots, policy, 'rendered');
   }
   const violations = [...sourceAudit.violations, ...(renderedAudit?.violations ?? [])];
+  const ctaLabels = [...sourceAudit.ctaLabels, ...(renderedAudit?.ctaLabels ?? [])];
   const summarize = audit => audit ? {
-    status: audit.violations.length ? 'FAIL' : 'PASS',
+    status: audit.violations.length || audit.ctaLabels.length ? 'FAIL' : 'PASS',
     internal: audit.links.filter(link => link.classification === 'internal').length,
     affiliate: audit.links.filter(link => link.classification === 'affiliate').length,
     user_approved_exception: audit.links.filter(link => link.classification === 'user_approved_exception').length,
     links: audit.links,
   } : { status: 'NOT_CHECKED' };
-  return { status: violations.length ? 'FAIL' : 'PASS', source: summarize(sourceAudit), rendered: summarize(renderedAudit),
-    disallowed_external_link_count: violations.length, violations };
+  return { status: violations.length || ctaLabels.length ? 'FAIL' : 'PASS', source: summarize(sourceAudit), rendered: summarize(renderedAudit),
+    disallowed_external_link_count: violations.length, violations,
+    cta_destination_label_count: ctaLabels.length, cta_destination_violations: ctaLabels };
 }
 
 export async function auditFiles(input) {

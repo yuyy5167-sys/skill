@@ -15,6 +15,8 @@ description: 提供された教育・勉強系の記事本文を、キーワー�
 
 同じ対象の依頼単位の詳細履歴は`$article-production-log`へ記録する。親経由では渡された`article_log_context.log_id`を使用して品質軸`ui_mobile | structure | images | internal_links | cta`の該当結果だけを返し、子で新規ログを作らない。本スキルを単独利用したユーザー発言では編集前に`start-log`、全幅実表示後に`finish-log`を行う。未承認候補から部品、CSS、装飾数を変更しない。
 
+対象勉強ブログのCTAには、[ボタン下のリンク先表記の方針](../article-internal-linker/references/cta-caption-policy.md)を適用する。「リンク先：～公式サイト」の補足行を新規作成・再挿入せず、原稿と最終HTMLで0件を確認する。ボタン・URL・計測画像は保持する。
+
 ## 最初に読むもの
 
 対象ブログの今後の新規記事では、2026-10-12のユーザー指定により記事タイトルより上の左側へ「この記事にはプロモーションを含む場合があります」を12pxで1回表示する。Astroでは共通レイアウトの`ArticlePromotionDisclosure`を使い、親へ`promotionDisclosure: true`のfrontmatter設定を引き継ぐ。standaloneでは同じ文言を記事冒頭に左寄せで1回置く。本文へ表示を重複追加せず、H1・H2・H3、CTA枠タイトルへ「（広告）」を付けない。公開済み記事・既存下書きへ自動で遡及適用せず、別プロジェクトへ一般化しない。

@@ -24,6 +24,10 @@ description: Cloudflare/Astro教育ブログの新規記事と、ユーザーが
 
 依頼文に記事目的が明記されていれば、その原文を確認回答として扱い再質問しない。キーワード、記事型、過去記事、AIの推測だけでは目的を決めない。「どちらでもよい」「任せる」など目的が確定しない回答では、推奨理由を示したうえでユーザーにどちらかを選んでもらう。`article_business_purpose.status: confirmed`かつ`confirmed_by_user: true`になるまで制作TODOを開始しない。
 
+## CTAボタン下の補足表記
+
+新規作成・既存記事修正とも、[CTAボタン下のリンク先表記](../article-internal-linker/references/cta-caption-policy.md)を適用する。リンク担当とUI担当へ同じ方針を渡し、原稿・最終HTMLに補足行を復活させない。
+
 ## 正本と依存スキル
 
 記事の作成、整形、保存、検査を始める前に、`/Users/yudaikato/Documents/AIフォルダ/ブログ/運用資料/デザイン・制作ルール/記事装飾ルールブック.md` を全文読む。読めない場合は装飾や保存形式を推測せず停止する。

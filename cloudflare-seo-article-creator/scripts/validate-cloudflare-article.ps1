@@ -503,7 +503,7 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedAffiliateLinkManifestJson)) {
                 -not $multiPlacementIds.Add($link.placement_id)) {
                 throw 'CTAの各項目には重複しないplacement_id、section_id、実際のH2見出しが必要です。'
             }
-            foreach ($field in @('lead_text', 'button_text', 'destination_text', 'reader_question', 'official_information_needed', 'destination_purpose')) {
+            foreach ($field in @('lead_text', 'button_text', 'reader_question', 'official_information_needed', 'destination_purpose')) {
                 if (-not $link.PSObject.Properties[$field] -or $link.$field -isnot [string] -or [string]::IsNullOrWhiteSpace($link.$field)) {
                     throw "アフィリエイト期待マニフェストの各項目には空でない$fieldが必要です。"
                 }
@@ -660,7 +660,6 @@ try {
                             $rootClass = if ($expectedAffiliate.provider -ceq 'smile_zemi') { 'smile-zemi-cta' } else { 'shinken-zemi-cta' }
                             $buttonClass = if ($expectedAffiliate.provider -ceq 'smile_zemi') { 'smile-zemi-cta__button' } else { 'shinken-zemi-cta__button' }
                             $leadClass = if ($expectedAffiliate.provider -ceq 'smile_zemi') { 'smile-zemi-cta__lead' } else { 'shinken-zemi-cta__lead' }
-                            $destinationClass = if ($expectedAffiliate.provider -ceq 'smile_zemi') { 'smile-zemi-cta__destination' } else { 'shinken-zemi-cta__destination' }
                             $placement = [regex]::Escape($expectedAffiliate.placement_id)
                             $classEscape = [regex]::Escape($rootClass)
                             $chosen = @($allCtaBlocks | Where-Object {
@@ -704,13 +703,10 @@ try {
                                 $sourceValid = $false
                             }
                             $leadEscape = [regex]::Escape($leadClass)
-                            $destinationEscape = [regex]::Escape($destinationClass)
                             $leadElement = [regex]::Match($ctaBlock, "(?is)<p\b(?=[^>]*class\s*=\s*[\x22\x27][^\x22\x27]*\b$leadEscape\b[^\x22\x27]*[\x22\x27])[^>]*>(?<text>.*?)</p>")
                             $buttonElement = [regex]::Match($ctaBlock, "(?is)<a\b(?=[^>]*class\s*=\s*[\x22\x27][^\x22\x27]*\b$buttonEscape\b[^\x22\x27]*[\x22\x27])[^>]*>(?<text>.*?)</a>")
-                            $destinationElement = [regex]::Match($ctaBlock, "(?is)<p\b(?=[^>]*class\s*=\s*[\x22\x27][^\x22\x27]*\b$destinationEscape\b[^\x22\x27]*[\x22\x27])[^>]*>(?<text>.*?)</p>")
                             if (-not $leadElement.Success -or (ConvertTo-NormalizedText $leadElement.Groups['text'].Value) -cne (ConvertTo-NormalizedText $expectedAffiliate.lead_text) -or
-                                -not $buttonElement.Success -or (ConvertTo-NormalizedText $buttonElement.Groups['text'].Value) -cne (ConvertTo-NormalizedText $expectedAffiliate.button_text) -or
-                                -not $destinationElement.Success -or (ConvertTo-NormalizedText $destinationElement.Groups['text'].Value) -cne (ConvertTo-NormalizedText $expectedAffiliate.destination_text)) {
+                                -not $buttonElement.Success -or (ConvertTo-NormalizedText $buttonElement.Groups['text'].Value) -cne (ConvertTo-NormalizedText $expectedAffiliate.button_text)) {
                                 Add-ValidationError "配置IDの表示文が期待マニフェストと一致しません: $($expectedAffiliate.placement_id)"
                                 $sourceValid = $false
                             }
@@ -1007,6 +1003,11 @@ const { pathToFileURL } = require('node:url');
             if ($null -ne $violation) {
                 $disallowedExternalLinks.Add($violation.href)
                 Add-ValidationError "許可されていない外部誘導があります: $($violation.phase) / $($violation.href)"
+            }
+        }
+        foreach ($caption in @($externalLinkAudit.cta_destination_violations)) {
+            if ($null -ne $caption) {
+                Add-ValidationError "CTAボタン下のリンク先補足表記は禁止です: $($caption.phase)"
             }
         }
         if ($linkAuditExitCode -ne 0 -or $externalLinkAudit.status -ne 'PASS') {

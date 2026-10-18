@@ -115,14 +115,13 @@ CTAは3件を標準値として検討するが、必須数・上限ではない�
 <div class="shinken-zemi-cta" data-course="preschool" data-placement-id="CTA-01">
   <p class="shinken-zemi-cta__lead">こどもちゃれんじ幼児講座の対象年齢・教材内容・受講費を公式サイトで確認できます</p>
   <a class="shinken-zemi-cta__button" href="//ck.jp.ap.valuecommerce.com/servlet/referral?sid=3613518&amp;pid=892710747" rel="nofollow"><img src="//ad.jp.ap.valuecommerce.com/servlet/gifbanner?sid=3613518&amp;pid=892710747" height="1" width="1" border="0" alt="">こどもちゃれんじ幼児講座の公式サイトを見る</a>
-  <p class="shinken-zemi-cta__destination">リンク先：こどもちゃれんじ公式サイト</p>
 </div>
 ```
 
 - `data-course` は `preschool`、`elementary`、`junior_high`、`high` のいずれかとし、計画済み講座と一致させる
 - `href`、計測画像 `src`、`rel`、`height`、`width`、`border` は講座表の値と固定属性を保持する。HTMLソースでは `&` を `&amp;` と直列化できるが、DOMで復元したURLは表の値と完全一致させる
 - 計測画像の `alt` は空文字とし、読者向けの情報を重複させない
-- リード文は公式サイトで確認できる内容を具体的に示す。ボタン文は講座名と「公式サイト」を含める。リンク先表示文は遷移先が公式サイトであることを明示する
+- リード文は公式サイトで確認できる内容を具体的に示す。ボタン文は講座名と「公式サイト」を含める。遷移先の補足行は追加しない
 - 効果保証、体験談、煽り、未確認の特典・締切・限定性、公式広告文のコピーを追加しない
 
 ## Z会講座別アフィリエイトCTA
@@ -143,7 +142,7 @@ CTAは3件を標準値として検討するが、必須数・上限ではない�
 - 幼児向け記事には`preschool`、小学生向け記事には`elementary`、中学生向け記事には`junior_high`、高校生向け記事には`high`だけを使う。複数学年向け、講座横断、または判定不能な記事には使わない
 - `href`と計測画像`src`は表の値を一字も変更せず、`rel="nofollow"`、`border="0"`、`width="1"`、`height="1"`、`alt=""`を保持する
 - 共通のCTA件数・公式確認場面の規則に従い、各`placement_id`の承認済みセクションで教材内容、料金、注意点、向き不向き、キャンペーン条件などを説明した後の自然な段落へ置く。記事冒頭、主張の代替、または広告的な反復配置にはしない
-- スマイルゼミCTAの`lead_text`、`button_text`、`destination_text`は、資料請求への案内だけを示す。入会、効果、無料、特典、締切など、確認していない内容を追加しない
+- スマイルゼミCTAの`lead_text`、`button_text`は、資料請求への案内だけを示す。入会、効果、無料、特典、締切など、確認していない内容を追加しない
 
 ### スマイルゼミCTAのDOM契約
 
@@ -155,13 +154,12 @@ CTAは3件を標準値として検討するが、必須数・上限ではない�
 <div class="smile-zemi-cta" data-course="junior_high" data-placement-id="CTA-01">
   <p class="smile-zemi-cta__lead">詳しくは、スマイルゼミ公式サイトから資料請求へ進めます</p>
   <a class="smile-zemi-cta__button" href="https://px.a8.net/svt/ejp?a8mat=3H9NZ4+HVBQA+2P76+6BU5U" rel="nofollow"><img border="0" width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=3H9NZ4+HVBQA+2P76+6BU5U" alt="">スマイルゼミ中学生コースの資料を請求する</a>
-  <p class="smile-zemi-cta__destination">リンク先：スマイルゼミ中学生コース公式サイト</p>
 </div>
 ```
 
 - `data-course`は`preschool`、`elementary`、`junior_high`、`high`のいずれかとし、計画済み講座と一致させる
 - `href`、計測画像`src`、`rel`、`border`、`width`、`height`、`alt`は講座表と固定属性を保持する
-- ボタン文は対象講座名と「資料を請求する」を含める。リンク先表示文は公式サイトへの遷移を明示する
+- ボタン文は対象講座名と「資料を請求する」を含める。ボタン下の遷移先補足行は追加しない
 - `smile-zemi-cta__button`は緑色の共通CSSで表示し、5幅の実表示でCTA枠外へはみ出さないことを監査する
 
 ### CTAの表示契約
@@ -260,8 +258,8 @@ article_key + intent_id + destination_id
 - `affiliate_link_manifest` にないアフィリエイト計測URLや `rel="sponsored"` のリンクを本スキルが追加していない
 - `traffic`ではCTA固定クラス、アフィリエイトリンク、計測画像URLが0件である
 - `traffic`では`required: true`かつ`primary_destination: true`の成約記事画像カードが1件存在し、成約用役割の確認証拠と一致する
-- `affiliate_link_manifest` にあるCTAは、プロバイダー、対象講座、`href`、計測用画像の `src`、`rel="nofollow"`、リード文、ボタン文、リンク先表示文、配置セクションが一致する
-- プロバイダー別CTAでは、固定クラス、`data-course`、CTA数、リード文、ボタン文、リンク先表示文、コンポーネントIDが一致する
+- `affiliate_link_manifest` にあるCTAは、プロバイダー、対象講座、`href`、計測用画像の `src`、`rel="nofollow"`、リード文、ボタン文、配置セクションが一致する
+- プロバイダー別CTAでは、固定クラス、`data-course`、CTA数、リード文、ボタン文、コンポーネントIDが一致する
 - プロバイダー別CTAでは、320・375・390・768・1280pxの実表示記録が揃い、ページとCTAの横はみ出し、ボタンの最小高さ・最大幅、計測画像の1px寸法、CTA起因のコンソールエラーがない。記録が欠ける場合は `affiliate_cta_render_unverified`
 
 ## 最低限の受入テスト
@@ -285,7 +283,7 @@ article_key + intent_id + destination_id
 15. カード形式でページ全体の横スクロールやカード外へのはみ出しが発生しない
 16. 小学・中学・高校講座の各 `target_course` で、対応するユーザー提供の `href` と計測用画像の `src` が選ばれる
 17. 成約用で対象講座が一意に確定しない記事では、アフィリエイトリンクを追加せず`conversion_affiliate_unresolved`で全体を停止する。内部リンクだけで完成扱いにしない
-18. アフィリエイトCTAがある場合、HTML化後に `href`、計測用画像の `src`、`rel="nofollow"`、リード文、ボタン文、リンク先表示文、配置セクションが `affiliate_link_manifest` と一致する
+18. アフィリエイトCTAがある場合、HTML化後に `href`、計測用画像の `src`、`rel="nofollow"`、リード文、ボタン文、配置セクションが `affiliate_link_manifest` と一致する
 19. 対応済みサイトでは、対象プロバイダーごとの講座別CTAが固定DOM契約で、承認済み`placement_id`とマニフェストの件数どおりに挿入される
 20. CTA対応が確認できないサイトでは、本文を変更せず `affiliate_cta_component_missing` で停止する
 21. 同じ配置に既存CTAがある場合、自動置換や重複追加をしない。別セクションの明示配置まで無条件に削らない

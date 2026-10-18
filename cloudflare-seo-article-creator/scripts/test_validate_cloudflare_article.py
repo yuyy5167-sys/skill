@@ -47,7 +47,7 @@ class ParentValidation(unittest.TestCase):
                       'destination_purpose': '教材見本を確認する', 'lead_copy': '学年に合う教材と受講条件を公式サイトで確認できます。'}
             manifest = {**link, 'provider': provider, 'target_course': course, 'presentation': 'cta_button',
                         'component_id': component, 'rel': 'nofollow', 'lead_text': moment['lead_copy'],
-                        'button_text': '対象講座の資料を請求する', 'destination_text': 'リンク先：対象講座公式サイト',
+                        'button_text': '対象講座の資料を請求する',
                         **{k: v for k, v in moment.items() if k != 'lead_copy'}}
             if mutation in ('wrong_course_url', 'wrong_tracking', 'unsupported_course'):
                 if mutation == 'wrong_course_url':
@@ -63,9 +63,14 @@ class ParentValidation(unittest.TestCase):
 <div class="{css}" data-course="{manifest['target_course']}" data-placement-id="CTA-01">
   <p class="{css}__lead">{manifest['lead_text']}</p>
   <a class="{css}__button" href="{html.escape(manifest['href'], quote=True)}" rel="nofollow"><img src="{html.escape(manifest['tracking_image_src'], quote=True)}" width="1" height="1" border="0" alt="">{manifest['button_text']}</a>
-  <p class="{css}__destination">{manifest['destination_text']}</p>
 </div>
 '''
+            if mutation == 'legacy_manifest':
+                manifest['destination_text'] = 'リンク先：対象講座公式サイト'
+            if mutation in ('destination_caption', 'plain_destination_caption'):
+                caption = (f'<p class="{css}__destination">リンク先：対象講座公式サイト</p>'
+                           if mutation == 'destination_caption' else '<p>リンク先：対象講座公式サイト</p>')
+                body = body.replace('</div>', caption + '\n</div>')
             if mutation == 'missing_nofollow':
                 body = body.replace('rel="nofollow"', '')
             if mutation == 'wrong_pixel_size':
@@ -87,6 +92,8 @@ draft: true
             article.write_text(source)
             rendered = root / 'article.html'
             rendered.write_text('<article data-article-content><h2>教材を確認する</h2><p><strong>教材と解説</strong>を確認できます。</p>' + body[body.index('<div'):] + '</article>')
+            if mutation == 'rendered_only_caption':
+                rendered.write_text(rendered.read_text().replace('</div>', '<small>リンク先：対象講座公式サイト</small></div>'))
             params = {'ArticlePath': str(article), 'ProjectRoot': str(root), 'ValidationMode': 'parent',
                       'ExpectedTitle': title, 'ExpectedArticleBusinessPurpose': 'conversion',
                       'ExpectedArticleProfileJson': json.dumps({'type': 'conversion_other', 'classification_reason': '教材選択の説明'}),
@@ -122,6 +129,19 @@ draft: true
             with self.subTest(provider=provider):
                 report, code = self.run_fixture(provider=provider)
                 self.assertEqual((code, report['status']), (0, 'PASS'), report)
+
+    def test_legacy_manifest_does_not_require_a_caption(self):
+        report, code = self.run_fixture(mutation='legacy_manifest')
+        self.assertEqual((code, report['status']), (0, 'PASS'), report)
+
+    def test_destination_captions_are_rejected(self):
+        for provider in ('zkai', 'shinken_zemi', 'smile_zemi'):
+            for mutation in ('destination_caption', 'plain_destination_caption', 'rendered_only_caption'):
+                with self.subTest(provider=provider, mutation=mutation):
+                    report, code = self.run_fixture(provider=provider, mutation=mutation)
+                    self.assertNotEqual(code, 0, report)
+                    self.assertFalse(report['parent_contract_pass'], report)
+                    self.assertIn('CTAボタン下のリンク先補足表記は禁止', str(report))
 
     def test_invalid_inputs_cannot_pass(self):
         for mutation in ('wrong_course_url', 'wrong_tracking', 'unsupported_course', 'missing_nofollow',
