@@ -157,11 +157,35 @@ article_feedback_context:
   ledger_status: ok | empty | degraded
 ```
 
-`article.mode`が`new`以外、またはキーワードと新規記事作成指示がそろわない場合は本スキルの一括実行対象外とする。事業目的が未確認ならログ記録と確認質問だけを行い、その他の工程を開始しない。`authorization.scope.article_root`は`<project_root>\src\content\blog\<article_id>`へ正規化し、永続成果物はこの内へ保存する。表示確認後に不要になるファイルは、別に確定した`authorization.scope.temporary_run_root`（`temporary_workspace.run_root`と同じパス）内へ保存する。この二つの書込み範囲を混在・拡張しない。`project_root`と`rulebook_path`は実行時に存在確認し、移動していた場合は推測で置換しない。
+`article.mode`が`new`以外、またはキーワードと新規記事作成指示がそろわない場合は本スキルの一括実行対象外とする。一覧からの選定を任された場合は、[キーワード選定方針](keyword-selection-policy.md)に沿って先に候補を確定できる。事業目的が未確認なら、ログ記録・確認質問・既存資料によるキーワード選定だけを行い、記事の競合・一次情報調査や制作工程を開始しない。`authorization.scope.article_root`は`<project_root>\src\content\blog\<article_id>`へ正規化し、永続成果物はこの内へ保存する。表示確認後に不要になるファイルは、別に確定した`authorization.scope.temporary_run_root`（`temporary_workspace.run_root`と同じパス）内へ保存する。この二つの書込み範囲を混在・拡張しない。`project_root`と`rulebook_path`は実行時に存在確認し、移動していた場合は推測で置換しない。
 
 メインキーワード、明示的な記事作成指示、確認済み事業目的があり、対象が既存記事ではなく本スキルの新規記事範囲だと確認できれば、依頼文に「新規」という語がなくても、一括承認は調査から統合検査後の最終プレビュー表示まで有効とする。依頼文に`成約用`または`集客用`が明記されていれば、その原文を確認回答として扱う。キーワード、記事型、履歴から目的を推測せず、「任せる」など選択が確定しない回答では制作を始めない。計画、タイトル、調査、執筆、権利条件を満たす画像、サムネイル、各H2見出し画像、保存、検査、修正、隔離プレビューについて途中承認を追加しない。ユーザーが停止を指示した場合は安全な区切りで止める。
 
 同名記事ルート、既存ファイル、既存記事への統合・リライト推奨がある場合、`may_overwrite: false`を維持して`BLOCKED`にする。一括承認を公開、デプロイ、Git操作、共通CSS変更へ拡張しない。範囲外の権限またはユーザーにしか決められない判断が必要な場合も、推測で進めず`BLOCKED`にする。
+
+## キーワード選定記録
+
+一覧から制作対象を選んだ場合だけ、次を既存の実行状態と記事制作ログへ保持する。ユーザーが今回のキーワードを明示指定した通常実行に、一覧表の入力を追加で要求しない。選定基準は[キーワード選定方針](keyword-selection-policy.md)を正本とする。
+
+```yaml
+keyword_selection:
+  source_file: "一覧表の正本の絶対パス"
+  source_sheet: "対象シート"
+  main_keyword: "article.main_keywordと同じ語"
+  selected_rows:
+    - row: 2
+      keyword: "一覧の元の表記"
+      color: "赤 | 青 | 緑"
+      role: primary | related
+      integration_reason: "主キーワードの採用理由、または同じ記事の回答に統合する理由"
+  selection_reason: "この1記事を選ぶ理由"
+  existing_article_check: "照合した記事・制作記録と、同じ検索意図が未対応である根拠"
+  core_exception: null # 赤の主キーワードでは下記の根拠を保持
+```
+
+赤の主要例外を採用する場合の`core_exception`には、`reader_decision`（支える主要な判断）、`incoming_articles`（案内元の記事・企画の根拠と読者が進む理由）、`existing_coverage_gap`（既存記事では足りない理由）を保持する。案内元は公開済み・下書き・予定を区別し、予定に仮URLを付けない。複数の行・関連語を採用した場合は、それぞれの元行と色を残す。
+
+この記録をfrontmatter、新しい管理台帳、検査用の別マニフェスト、必須CLI引数へ追加しない。見出し工程へ進む前に、調査後の主キーワード・統合範囲が選定記録と一致すること、赤の例外条件が引き続き成り立つことを親が確認する。
 
 ## 記事プロファイル・口コミ・料金・CTA戦略
 
