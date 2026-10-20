@@ -6,10 +6,17 @@ Cloudflare/Astro教育ブログの記事で、サムネイルの画風が確定�
 
 この文書は `asset_scope: thumbnail_and_h2 | h2_only` の場合だけ読む。サムネイル固有の小型カード、`object-fit: cover`、`-thumbnail.` CSSの検査をH2画像へ流用しない。
 
+## プロファイルの選択と優先
+
+`visual_profile.id: cream-manga-mustard-v1`なら[新デザイン契約](cream-manga-mustard-v1.md)の固定ブロック、revision 1、SHAを使う。以下の`h2_style_profile_v1`/revision 2は省略既存入力の従来例で、新profileへ合成しない。各スキーマのID/版/SHAは選択契約の実値を保持する。サムネイル/H2でprofile不一致なら親へ返す。
+
+新profileでは水彩検査はnot_applicable、palette_profile/monochrome_lineworkを観察する。画風・サムネイル・過去H2・構図画像を直接生成へ渡さない。人物active正本だけ参照でき、同一性を保った白黒明暗変換を許可する。
+
 ## 1. 入力と適用状態
 
 ```yaml
 asset_scope: thumbnail_and_h2 | h2_only
+visual_profile: null # 新profileは{id: cream-manga-mustard-v1, revision: 1}
 article_path: ""
 target_grade: elementary | junior_high | high_school | multi_grade | unknown
 authorization_mode: standalone_interactive | orchestrated_prepublication
@@ -104,7 +111,10 @@ runtime_style_delta:
 
 ```yaml
 section_image_plan:
+  article_id: ""
   asset_id: ""
+  section_id: ""
+  source_section: "" # 本文パス/節とfacts_allowedの根拠
   heading: ""
   section_summary: ""
   one_glance_meaning: ""
@@ -124,8 +134,8 @@ section_image_plan:
   forbidden_implications: []
   elements_to_exclude: []
   output_filename: ""
-  style_profile_id: h2_style_profile_v1
-  style_profile_revision: 2
+  style_profile_id: h2_style_profile_v1 | cream-manga-mustard-v1
+  style_profile_revision: 2 # cream-manga-mustard-v1では1
   style_profile_sha256: ""
   runtime_style_delta: null
   final_prompt_status: pending_copy | pending_thumbnail_style_delta | ready
@@ -167,6 +177,8 @@ section_image_plan:
 
 ```yaml
 generation_request:
+  visual_profile: null
+  section_style_contract: null # 新profileで必須。profile_id/revision/sha256
   asset_id: ""
   request_id: ""
   design_version: ""
@@ -218,10 +230,12 @@ section_images:
   applicability: applicable | not_applicable
   not_applicable_reason: null | no_markdown_h2 | thumbnail_only_scope
   status: null | PREVIEW_READY | FINAL_ASSET_READY | BLOCKED
-  style_profile_id: h2_style_profile_v1
-  style_profile_revision: 2
+  style_profile_id: h2_style_profile_v1 | cream-manga-mustard-v1
+  style_profile_revision: 2 # cream-manga-mustard-v1では1
   style_profile_sha256: ""
   direct_style_images_sent_to_generator: false
+  visual_profile: null
+  section_style_contract: null
   expected_h2_count: 0
   generated_count: 0
   saved_count: 0

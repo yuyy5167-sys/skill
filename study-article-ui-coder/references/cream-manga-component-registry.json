@@ -1,0 +1,17 @@
+{
+  "profile": "cream-manga-mustard-v1",
+  "version": 1,
+  "site_stylesheet": "src/styles/article-editions.css",
+  "body_classes": [
+    "edition-anchor", "edition-annotation", "edition-answer", "edition-caption",
+    "edition-choices", "edition-choices__label", "edition-comic", "edition-comic__answer",
+    "edition-comic__question", "edition-equation", "edition-family", "edition-family__children",
+    "edition-family__parent", "edition-note", "edition-note__label", "edition-qa",
+    "edition-qa__answer", "edition-qa__question", "edition-routes", "edition-sentence",
+    "edition-source", "edition-steps", "edition-thumbnail", "edition-visual"
+  ],
+  "layout_owned_classes": [
+    "edition-body", "edition-kicker", "edition-lead", "edition-next",
+    "edition-outline", "edition-outline__number", "edition-outline__title"
+  ]
+}

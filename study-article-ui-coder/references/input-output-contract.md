@@ -23,6 +23,34 @@ ui_design:
   allowed_adjustments: []
 ```
 
+### 勉強ブログのA〜E接続
+
+このブログの新規記事の`cream-manga-mustard-v1`では、上記に次を追加する。A〜Eは見た目の設計であり、成約用・集客用などの事業目的から独立している。子は型、CTA件数、導線先を再推定しない。
+
+```yaml
+ui_design:
+  design_version: 1 # 親article_visual_design.design_versionと同じ整数
+  article_design:
+    profile: cream-manga-mustard-v1
+    design: C # A | B | C | D | E
+    label: 料金の比較ガイド # 前後空白を除き空ではない
+    showMaterialFinder: false
+site_rendering_capabilities:
+  article_design:
+    profile: cream-manga-mustard-v1
+    metadata_supported: true
+    origins: [frontmatter, legacy-map]
+    explicit_answer_supported: true
+    optional_end_finder_supported: true
+    registered_components: [] # 現物確認した具体部品名。登録簿との一致を検査
+```
+
+`ui_design.article_design`をfrontmatterの`articleDesign`へ対応付ける。キーは`profile`、`design`、`label`、`showMaterialFinder`だけとし、選択理由や版は親の実行記録へ残す。`showMaterialFinder`の省略はfalse。必要な機能・部品が実装されていることを確認せず、capabilitiesのbooleanだけで完成扱いにしない。
+
+導入・H2・H3・本文段落・リスト・表・CTA・内部リンクカード・サムネイル・H2画像等の全意味ブロックを、重複なく`component_assignments`へ対応付ける。通常本文・標準見出し・Markdown画像は`plain`として有効である。境界コメントは構造上の制御情報として別途1個を確認する。画像工程やリンク工程がブロックを追加・変更した場合は、最終原稿に対して割当を再照合する。画像・本文の不足を部品の自作や割当の削除で埋めない。
+
+サムネイルの生成・H2画像の限定挿入は親が依頼した画像工程、`coverImage`と導入サムネイルの統合は親の責務である。UI工程は承認済みのパス・alt・配置を保持し、未承認画像を生成・探索しない。
+
 `component_assignments`は本文のすべてのブロックを一意に割り当てる。部品を使わない本文も`plain`として明示する。`design_version`は整数とし、`section_order`、`source_block`、`component`、`purpose`、`placement`、配列の`preserve`の不足、重複、本文との不一致は子が推測で補わない。
 
 `allowed_adjustments`には、親が許可した範囲だけを入れる。例えば、段落分け、接続文、見出し内での許可済みの部品記法への変換、可読性を損なわない余白調整である。読者、検索意図、記事型、見出し順、部品の目的・配置、保持対象を変える必要がある場合は、次を返して親の判断を待つ。
@@ -160,6 +188,8 @@ design_conformance:
   deviations: []
   allowed_adjustments_applied: []
 ```
+
+新profileでは`design_conformance`に`article_design`の実際の解決結果（profile、design、origin）、境界入力検査、完成DOMの順序検査、登録簿との照合結果、末尾教材診断の表示状態も返す。入力コメントは分割時に消費されるため、完成HTMLに境界コメントを残すことを合格条件にしない。
 
 `design_conformance.result: pass`は、全本文ブロックが指定された割当に対応し、許可範囲外の変更がない場合だけ使う。実表示や原文保全の未実施検査を`pass`にしない。
 

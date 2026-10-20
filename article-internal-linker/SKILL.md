@@ -45,6 +45,12 @@ Z会を扱う場合は [Z会専用CTA契約](references/zkai-cta.md)を追加で
 - リンク先の役割を件数で決めない。口コミ・料金紹介・比較・その他の成約直結記事は`image_card`、それ以外の関連記事は`text_link`とする
 - `image_card`は最大2件とし、上限を超える候補を`text_link`へ変更して回避しない
 
+## 記事デザインの外観指定
+
+対象ブログの今後の新規記事で `articleDesign.profile: cream-manga-mustard-v1` を受け取った場合は、[教育ブログ用CTA外観プロファイル](references/article-design-profile.md)を `plan | insert | audit` で必要な範囲まで読む。外観はこの参照で従来のオレンジ/緑の指定から分岐する。目的・講座・URL・計測・件数・案内文・固定DOMの契約は保持し、A〜Eから目的やCTA件数を推測しない。profile未指定の旧記事・別サイトへ新仕様を自動適用しない。
+
+`insert`前に、使用するプロバイダー/カードごとのprofile対応共通CSSを現在実行で確認する。未実装・未確認なら元本文を保持して `article_design_profile_component_missing` を返す。本スキルが不足CSSを作成・編集して補うことはしない。
+
 ## CTA表示の継続方針
 
 対象ブログの今後の新規作成・既存記事修正では、[CTAボタン下のリンク先表記](references/cta-caption-policy.md)を適用する。教材を問わず補足行を出さず、URL・ボタン・計測画像を保持する。
@@ -114,6 +120,7 @@ HTML化後の本文と `expected_link_manifest` を比較し、次を確認す�
 - `image_card`が記事全体で2件を超えず、画像・正式タイトル・紹介文を持つカードとして表示されている
 - `affiliate_link_manifest` がある場合、講座・`href`・計測用画像の `src`・`rel="nofollow"`・リード文・ボタン文が期待値と一致し、別講座のリンクや重複がない
 - アフィリエイトCTAがある場合、固定DOMクラス、`data-course`、リード文、ボタン文、CTA数、共通コンポーネントIDが期待値と一致する
+- `cream-manga-mustard-v1`指定では外観プロファイルの現在実装確認と5幅の実表示記録があり、指定profile/design/由来と実DOM、使用する各CTAとカードの外観が一致する。欠落・不一致・旧記事への漏出を既定表示で隠さない
 - 成約用では`cta_strategy.planned_count`、`official_confirmation_moments`、`affiliate_link_manifest.links`、実CTAの件数と`placement_id`が一致し、各CTAの直前文脈が対応する`reader_question`と`official_information_needed`を説明している
 - CTA同士が近接せず、同じ`lead_text`または実質的に同じ確認理由を繰り返していない
 - アフィリエイトCTAがある場合、320・375・390・768・1280pxの実表示結果で横方向にはみ出さず、ボタン寸法と計測画像寸法が表示契約を満たし、ブラウザコンソールにCTA起因のエラーがない

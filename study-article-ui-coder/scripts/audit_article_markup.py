@@ -14,6 +14,9 @@ from typing import Iterable
 
 
 ASTRO_CLASS_PREFIXES = ("article-callout", "article-link-card", "scroll-table")
+COMPONENT_REGISTRY = json.loads(Path(__file__).resolve().parent.parent.joinpath("references/cream-manga-component-registry.json").read_text(encoding="utf-8"))
+CREAM_MANGA_PROFILE = COMPONENT_REGISTRY["profile"]
+CREAM_MANGA_BODY_CLASSES = frozenset(COMPONENT_REGISTRY["body_classes"])
 FORBIDDEN_TAGS = {"script", "iframe", "object", "embed"}
 SVG_ALLOWED_TAGS = {
     "svg", "g", "path", "rect", "circle", "line", "polyline", "polygon",
@@ -46,10 +49,11 @@ class Issue:
 
 
 class MarkupAuditParser(HTMLParser):
-    def __init__(self, target: str, allowed_classes: Iterable[str]) -> None:
+    def __init__(self, target: str, allowed_classes: Iterable[str], article_profile: str | None = None) -> None:
         super().__init__(convert_charrefs=True)
         self.target = target
         self.allowed_classes = tuple(allowed_classes)
+        self.article_profile = article_profile
         self.issues: list[Issue] = []
         self.stack: list[tuple[str, set[str], int]] = []
         self.ids: dict[str, int] = {}
@@ -138,6 +142,12 @@ class MarkupAuditParser(HTMLParser):
         else:
             prefixes = ASTRO_CLASS_PREFIXES + self.allowed_classes
             for class_name in classes:
+                # Only exact registered body classes are allowed. A caller cannot
+                # turn an arbitrary edition-* name into a component by prefix.
+                if class_name.startswith("edition-"):
+                    if self.article_profile != CREAM_MANGA_PROFILE or class_name not in CREAM_MANGA_BODY_CLASSES:
+                        self.add("UNSUPPORTED_CLASS", f"Astroで未登録または適用外のedition部品 '{class_name}' です。", line)
+                    continue
                 if not any(class_name == p or class_name.startswith(p + "__") or class_name.startswith(p + "--") for p in prefixes):
                     self.add("UNSUPPORTED_CLASS", f"Astroで許可されていないclass '{class_name}' です。", line)
 
@@ -197,9 +207,9 @@ def strip_frontmatter(text: str) -> str:
     return text[match.end():] if match else text
 
 
-def audit_document(text: str, target: str, allowed_classes: Iterable[str] = ()) -> list[Issue]:
+def audit_document(text: str, target: str, allowed_classes: Iterable[str] = (), article_profile: str | None = None) -> list[Issue]:
     body = strip_frontmatter(text) if target == "astro-markdown" else text
-    parser = MarkupAuditParser(target, allowed_classes)
+    parser = MarkupAuditParser(target, allowed_classes, article_profile)
     parser.feed(body)
     parser.close()
     issues = parser.finalize()
@@ -315,6 +325,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--target", choices=("standalone-html", "astro-markdown"), required=True)
     parser.add_argument("--input", type=Path, help="監査対象。省略時は標準入力")
     parser.add_argument("--readability-warnings", action="store_true", help="空段落・連続改行の補助警告を追加。passedと終了コードには影響しない")
+    parser.add_argument("--article-profile", choices=(CREAM_MANGA_PROFILE,), help="対象サイトで実装確認済みの場合だけ指定する記事デザイン")
     parser.add_argument(
         "--allowed-class",
         action="append",
@@ -337,7 +348,7 @@ def main() -> int:
         print(json.dumps({"target": args.target, "passed": False, "error": str(exc)}, ensure_ascii=False, indent=2))
         return 2
 
-    issues = audit_document(text, args.target, args.allowed_class)
+    issues = audit_document(text, args.target, args.allowed_class, args.article_profile)
     result = {
         "target": args.target,
         "passed": not issues,

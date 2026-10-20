@@ -24,6 +24,35 @@ def codes(text: str, target: str) -> set[str]:
 
 
 class AuditArticleMarkupTests(unittest.TestCase):
+    def test_registered_edition_components_require_profile(self) -> None:
+        text = '<figure class="edition-thumbnail"><img src="./images/cover.webp" alt="教材選び"></figure><p class="edition-answer">短い答え。</p><div class="edition-note"><p class="edition-note__label">要点</p><p>説明。</p></div>'
+        self.assertIn('UNSUPPORTED_CLASS', codes(text, 'astro-markdown'))
+        self.assertEqual(AUDIT.audit_document(text, 'astro-markdown', article_profile=AUDIT.CREAM_MANGA_PROFILE), [])
+
+    def test_registry_rejects_invented_variants_and_layout_classes(self) -> None:
+        for class_name in ['edition-invented', 'edition-note__invented', 'edition-note--invented', 'edition-body', 'edition-outline', 'edition-next']:
+            found = AUDIT.audit_document(f'<div class="{class_name}">説明。</div>', 'astro-markdown', ['edition', 'edition-note'], AUDIT.CREAM_MANGA_PROFILE)
+            self.assertIn('UNSUPPORTED_CLASS', {x.code for x in found})
+
+    def test_profile_preserves_security_and_other_project_contracts(self) -> None:
+        text = '<p class="edition-answer" style="color:red">短い答え。</p><script>x</script>'
+        found = AUDIT.audit_document(text, 'astro-markdown', article_profile=AUDIT.CREAM_MANGA_PROFILE)
+        self.assertEqual({x.code for x in found}, {'INLINE_STYLE', 'FORBIDDEN_TAG'})
+        self.assertIn('UNSUPPORTED_CLASS', codes('<p class="edition-answer">答え。</p>', 'standalone-html'))
+
+    def test_all_registered_classes_have_matching_site_css(self) -> None:
+        # Registry completeness is checked by the integration suite against the site.
+        self.assertEqual(len(AUDIT.CREAM_MANGA_BODY_CLASSES), 24)
+        self.assertFalse(AUDIT.CREAM_MANGA_BODY_CLASSES.intersection(AUDIT.COMPONENT_REGISTRY['layout_owned_classes']))
+
+    def test_cli_profile_uses_registry_without_broad_prefix(self) -> None:
+        command = [sys.executable, '-B', str(SCRIPT_PATH), '--target', 'astro-markdown', '--article-profile', AUDIT.CREAM_MANGA_PROFILE]
+        good = subprocess.run(command, input='<p class="edition-answer">答え。</p>', text=True, capture_output=True, check=False)
+        bad = subprocess.run(command, input='<p class="edition-answer__fake">答え。</p>', text=True, capture_output=True, check=False)
+        self.assertEqual(good.returncode, 0)
+        self.assertEqual(bad.returncode, 1)
+        self.assertFalse(json.loads(bad.stdout)['passed'])
+
     def test_readability_empty_and_repeated_breaks(self) -> None:
         found = AUDIT.readability_warnings('<p> &nbsp; </p><p>本文<br />\n<!--注--><br><br>続き</p>', 'astro-markdown')
         self.assertEqual([x.code for x in found], ['EMPTY_PARAGRAPH', 'CONSECUTIVE_BREAKS'])

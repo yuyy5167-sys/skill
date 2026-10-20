@@ -45,7 +45,13 @@ param(
 
     [string]$AllowedExternalApprovalJson = '[]',
 
-    [string]$RenderedHtmlPath
+    [string]$RenderedHtmlPath,
+
+    [switch]$RequireArticleDesign,
+
+    [string]$ExpectedArticleDesignJson,
+
+    [string]$ExpectedArticleDesignStateJson
 )
 
 $ErrorActionPreference = 'Stop'
@@ -60,6 +66,7 @@ $checks = [ordered]@{
     review_price_evidence = 'not_checked'
     cta_strategy = 'not_checked'
     article_structure = 'not_checked'
+    article_design = 'not_checked'
     title_contract = 'not_checked'
     internal_links = 'not_checked'
     affiliate = 'not_checked'
@@ -562,7 +569,7 @@ try {
     else {
         $frontmatter = $frontmatterMatch.Groups['frontmatter'].Value
         $body = $content.Substring($frontmatterMatch.Length)
-        $allowedKeys = @('title', 'description', 'date', 'updatedDate', 'categories', 'tags', 'coverImage', 'promotionDisclosure', 'promotionDisclosureText', 'compactBody', 'draft')
+        $allowedKeys = @('title', 'description', 'date', 'updatedDate', 'categories', 'tags', 'coverImage', 'promotionDisclosure', 'promotionDisclosureText', 'compactBody', 'draft', 'articleDesign')
         $topLevelKeys = [regex]::Matches($frontmatter, '(?m)^(?<key>[A-Za-z][A-Za-z0-9_-]*):') | ForEach-Object { $_.Groups['key'].Value }
 
         foreach ($key in $topLevelKeys) {
@@ -974,6 +981,25 @@ const { pathToFileURL } = require('node:url');
         }
         if ($checks.internal_links -ne 'fail') { $checks.internal_links = 'pass' }
 
+        $currentCheck = 'article_design'
+        $designAuditInput = [ordered]@{
+            project_root = $resolvedProjectRoot
+            article_path = $resolvedArticlePath
+            require_design = [bool]$RequireArticleDesign
+        }
+        if (-not [string]::IsNullOrWhiteSpace($ExpectedArticleDesignJson)) { $designAuditInput.expected_design = $ExpectedArticleDesignJson | ConvertFrom-Json -ErrorAction Stop }
+        if (-not [string]::IsNullOrWhiteSpace($ExpectedArticleDesignStateJson)) { $designAuditInput.design_state = $ExpectedArticleDesignStateJson | ConvertFrom-Json -ErrorAction Stop }
+        if (-not [string]::IsNullOrWhiteSpace($RenderedHtmlPath)) { $designAuditInput.rendered_html_path = $RenderedHtmlPath }
+        $designAuditOutput = ($designAuditInput | ConvertTo-Json -Depth 30 -Compress) | & node (Join-Path $PSScriptRoot 'audit-article-design.mjs')
+        $designAuditExitCode = $LASTEXITCODE
+        $articleDesignAudit = ($designAuditOutput -join [Environment]::NewLine) | ConvertFrom-Json -ErrorAction Stop
+        if ($articleDesignAudit.article_sha256 -cne $articleSha256) { Add-ValidationError 'Design audit article hash mismatch.' }
+        if ($designAuditExitCode -ne 0 -or $articleDesignAudit.status -ne 'PASS') {
+            foreach ($issue in @($articleDesignAudit.errors)) { if ($null -ne $issue) { Add-ValidationError $issue } }
+            Add-ValidationError "Article design audit failed: $($articleDesignAudit.error)"
+        }
+        if ($RequireArticleDesign -and $ValidationMode -eq 'parent' -and $articleDesignAudit.rendered.status -ne 'PASS') { Add-ValidationError 'New-article design completion requires rendered HTML validation.' }
+        if ($checks.article_design -ne 'fail') { $checks.article_design = 'pass' }
         $currentCheck = 'external_links'
         if ($ExternalLinkPolicy -ne 'allow_task_required_only') {
             Add-ValidationError '外部リンク検査は省略できません。ExternalLinkPolicyはallow_task_required_onlyを使用してください。'
@@ -1092,6 +1118,7 @@ $result = [ordered]@{
     external_link_policy = $ExternalLinkPolicy
     disallowed_external_link_count = $disallowedExternalLinks.Count
     disallowed_external_links = @($disallowedExternalLinks)
+    article_design_audit = $articleDesignAudit
     external_link_audit = $externalLinkAudit
     expected_emphasis_count = $expectedEmphasisCount
     matched_emphasis_count = $matchedEmphasisCount

@@ -7,6 +7,10 @@ description: Cloudflare/Astro教育ブログの新規記事と、ユーザーが
 
 `/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ` の新規記事と、ユーザーが明示承認した既存記事一括修正を、上流調査からサムネイル・各H2見出し画像の組み込み、最終ローカルプレビューのユーザー表示まで一貫して実行する統括スキルである。キーワードと新規記事作成指示だけでは制作を開始せず、最初に記事の事業目的をユーザー本人へ確認する。`成約用`または`集客用`が確認できた後、その1記事分の公開前作業を一括承認として扱う。人間確認後に同じ記事への明示的な公開指示がある場合だけ、事前通知した対象`index.md`のGitHub保存を追加工程として実行できる。本番公開とCloudflareデプロイは常に別工程とする。
 
+## 今後の新記事のA〜Eデザイン
+
+対象ブログの新規記事は [A〜Eデザイン標準](references/article-design-standard.md) を必ず読み、`cream-manga-mustard-v1` を使う。調査後に親がA〜Eを選び、完全な `ui_design` を `parent_directed` でUIへ渡す。画像子には同じ `visual_profile`、リンク子には `articleDesign` と実装確認済みの外観能力を渡す。サイト基盤未対応なら `design_migration_required` とし、通常制作で共有CSS・ID辞書を変更しない。既存記事修正は指定範囲を保持し、この既定だけを理由に変更しない。
+
 ## キーワード一覧からの制作対象選定
 
 一覧から選定を任された場合は、[キーワード選定方針](references/keyword-selection-policy.md)を先に読む。赤色の通常キーワードは原則として作らず、口コミ・料金・キャンペーン等の必要な主要記事だけを根拠付きで例外採用する。関連語の統合と既存記事との重複を確認し、一覧の行・色・採用理由を制作記録へ保持してから、確定したキーワードで通常工程へ進む。候補が尽きても赤色の通常記事へ自動で進まない。
@@ -64,7 +68,7 @@ description: Cloudflare/Astro教育ブログの新規記事と、ユーザーが
 1. 毎回、[ワークフロー](references/workflow.md)を読む。
 2. 上流・下流スキルへ情報を渡す前に、[入出力契約](references/input-output-contract.md)を読む。
 3. 記事の完成判定前に、[品質ゲート](references/quality-gate.md)を読む。
-4. 記事ファイル作成後の事前検査は`basic`または共通リンク検査で行う。最終ビルド後は`scripts/validate-cloudflare-article.ps1 -ValidationMode parent -RenderedHtmlPath <対象HTML>`で[静的検査入力契約](references/input-output-contract.md#静的検査入力契約)に従って検査する。確認済み事業目的、強調計画、内部リンク期待マニフェスト、アフィリエイト期待マニフェストを同じ実行状態から渡し、原稿だけの`PASS`は完成判定に使わない。
+4. 記事ファイル作成後の事前検査は`basic`または共通リンク検査で行う。新記事はデザイン標準の `RequireArticleDesign` と期待metadata・現行版記録も渡す。最終ビルド後は`scripts/validate-cloudflare-article.ps1 -ValidationMode parent -RenderedHtmlPath <対象HTML>`で[静的検査入力契約](references/input-output-contract.md#静的検査入力契約)に従って検査する。確認済み事業目的、強調計画、内部リンク期待マニフェスト、アフィリエイト期待マニフェストを同じ実行状態から渡し、原稿だけの`PASS`は完成判定に使わない。
 5. 制作の一時ファイルを作る前に、`scripts/prepare-local-preview.py --initialize-only`（PowerShellでは同名の`.ps1 -InitializeOnly`）で作業フォルダ直下の一時実行フォルダを準備する。`draft: true`の記事を表示するときは、同じ実行IDで通常実行してその中へ隔離プレビューを作る。保存先と配信・削除条件は[ワークフローの検証手順](references/workflow.md#11-検証)を読む。
 6. 本文執筆前と内容検収時は、[改善前後の参照例](references/content-quality-examples.md)を読む。架空仕様は文章品質の例であり、記事の事実・構成テンプレートへ転用しない。
 
@@ -95,8 +99,8 @@ description: Cloudflare/Astro教育ブログの新規記事と、ユーザーが
 - 調査日の書き方は文章スキルを正本とする。親が記事全体で出典・確認日・対象情報・注記の配置を整理し、必要な適用時期や期限を保持して下流へ渡す。各節に確認作業の報告を繰り返さない。
 - 本文受理後に、本文の各H2・H3の結論を示す短い単語または句を、少なくとも1件ずつ`emphasis_plan`へ入れる。各項目を章・回答ID・完全一致語句・対応する役割・理由へ対応づけ、指定章の本文中の`strong`として残す。強調は重要語句・短い句を基本とし、実表示で原則1行以内、長くても2行以内にする。各節で強調を結論の1件だけに限定せず、別の重要な判断材料もある場合は、内容に応じて`condition`、`deadline`、`caution`、`action`など検査で許可された役割の短い強調を計画へ加える。記事全体で読者が要点を拾いやすい箇所へ複数配置する一方、件数のノルマや水増しは設けず、見出し自体、長い一文・段落全体、同じ語句の反復、重要でない語の装飾目的の強調を禁止する。
 - 公開確認済みの自サイト記事に本文との直接的な関連がある場合は内部リンクを計画し、`expected_link_manifest`へ確定する。集客用では、記事管理情報・対応する制作ログ・ユーザー承認済み一覧のいずれかで成約用と確認できた公開記事を主リンクとして1件必須にし、`required: true`、`destination_role: conversion_direct`、`presentation: image_card`で記録する。タイトルや「口コミ・料金・比較」という語だけで成約用と推測しない。成約用では内部リンクは補助導線とし、本文との関連がある場合だけ使う。画像付きカードは記事全体で最大2件にし、件数を理由に表示形式を入れ替えない。
-- `$study-article-ui-coder`へ完成本文、確認済みリンク、採用可能画像、対応見出し・主張・帰属表示、`emphasis_plan`を`required_elements`として渡し、既に挿入したCTAのDOMと属性、および承認済み内部リンクの表示形式・URL・配置を`preserve_elements`へ渡して、承認済み画像の配置を含む`astro-markdown`を受け取る。frontmatter付与とファイル保存は本スキルが直接実行し、差分と検証証跡を確認する。配置条件を満たさない保存画像は`保存済み・未配置`として報告し、本文へ無理に挿入しない。
-- 画像工程では`$education-blog-thumbnail-creator`を`execution_mode: full`、`asset_scope: thumbnail_and_h2`で直接実行する。完成本文、通知済み記事ルート内の保存先、同じ新規記事へのH2画像参照の限定編集権限を渡し、サムネイルの画風確定後に各Markdown H2の見出し画像を作る。生成前レビュー、参照状態、確定文字列、最終プロンプト、実画像を照合する。文字なしの例外は、子の契約に適合するユーザー指示原文と対象資産がある場合だけ受理する。`$imagegen`を直接呼ばない。
+- `$study-article-ui-coder`へ完成本文、確認済みリンク、採用可能画像、対応見出し・主張・帰属表示、`emphasis_plan`を`required_elements`として渡し、既に挿入したCTAのDOMと属性、および承認済み内部リンクの表示形式・URL・配置を`preserve_elements`へ渡して、承認済み画像の配置を含む`astro-markdown`を受け取る。新記事ではA〜E標準の完全な `ui_design` と現行 `design_version` を `parent_directed` で渡す。frontmatter付与とファイル保存は本スキルが直接実行し、差分と検証証跡を確認する。配置条件を満たさない保存画像は`保存済み・未配置`として報告し、本文へ無理に挿入しない。
+- 画像工程では`$education-blog-thumbnail-creator`を`execution_mode: full`、`asset_scope: thumbnail_and_h2`で直接実行する。完成本文、通知済み記事ルート内の保存先、新記事の `visual_profile: {id: cream-manga-mustard-v1, revision: 1}`、同じ新規記事へのH2画像参照の限定編集権限を渡し、サムネイルの画風確定後に各Markdown H2の見出し画像を作る。生成前レビュー、参照状態、確定文字列、最終プロンプト、実画像を照合する。文字なしの例外は、子の契約に適合するユーザー指示原文と対象資産がある場合だけ受理する。`$imagegen`を直接呼ばない。
 - 全H2画像の生成・保存・再検査が合格するまで記事へ画像参照を挿入しない。依存スキルの一括反映後に`check-h2-images.ps1`と実表示を確認し、`thumbnail.status`と`section_images.status`がともに`FINAL_ASSET_READY`の場合だけ画像工程を完成とする。
 - ユーザーが提供していない実体験、成果、専門性、料金、キャンペーン、URLを創作しない。
 - 中間レポート、設計、TODO、証跡は実行状態で管理し、ユーザーが求めない中間ファイルを作らない。

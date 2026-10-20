@@ -47,6 +47,10 @@ thumbnail_design:
 
 `render_from_plan`は、`thumbnail_design.design_version`、`used_design_version`、`generation_request.design_version`が一致し、`pre_generation_review.result: pass`の場合だけ、最終プロンプトを`generation_request: {request_id, design_version, final_prompt}`として先に返す。承認未到着時は`handoff_status: prompt_ready`、`status: null`、`generation_approval: null`を維持する。親から`generation_approval: {request_id, design_version, final_prompt, result: pass}`が戻り、3項目が完全一致し、未消費の場合だけ生成する。不一致または不合格は`handoff_status: needs_parent_input`、`status: null`、`generation_approval: null`とし、`change_request`へ不一致項目を残す。設計版またはプロンプト変更後の承認は履歴だけとし、承認を消費して生成を開始した時点でも`generation_approval_history`へ移してactiveな`generation_approval`を`null`に戻す。同じ`request_id`は一度だけ消費する。結果不明時は自動再実行しない。初回生成、再生成、画像編集のすべてでこの照合を繰り返す。権限、保存、生成後の品質ゲートはこの承認によって緩和されない。
 
+## 選択プロファイルの優先
+
+`cream-manga-mustard-v1`は[新デザイン契約](cream-manga-mustard-v1.md)を画風/採用見本/人物明暗変換/contain表示の正本とする。本書の水彩/旧配色/cover固有指示は従来profileに限定。意味/コピー/差別化/事実/実画像/実表示は維持し、水彩検査はnot_applicable、白黒線画と小さなからし色を検査する。
+
 ## 1. 記事タイプから視覚モチーフを決める
 
 | 記事タイプ | 有力な視覚モチーフ |
@@ -385,7 +389,7 @@ image_only_readback:
 
 本節は改訂後の生成試験に使う。通常の記事1件ごとに全試験を実行しない。形式検査の合格は、生成品質の確認とは区別する。
 
-- 性格の異なる3記事（教材選び・料金・困りごとの解決など）を選び、各記事を同じ入力条件で2回生成する。前回の試験結果・修正指摘を次の初回生成へ渡さない。別コンテキストを使うなど実際の隔離方法を記録し、独立実行できない場合はその制約を示す。独立した再生成と独立した評価者を混同しない。
+- 性格の異なる3記事（教材選び・料金・困りごとの解決など）を選び、各記事を同じ入力条件で2回生成する。新profileではサムネイルとH2の双方を対象とする（計12資産）。前回の試験結果・修正指摘を次の初回生成へ渡さない。別コンテキストを使うなど実際の隔離方法を記録し、独立実行できない場合はその制約を示す。独立した再生成と独立した評価者を混同しない。
 - 開始時に記事と指定、スキル版、承認見本、キャラクターシート、比較する既存画像一覧、指定可能なモデル・設定・ツール条件を固定する。ファイルはパスとハッシュ等で同一性を確認する。生成ツールがモデルを公開しない場合はツール名・日時を記録し、モデル名を推測しない。
 - 試験画像は次の試験の見本や既存画像一覧へ加えない。試験完了後に異なる記事の画像を並べて差別化を評価する。同じ記事の2回分は品質のぶれの確認に使い、必ず異なる構図を要求しない。
 - 観測できた実行条件、初回結果、修正後結果、修正回数・原因を記録する。未解決の必須項目がある画像を合格に含めない。修正には通常と同じ再設計・停止規則を適用する。

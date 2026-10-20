@@ -20,7 +20,7 @@ REGISTRY = SCRIPT.parents[2] / 'article-internal-linker/references/zkai-affiliat
 
 
 class ParentValidation(unittest.TestCase):
-    def run_fixture(self, provider='zkai', course='elementary', mutation=None):
+    def run_fixture(self, provider='zkai', course='elementary', mutation=None, new_design=False, traffic=False):
         project = Path(os.environ['ARTICLE_TEST_PROJECT_ROOT'])
         with tempfile.TemporaryDirectory(dir=os.environ['ARTICLE_TEST_WORK_ROOT'], prefix='parent-test-') as work:
             root = Path(work)
@@ -107,6 +107,35 @@ draft: true
                       'ExpectedInternalLinkManifestJson': '{"new_links":[]}',
                       'ExpectedAffiliateLinkManifestJson': json.dumps({'links': [manifest]}),
                       'ExternalLinkPolicy': 'allow_task_required_only', 'RenderedHtmlPath': str(rendered)}
+            if new_design:
+                (root / 'src/lib').mkdir(parents=True, exist_ok=True)
+                shutil.copy2(project / 'src/lib/articleDesignMetadata.mjs', root / 'src/lib/articleDesignMetadata.mjs')
+                shutil.copy2(cover, article.parent / 'images/h2-01.webp')
+                metadata = {'profile': 'cream-manga-mustard-v1', 'design': 'C', 'label': '比較の検証', 'showMaterialFinder': False}
+                lead = '<figure class="edition-thumbnail">\n\n![教材の選び方](./images/cover.webp)\n\n</figure>\n\n導入です。'
+                new_body = body.replace('## 教材を確認する', '## 教材を確認する\n\n![教材と解説](./images/h2-01.webp)')
+                new_source = source.replace('draft: true', 'articleDesign: ' + json.dumps(metadata, ensure_ascii=False) + '\ndraft: true').replace(body, lead + '\n\n<!--article-lead-end-->\n\n' + new_body)
+                article.write_text(new_source)
+                new_html_body = rendered.read_text().replace('<article data-article-content>', '<div data-article-content>').replace('</article>', '</div>').replace('<h2>', '<h2 id="test">').replace('</h2>', '</h2><p><img src="/assets/h2.webp" alt="教材と解説"></p>', 1)
+                rendered.write_text('<main class="article-page article-edition" data-article-design="C" data-article-design-origin="frontmatter" data-article-profile="cream-manga-mustard-v1"><div data-article-lead><figure class="edition-thumbnail"><img src="/assets/cover.webp" alt="教材の選び方"></figure><p>導入です。</p></div><nav class="edition-outline"><p class="edition-outline__title">目次</p><a href="#test"><span>01</span><span>教材を確認する</span><span>›</span></a></nav>' + new_html_body + '</main>')
+                params.update({'RequireArticleDesign': True, 'ExpectedArticleDesignJson': json.dumps(metadata),
+                  'ExpectedArticleDesignStateJson': json.dumps({'design_version':1,'ui_used_design_version':1,'thumbnail_accepted_design_version':1,'section_images_accepted_design_version':1})})
+            if traffic:
+                destination = '/2026/10/02/study-sapuri-junior-20261002/'
+                description = '講座の内容と受講条件を確認できます。'
+                card = '\n\n【内部リンクカード】\nURL: ' + destination + '\n紹介文: ' + description + '\n'
+                current = article.read_text()
+                current = current[:current.index('<div class="' + css)] + card
+                article.write_text(current)
+                current_html = rendered.read_text()
+                start = current_html.index('<div class="' + css)
+                rendered.write_text(current_html[:start] + '<a href="' + destination + '"><img src="/fixture.webp" alt="講座の解説">' + description + '</a></div></main>')
+                params.update({'ExpectedArticleBusinessPurpose':'traffic','ExpectedAffiliateDisposition':'not_applicable',
+                  'ExpectedArticleProfileJson':json.dumps({'type':'traffic','classification_reason':'疑問へ回答して解説記事へ案内'}),
+                  'ExpectedCtaStrategyJson':json.dumps({'default_count':3,'planned_count':0,'count_mode':'not_applicable','official_confirmation_moments':[]}),
+                  'ExpectedAffiliateLinkManifestJson':'{"links":[]}',
+                  'ExpectedInternalLinkManifestJson':json.dumps({'new_links':[{'href':destination,'destination_role':'conversion_direct','presentation':'image_card','required':True,'primary_destination':True,'card_description':description}]})})
+                params.pop('ExpectedAffiliateProvider',None);params.pop('ExpectedAffiliateCourse',None)
             if mutation == 'missing_manifest':
                 del params['ExpectedAffiliateLinkManifestJson']
             driver = root / 'driver.ps1'
@@ -129,6 +158,23 @@ draft: true
             with self.subTest(provider=provider):
                 report, code = self.run_fixture(provider=provider)
                 self.assertEqual((code, report['status']), (0, 'PASS'), report)
+
+    def test_new_comparison_design_preserves_all_provider_contracts(self):
+        for provider in ('zkai', 'shinken_zemi', 'smile_zemi'):
+            with self.subTest(provider=provider):
+                report, code = self.run_fixture(provider=provider, new_design=True)
+                self.assertEqual((code, report['status'], report['checks']['article_design']), (0, 'PASS', 'pass'), report)
+
+    def test_comparison_design_traffic_keeps_zero_affiliate_funnel(self):
+        report, code = self.run_fixture(new_design=True, traffic=True)
+        self.assertEqual((code, report['status'], report['checks']['article_design']), (0, 'PASS', 'pass'), report)
+        self.assertEqual(report['affiliate_markup_count'], 0, report)
+        self.assertEqual(report['internal_link_card_count'], 1, report)
+
+    def test_new_design_does_not_weaken_pixel_validation(self):
+        report, code = self.run_fixture(mutation='wrong_pixel_size', new_design=True)
+        self.assertNotEqual(code, 0, report)
+        self.assertFalse(report['parent_contract_pass'], report)
 
     def test_legacy_manifest_does_not_require_a_caption(self):
         report, code = self.run_fixture(mutation='legacy_manifest')

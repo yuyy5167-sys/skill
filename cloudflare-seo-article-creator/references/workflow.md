@@ -135,6 +135,8 @@
 
 ## 4. 内部リンク計画と記事設計
 
+対象ブログの新記事は、見出し確定後・リンクplanより先に [A〜Eデザイン標準](article-design-standard.md) で `article_visual_design` と4項目の `articleDesign` を確定する。サイトのmetadata/部品対応とCTA外観能力を確認し、linkerの `plan` / `insert` / 最終 `audit` へ同じ `articleDesign` と `site_rendering_capabilities` を渡す。未対応は通常制作で共有CSSを編集せず移行工程へ返す。
+
 見出し構成と読者の疑問から、確認済み`article_business_purpose`、`article_profile`、成約用では標準3件を起点に作成した`cta_strategy`を付けて`$article-internal-linker`の`plan`を直接実行し、目的と採用先を決める。成約用ではアフィリエイトCTAを主導線、内部リンクを補助導線とする。集客用では、記事管理情報、対応する制作ログ、またはユーザー承認済み一覧により成約用と確認でき、現在実行で公開確認した自サイト記事1件を主導線に固定する。タイトルや記事トピックだけで成約用と推測しない。主リンクは`required: true`、`destination_role: conversion_direct`、`presentation: image_card`とし、画像付きカード機能とリンク先画像を確認する。適切な成約用記事がなければ本文作成前に停止する。
 
 実行状態の記事設計へ次をまとめる。
@@ -246,7 +248,7 @@ UI工程では、受理した判断理由・対象・条件・限界を既存の
 
 ## 6. 内部リンク挿入
 
-確認済み`article_business_purpose`、`article_profile`、`cta_strategy`、確定したリンク意図と`approved_destination_id`、リンク先の`destination_role`と`presentation`、完成Markdown、現在実行で公開確認した候補、目的別の`affiliate_link_plan`、現在確認した`site_rendering_capabilities`を`$article-internal-linker`の`insert`へ渡す。対象章・目的・採用先・表示形式・対象講座を変更せず、許可範囲で段落と誘導文を調整する。
+確認済み`article_business_purpose`、`article_profile`、`cta_strategy`、確定したリンク意図と`approved_destination_id`、リンク先の`destination_role`と`presentation`、完成Markdown、現在実行で公開確認した候補、目的別の`affiliate_link_plan`、現在確認した`site_rendering_capabilities`と新記事の`articleDesign`を`$article-internal-linker`の`insert`へ渡す。対象章・目的・採用先・表示形式・対象講座を変更せず、許可範囲で段落と誘導文を調整する。
 
 - 成約用ではCTAと必要な内部リンクを含む`pass`だけを受理する。集客用ではアフィリエイトCTAが0件で、主成約記事カードを含む`pass`だけを受理する。
 - `blocked`または`blocks_draft: true`なら後工程へ進まない。
@@ -339,10 +341,27 @@ cta_strategy:
 
 ## 8. `study-article-ui-coder`によるAstro Markdown化
 
-完成本文、確認済みリンク、採用可能な`evidence_capture.assets`、対応する`capture_attempts`、配置に必要な見出し・主張・帰属表示、キーワード、学年、記事目的、確定した検索者・利用者・評価軸、適用条件付きの禁止表現、`emphasis_plan`、CTA保持条件、現行ルールブックを`$study-article-ui-coder`へ渡す。`design_mode`は依存スキルの標準である`autonomous`を使用する。
+完成本文、確認済みリンク、採用可能な`evidence_capture.assets`、対応する`capture_attempts`、配置に必要な見出し・主張・帰属表示、キーワード、学年、記事目的、確定した検索者・利用者・評価軸、適用条件付きの禁止表現、`emphasis_plan`、CTA保持条件、現行ルールブックを`$study-article-ui-coder`へ渡す。対象ブログの新記事では [A〜Eデザイン標準](article-design-standard.md) の `article_visual_design` と完全な `ui_design` を確定し、`parent_directed` を使用する。標準対象外の既存修正は従来の `autonomous` を維持できる。
 
 ```yaml
-design_mode: autonomous
+design_mode: parent_directed # 対象ブログの新規記事
+design_version: 1 # 現行article_visual_designと一致
+ui_design: # 記法例。本文の全ブロックを列挙した現行設計で置換
+  article_id: "<同じ記事ID>"
+  design_version: 1
+  audience: "<確定した検索者と利用者>"
+  search_intent: "<主質問>"
+  article_type: "<調査後に確定した記事型>"
+  article_design: {profile: cream-manga-mustard-v1, design: C, label: 料金の比較ガイド, showMaterialFinder: false}
+  section_order: [lead, H2-01] # 実際の全章IDを順番に記録
+  component_assignments:
+    - section_id: H2-01
+      source_block: H2-01-P01 # 原文の一意な範囲へ対応
+      component: plain
+      purpose: "条件と理由を通常本文で説明する"
+      placement: "H2画像・短答の後"
+      preserve: [結論, 条件, 根拠]
+  allowed_adjustments: [意味を変えない段落分け]
 output_target: astro-markdown
 editing_mode: structure-light-edit
 publication_state: draft
@@ -362,17 +381,23 @@ preserve_elements:
 
 `coded_content`、`component_map`、`validation_report`、`unresolved_items`、`change_summary`を一組で受け取る。`validation_report.emphasis`の全項目を元の計画と照合し、マークアップと実表示の合格を分ける。未表示を`pass`にしない。`unsupported_component`の場合は、既存ルールブックにある単純なMarkdown・固定部品で意味を保つよう再設計してから直接再変換する。共通CSSや未定義classが必要なら`design_migration_required`として停止する。
 
-受理した`coded_content`へ、実行時の`src\content.config.ts`で許可されているフィールドだけを持つfrontmatterを付けて保存する。現在の既定形は次とする。
+受理した`coded_content`へ、実行時の`src\content.config.ts`で許可されているフィールドだけを持つfrontmatterを付けて保存する。画像生成前の保存例は次とする。日付・ID等は同じ実行で確定した値を使う。未生成coverImageは省略し、10節で実在画像だけを設定する。この途中状態を完成扱いにしない。
 
 ```md
 ---
 title: "記事タイトル"
-date: 2026-08-23
+date: 2026-10-20 # 記法例。実行で確定した日付を使用
 categories:
   - "カテゴリー"
 tags:
   - "タグ"
-coverImage: "images/eyecatch.webp"
+promotionDisclosure: true
+promotionDisclosureText: "この記事にはプロモーションを含む場合があります"
+articleDesign:
+  profile: cream-manga-mustard-v1
+  design: C # 親が選んだA〜E
+  label: "料金の比較ガイド" # 親の採用ラベル
+  showMaterialFinder: false
 draft: true
 ---
 ```
@@ -398,9 +423,10 @@ draft: true
 
 ## 10. サムネイルと各H2見出し画像
 
-`$education-blog-thumbnail-creator`の`execution_mode: full`、`asset_scope: thumbnail_and_h2`を直接実行する。完成本文からサムネイルを設計・生成・検品し、その画風が確定した後に全Markdown H2の見出し画像を設計・生成・検品・限定挿入する。サムネイルではキャラクター正本、スタイル文法、承認見本、比較画像を確認し、H2画像では依存スキルの文章スタイル契約と参照分離規則を守る。
+`$education-blog-thumbnail-creator`の`execution_mode: full`、`asset_scope: thumbnail_and_h2`を直接実行する。完成本文からサムネイルを設計・生成・検品し、その画風が確定した後に全Markdown H2の見出し画像を設計・生成・検品・限定挿入する。サムネイルではキャラクター正本、スタイル文法、承認見本、比較画像を確認し、H2画像では依存スキルの文章スタイル契約と参照分離規則を守る。新記事は両資産へ同じ新profileを指定し、旧配色の固定指示を混ぜない。
 
 ```yaml
+visual_profile: {id: cream-manga-mustard-v1, revision: 1} # 新記事
 article_title: ""
 article_path: ""
 target_grade: elementary | junior_high | high_school | multi_grade | unknown
@@ -434,18 +460,18 @@ H2画像は全対象を生成・目視してから未使用名へ保存し、保
 
 画像設計後にH2の文言または意味が変わった場合は該当画像の承認と検査を無効化する。H2の追加・削除で件数が変わった場合は、全H2画像の対応関係と構造検査をやり直す。タイトルまたは記事の中心的な約束が変わった場合はサムネイルも再検証する。
 
-`thumbnail.status`と`section_images.status`がともに`FINAL_ASSET_READY`になった場合だけG7を合格にする。新規記事のfrontmatterへサムネイルの最終画像を`coverImage`として設定し、H2画像については全H2直下の参照、実在ファイル、alt、形式、寸法、容量、実表示を確認する。どちらかが`PREVIEW_READY`、`BLOCKED`または未検証なら記事を完成扱いにしないが、本文が安全に完成していれば未完了状態を表示した記事プレビューは開ける。
+`thumbnail.status`と`section_images.status`がともに`FINAL_ASSET_READY`になった場合だけG7を合格にする。新規記事のfrontmatterへサムネイルの最終画像を`coverImage`として設定し、親が導入の `edition-thumbnail` にも同じ画像を1回だけ統合する。H2は画像子が一括挿入する。境界・目次・E短答・画像後の全block割当をデザイン標準どおり再検査し、H2画像については全H2直下の参照、実在ファイル、alt、形式、寸法、容量、実表示を確認する。どちらかが`PREVIEW_READY`、`BLOCKED`または未検証なら記事を完成扱いにしないが、本文が安全に完成していれば未完了状態を表示した記事プレビューは開ける。
 
 ## 11. 検証
 
 1. `$education-blog-thumbnail-creator`の`scripts/check-h2-images.ps1`へ正本記事パスを渡し、全H2画像の構造・実在・形式検査を行う。
-2. ビルド前は`basic`または共通`audit-article-links.mjs`で原稿の事前検査を行う。手順6の最終ビルド後、`scripts/validate-cloudflare-article.ps1`へ`-ValidationMode parent`、`-RenderedHtmlPath`、`-ExpectedArticleBusinessPurpose conversion|traffic`、`-ArticlePath`、`-ProjectRoot`、`-ExpectedTitle`、`-ExpectedArticleProfileJson`、`-ExpectedCtaStrategyJson`、適用時の`-ExpectedReviewEvidencePlanJson`と`-ExpectedPriceEvidencePlanJson`、目的別`-ExpectedAffiliateDisposition`、`-ExpectedEmphasisPlanJson`、`-ExpectedInternalLinkManifestJson`、`-ExpectedAffiliateLinkManifestJson`、`-ExternalLinkPolicy allow_task_required_only`を渡す。例外は通常空とし、明示許可がある場合だけ`-AllowedExternalApprovalJson`へ原文・出典付きで渡す。成約用の単独CTAでは`-ExpectedAffiliateProvider`と`-ExpectedAffiliateCourse`も渡す。JSONは同じPowerShell内の変数で渡し、コマンド文字列へ直接埋め込んだり中間ファイルを作成したりしない。原稿・最終HTMLの両方が合格するまで完成にしない。
+2. ビルド前は`basic`または共通`audit-article-links.mjs`で原稿の事前検査を行う。手順6の最終ビルド後、`scripts/validate-cloudflare-article.ps1`へ`-ValidationMode parent`、`-RenderedHtmlPath`、`-ExpectedArticleBusinessPurpose conversion|traffic`、`-ArticlePath`、`-ProjectRoot`、`-ExpectedTitle`、`-ExpectedArticleProfileJson`、新記事では `-RequireArticleDesign -ExpectedArticleDesignJson <4項目JSON> -ExpectedArticleDesignStateJson <現行版記録>`、`-ExpectedCtaStrategyJson`、適用時の`-ExpectedReviewEvidencePlanJson`と`-ExpectedPriceEvidencePlanJson`、目的別`-ExpectedAffiliateDisposition`、`-ExpectedEmphasisPlanJson`、`-ExpectedInternalLinkManifestJson`、`-ExpectedAffiliateLinkManifestJson`、`-ExternalLinkPolicy allow_task_required_only`を渡す。例外は通常空とし、明示許可がある場合だけ`-AllowedExternalApprovalJson`へ原文・出典付きで渡す。成約用の単独CTAでは`-ExpectedAffiliateProvider`と`-ExpectedAffiliateCourse`も渡す。JSONは同じPowerShell内の変数で渡し、コマンド文字列へ直接埋め込んだり中間ファイルを作成したりしない。原稿・最終HTMLの両方が合格するまで完成にしない。
 3. 一時ファイルを初めて作る前に、`scripts/prepare-local-preview.py --project-root <正規プロジェクト> --work-root <現在の作業フォルダ> --article-id <記事ID> --run-id <同じrun-id> --initialize-only`を実行する。PowerShellでは同名の`.ps1`へ`-ProjectRoot`、`-WorkRoot`、`-ArticleId`、`-RunId`、`-InitializeOnly`を渡す。既存`tmp/`・`TMP/`を再利用し、なければ作業フォルダ直下へ`tmp/`を作る。別名の確認済み一時フォルダは`--temporary-root`（`-TemporaryRoot`）で作業フォルダ直下の実フォルダを指定する。`WorkRoot`省略時は`ProjectRoot`が既定なので、親経由では現在の作業フォルダを明示する。このMac環境ではブログ直下の既存`TMP/`を再利用する。出力の`run_root`、`scratch_directory`、`verification_directory`、`process_temp_directory`を実行状態と子工程へ渡す。記事ファイルや画像が未完成でも一時フォルダの準備はできる。
 4. 記事・画像の保存後、同じ引数から`--initialize-only`（`-InitializeOnly`）を外して通常実行し、`<一時フォルダ>/codex-article-work/<run-id>--<article-id>/preview/`へ許可リスト方式の隔離コピーを作る。`.git`、既存`dist`、`node_modules`、キャッシュ、一時フォルダ、`.env`をコピーしない。`--preview-root`（`-PreviewRoot`）を指定する場合もこの`preview/`だけに限定する。正本の`draft: true`を変更せず、表示用の変更はコピー内の記事だけに行う。既存記事修正でも同じ一時保存契約を使い、正本frontmatterを維持する。
 5. 元プロジェクトの`node_modules`をWindowsではジャンクション、macOS/Linuxではシンボリックリンクから再利用し、再インストールしない。出力`process_environment`にある`TMPDIR`、`TEMP`、`TMP`、`npm_config_cache`を、ビルド・配信・検証など今回の作業プロセスにだけ渡す。ユーザー環境の永続設定は変えない。作業ディレクトリを`preview_root`へ変更し、設定ファイル名`preview_config_argument`（`codex-preview.config.mjs`）を指定して`npm run build -- --config codex-preview.config.mjs`を実行する。設定の絶対パス`preview_config`は検証記録に残し、CLIには作業ディレクトリからの相対ファイル名を渡す。サイト全体のビルド確認とプレビュー用ビルドをこの1回で行い、プレビュー確認だけのために正規プロジェクト側へ新しい`dist`やキャッシュを作らない。既存の通常ビルド出力には触れない。
 6. 隔離コピーのビルド結果から手順2の親完成検査へ最終記事HTMLを渡す。原稿とHTMLのリンク検査合格後、同じ作業ディレクトリ・環境で`npm run preview -- --config codex-preview.config.mjs --host 127.0.0.1 --port <空きポート>`を実行し、利用可能なブラウザで記事URLを開く。配信に必要なコピー・ビルド結果・キャッシュ・補助ファイルはすべて同じ`run_root`内に置く。URL提示だけを表示済みにしない。
 7. 320px、375px、390px、768px、1280pxで、表以外の横はみ出し、画像、見出しID、アンカー、コンソールエラーを実査する。保存する検証画像・ログは、同じ一時実行フォルダの`verification_directory`配下へ置く。強調計画の全語句が指定章の表示本文で太字になり通常文字と見分けられること、Markdown記法が露出していないことを確認する。各強調箇所の実際の折返しも確認し、原則1行、最大2行に収める。3行以上になる場合は短い単語・句へ直して再検証する。各H2画像では画像全体、文字、数字、矢印、主役、縦横比、不要な枠を記事本文幅で確認する。
-8. レンダリング済みHTMLを`$article-internal-linker`の`audit`へ事業目的、`cta_strategy`、`expected_link_manifest`、`affiliate_link_manifest`、5画面幅の表示記録とともに渡す。成約用は計画件数どおりのCTA、集客用は主成約記事カードとアフィリエイト0件を、内部リンクの表示形式・画像読込み・URL・属性・重複・表示とともに子スキルの正本契約で監査する。
+8. レンダリング済みHTMLを`$article-internal-linker`の`audit`へ事業目的、新記事の`articleDesign`と検証済み`site_rendering_capabilities`、`cta_strategy`、`expected_link_manifest`、`affiliate_link_manifest`、5画面幅の表示記録とともに渡す。成約用は計画件数どおりのCTA、集客用は主成約記事カードとアフィリエイト0件を、内部リンクの表示形式・画像読込み・URL・属性・重複・表示とともに子スキルの正本契約で監査する。
 9. 統合検査TODOを除く全必須TODOが一度`accepted`になった後、タイトル、導入、見出し、本文、結論、事実と出典、内部リンク、公式画像、サムネイルの表示文字、各H2画像の意味と配置、装飾の役割、スマートフォン表示を一つの記事として横断検査する。不合格なら原因となったTODOを`revision_requested`へ戻し、その成果物に依存するTODOを`revalidation_scope`へ追加する。必要な範囲の再検証と統合検査の再実行が終わるまで完成状態を返さない。
 10. 正本SHA-256を最終取得して静的検査結果と照合する。隔離コピーの`source_article_sha256`が同じ正本を指し、コピーのfrontmatterの`draft`以外が正本と一致することを確認する。記事・コピー・画像に変更があれば影響する検査を無効化して再確認する。統合検査が合格したら、最終操作として完成版の記事URLをユーザーが見えるアプリ内ブラウザへ開くか、既存タブをそのURLへ移動する。表示後に現在URLと記事画面を確認し、`preview.presented_to_user: true`、`preview.presentation_stage: after_final_audit`を記録する。URLの報告、スクリーンショット、検査中に開いた履歴だけで代替しない。
 11. 利用可能な表示手段がない、最終URLへ移動できない、または記事画面を確認できない場合は`preview.status: display_blocked`、`preview.presented_to_user: false`とし、完成状態を返さない。

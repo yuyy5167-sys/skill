@@ -2,6 +2,8 @@
 
 この文書はstandaloneプレビューの固定契約を定める。Astroでは `platform-adapters.md` と対象プロジェクトの正本を優先し、ここにある`edu-` classを直接貼らない。
 
+勉強ブログの承認済みA〜Eは[cream-manga-adapter.md](cream-manga-adapter.md)と[具体部品登録簿](cream-manga-component-registry.json)に従う。以下の`edu-` class・standalone配色は新profileへ転用しない。本文へ許可するedition名は登録簿の`body_classes`だけで、レイアウト所有classや未登録の派生名は使わない。
+
 ## 共通規則
 
 - すべてのclassは`edu-`接頭辞のBEM形式とする。

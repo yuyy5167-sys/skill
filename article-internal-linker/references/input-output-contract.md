@@ -31,6 +31,38 @@ site_rendering_capabilities:
 
 `article_business_purpose`は親がユーザー確認済みの値を渡す。欠落・未確認・その他の値は`business_purpose_unconfirmed`とする。`current_article` は `article_key`、`wp_post_id`、`canonical_url`、`planned_permalink` のいずれかで識別できなければならない。すべて欠ける場合は `current_article_identity_missing`。サイト自体を識別できない場合は `site_identity_missing` とする。
 
+## 記事デザインの条件付き追加契約
+
+schema 1.2に次の任意項目を追加する。旧profile未指定入力の従来契約は維持するが、対象ブログの今後の新規記事を親から受け取る場合は `articleDesign` を必須とする。未知のprofile、A〜E以外、空ラベル、未知の設定項目、非booleanの末尾表示指定は `article_design_profile_unconfirmed` で停止し、既定表示へ退避しない。
+
+```yaml
+articleDesign:
+  profile: "cream-manga-mustard-v1"
+  design: "A | B | C | D | E"
+  label: "空でない記事種別ラベル"
+  showMaterialFinder: false # 省略時false。CTA件数や事業目的の根拠にしない
+site_rendering_capabilities:
+  article_design_profile:
+    profile: "cream-manga-mustard-v1"
+    supported: true
+    verified_in_run_id: "現在のrun_id"
+    style_source: "現在実行で確認したprofile解決処理と共通CSSの識別子"
+    scoped_to_profile: true
+    scope_selector: '.article-edition[data-article-profile="cream-manga-mustard-v1"][data-article-design-origin="frontmatter"]'
+  affiliate_cta_component:
+    supported: true
+    component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
+    style_source: "現在実行で確認した共通CSSの識別子"
+    appearance_profiles: ["cream-manga-mustard-v1"]
+  affiliate_cta_components: [] # 複数providerでは各項目へ同じappearance_profiles確認を持たせる
+```
+
+対象・profileの解決・外観・監査は [教育ブログ用CTA外観プロファイル](article-design-profile.md)を正本とする。親/UI用 `site_rendering_capabilities.article_design` と、このリンク表示専用 `article_design_profile` は併存し、確認を代用しない。
+
+`plan`では `articleDesign` を引き継ぎ、実装確認が未了でも外観指定を記録できる。`insert`前には使用するCTA/カードのprofile対応を現在実行で確認し、欠落なら `article_design_profile_component_missing` で元本文を保持して停止する。plan時点の予定や過去の確認だけでtrueを付けない。共通CSSを本スキルで新規実装する権限は追加しない。
+
+`articleDesign` のどの値も `article_business_purpose`、対象講座、`cta_strategy.planned_count` の確認の代替にはしない。以降のURL、計測、属性、固定DOM、配置・件数、意味・案内文、集客用主成約記事カードの契約を維持する。
+
 ## 候補情報源と鮮度
 
 候補一覧の正本は、実行ごとに次の優先順位で1つを選ぶ。
@@ -88,7 +120,7 @@ cta_strategy:
       lead_copy: "本文に合う固有の案内文"
 ```
 
-`site_rendering_capabilities` は `plan` では省略できる。`image_card`を`insert`する場合は`internal_link_card.supported: true`とリンク先画像を解決できることを、承認済みの講座別CTAを`insert`する場合はプロバイダーに対応する`supported: true`と`component_id`（進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`、Z会は専用契約の`zkai_cta_v1`）を現在実行で確認する。確認できなければ、それぞれ`internal_link_card_component_missing`または`affiliate_cta_component_missing`で停止する。成約直結記事をカード非対応のため`text_link`へ変更してはならない。
+`site_rendering_capabilities` は `plan` では省略できる。外観profileを指定した記事の`insert`では、上記の条件付き追加契約も必須とする。`image_card`を`insert`する場合は`internal_link_card.supported: true`とリンク先画像を解決できることを、承認済みの講座別CTAを`insert`する場合はプロバイダーに対応する`supported: true`と`component_id`（進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`、Z会は専用契約の`zkai_cta_v1`）を現在実行で確認する。確認できなければ、それぞれ`internal_link_card_component_missing`または`affiliate_cta_component_missing`で停止する。成約直結記事をカード非対応のため`text_link`へ変更してはならない。
 
 `conversion`で進研ゼミ・スマイルゼミ・Z会の記事を扱い、タイトル・想定読者・結論・承認済み設計から対象講座を一意に確認できる場合は、`plan` 出力に次を加える。`cta_strategy.default_count`は3だが固定件数ではなく、`planned_count`は独立した公式確認場面の数と一致させる。対象講座、承認済みURL、各配置の意味と自然な配置章を確定できなければ`conversion_affiliate_unresolved`で停止する。`traffic`は常に`status: "not_applicable"`、`planned_count: 0`とし、CTAを計画しない。
 
@@ -219,9 +251,11 @@ insertions:
     href: "入力で確認したURLをそのまま出力"
 skipped_candidates: []
 expected_link_manifest:
+  appearance_profile: null # profile指定時は cream-manga-mustard-v1
   existing_links: []
   new_links: [] # destination_roleとpresentationを含める
 affiliate_link_manifest:
+  appearance_profile: null # profile指定時は cream-manga-mustard-v1
   links: [] # 進研ゼミ・スマイルゼミ・Z会の承認済み講座別リンクだけ。内部リンクとは別に記録する
 body_with_internal_links: "合格時の本文。blocked時は元本文と同一"
 unresolved_intents: []
@@ -273,12 +307,25 @@ rendered_html: "HTML化後の本文またはページHTML"
 article_business_purpose: "conversion | traffic"
 cta_strategy: {}
 expected_link_manifest:
+  appearance_profile: null # profile指定時は cream-manga-mustard-v1
   existing_links: []
   new_links: []
 affiliate_link_manifest:
+  appearance_profile: null # profile指定時は cream-manga-mustard-v1
   links: []
 verified_candidates: []
 rendered_page_checks:
+  article_design_profile: # profile指定時に必須。未指定記事では省略可
+    profile: "cream-manga-mustard-v1"
+    design: "A | B | C | D | E"
+    origin: "frontmatter"
+    style_source: "現在実行で照合した共通CSSの識別子"
+    verified_in_run_id: "現在のrun_id"
+    providers_checked: [] # 実際に使用したCTAのproviderをすべて記録
+    cta_appearance_matches: true # CTAを使わない場合はnull
+    card_appearance_matches: true # image_cardを使わない場合はnull
+    unprofiled_pages_unchanged: true
+    regression_reference: "共通実装変更時の旧10記事/未指定記事の回帰記録と現在のスコープ確認"
   component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
   internal_link_cards:
     actual_count: 0
@@ -291,12 +338,15 @@ rendered_page_checks:
       button_min_height_ok: true
       button_max_width_ok: true
       tracking_image_one_px: true
+      profile_appearance_matches: true # profile指定時、該当CTA/カードの外観・全体表示を確認
   console_errors: []
 ```
 
 `affiliate_link_manifest.links` に `presentation: cta_button` がある場合、`rendered_page_checks` は必須であり、320・375・390・768・1280pxの5幅をすべて含める。欠落または未確認なら `affiliate_cta_render_unverified` とする。`expected_link_manifest.new_links`に`image_card`がある場合は、実カード数が期待件数と一致して2件以下であること、各カードに画像・正式タイトル・紹介文があり、画像が読み込まれ、表示形式がマニフェストと一致することも記録する。
 
 `traffic`では、CTA固定クラス、アフィリエイトリンク、計測画像URLが0件であること、`required: true`かつ`primary_destination: true`の`conversion_direct`画像カードが1件存在し、画像・正式タイトル・紹介文が表示されることを必須監査にする。
+
+profile指定時は上記の `article_design_profile`、5幅の `profile_appearance_matches`、各マニフェストの `appearance_profile` も照合する。profile/design/由来が親指定と一致しない場合は `article_design_profile_mismatch`、実表示記録が不足する場合は `article_design_profile_render_unverified` とする。profile未対応は `article_design_profile_component_missing` であり、見えていない状態と混同しない。`traffic`でも主成約記事カードを使うため、このprofile実表示確認を省略しない。旧10記事と未指定記事への非漏出は共通実装変更時の回帰記録を参照し、現在の適用スコープを再確認する。
 
 ## `audit` 出力
 
@@ -323,6 +373,8 @@ checks:
   cta_strategy_mismatches: []
   cta_context_mismatches: []
   cta_repetition_mismatches: []
+  article_design_profile_mismatches: []
+  article_design_profile_render_mismatches: []
 ```
 
 不一致が1件でもあれば `status: blocked`、`blocks_draft: true` とする。
@@ -353,6 +405,10 @@ checks:
 - `url_modified`
 - `existing_link_modified`
 - `affiliate_link_mismatch`
+- `article_design_profile_unconfirmed`
+- `article_design_profile_component_missing`
+- `article_design_profile_mismatch`
+- `article_design_profile_render_unverified`
 - `affiliate_cta_component_missing`
 - `affiliate_cta_render_unverified`
 - `cta_strategy_mismatch`

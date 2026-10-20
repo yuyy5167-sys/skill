@@ -1,0 +1,160 @@
+{
+  "profile_id": "cream-manga-mustard-v1",
+  "revision": 1,
+  "fixed_prompt": "背景は均一な薄いクリーム #FCF9F2。黒・白・グレーの漫画線画と控えめなスクリーントーンを主体にする。\nからし色 #EDCE68 を小さなマーカー、下線、判断の印のみに限定し、その他の有彩色を加えない。\n文字、顔、主輪郭、細い図解線をシャープに保つ。水彩のにじみ、写真調、3D、強い光沢、重い影、強いアニメ塗りを使用しない。\n保護者と児童生徒が読める落ち着いた教育エディトリアルの漫画風とし、幼児向けに寄せすぎない。\n最初に理解する意味を1つに定め、記事または節に必要な意味のある要素を通常1〜3組に整理する。\n確定した日本語コピーをすべて大きく読みやすく描く。原則1〜2ブロック、最大3ブロックとし、最も強い見出しは1個。主見出しと補足の強さを分ける。\n指定外の文字、疑似文字、ロゴ、透かし、小さな説明文、未確認の数値・料金・評価・順位・日付・サービス画面を追加しない。\n文字用の四角い枠、カード、帯、吹き出しを原則使用しない。必要な図の区分と文字用の飾り枠を混同しない。\n文字、顔、意味を担う小物は各辺8%を目安に余白を残し、顔や服や主役小物に文字を重ねない。\n人物を使う場合は承認済みの人物正本から顔、髪型、年齢感、体格、服の形を維持し、元の人物固有色だけを白黒の明暗へ変換する。\n過去画像や見本の配置・動作を複製せず、今回の記事または節から主役、構図、読む順を設計する。\n",
+  "fixed_prompt_sha256": "3cb3d9d218477e3a4d653824be6ada9cc4845e674ee6433f9b9b711114745517",
+  "assets": [
+    "thumbnail",
+    "section_image"
+  ],
+  "approved_examples": [
+    {
+      "id": "study-sapuri-cancel-20261003-thumbnail",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/study-sapuri-cancel-20261003/images/study-sapuri-cancel-20261003-thumbnail-v2-20261019.webp",
+      "sha256": "2db2412f1c4366f61115a8acdebc8d0227562e7d013397eeddba0911be3d8d23",
+      "width": 1536,
+      "height": 864,
+      "role": "style_example",
+      "state": "approved",
+      "source": "採用10記事v2。ユーザーの2026-10-20公開承認と今後の記事への標準化指示。",
+      "inherit": [
+        "画風",
+        "文字",
+        "余白"
+      ],
+      "do_not_inherit": [
+        "人物同一性",
+        "構図",
+        "位置",
+        "動作",
+        "コピー"
+      ]
+    },
+    {
+      "id": "study-sapuri-cancel-20261003-h2-01",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/study-sapuri-cancel-20261003/images/h2-01-v2-20261019.webp",
+      "sha256": "d107ca23d52c85559abf314afedc97a482ba41c860a5717d4a0213928c8d2de5",
+      "width": 1536,
+      "height": 864,
+      "role": "style_example",
+      "state": "approved",
+      "source": "採用10記事v2。ユーザーの2026-10-20公開承認と今後の記事への標準化指示。",
+      "inherit": [
+        "画風",
+        "文字",
+        "余白"
+      ],
+      "do_not_inherit": [
+        "人物同一性",
+        "構図",
+        "位置",
+        "動作",
+        "コピー"
+      ],
+      "usage": "inspection_only_h2_contract_calibration"
+    },
+    {
+      "id": "study-sapuri-elementary-20261002-thumbnail",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/study-sapuri-elementary-20261002/images/study-sapuri-elementary-20261002-thumbnail-v2-20261019.webp",
+      "sha256": "76f32fa854effed888427e24d33b17ae2bf01ebd1972c8e4c6c77bdadb5b8f20",
+      "width": 1536,
+      "height": 864,
+      "role": "style_example",
+      "state": "approved",
+      "source": "採用10記事v2。ユーザーの2026-10-20公開承認と今後の記事への標準化指示。",
+      "inherit": [
+        "画風",
+        "文字",
+        "余白"
+      ],
+      "do_not_inherit": [
+        "人物同一性",
+        "構図",
+        "位置",
+        "動作",
+        "コピー"
+      ]
+    },
+    {
+      "id": "study-sapuri-elementary-20261002-h2-01",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/study-sapuri-elementary-20261002/images/h2-01-v2-20261019.webp",
+      "sha256": "2f912d057013981cda2791569313fa972ecc0096f8c54e9472cd671711a4c856",
+      "width": 1536,
+      "height": 864,
+      "role": "style_example",
+      "state": "approved",
+      "source": "採用10記事v2。ユーザーの2026-10-20公開承認と今後の記事への標準化指示。",
+      "inherit": [
+        "画風",
+        "文字",
+        "余白"
+      ],
+      "do_not_inherit": [
+        "人物同一性",
+        "構図",
+        "位置",
+        "動作",
+        "コピー"
+      ],
+      "usage": "inspection_only_h2_contract_calibration"
+    },
+    {
+      "id": "study-sapuri-price-20260929-thumbnail",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/study-sapuri-price-20260929/images/study-sapuri-price-20260929-thumbnail-v2-20261019.webp",
+      "sha256": "756ea3b1b44ae9ffb258965e9a28ed574c8603c3238c786e7f1138ac521adc3c",
+      "width": 1536,
+      "height": 864,
+      "role": "style_example",
+      "state": "approved",
+      "source": "採用10記事v2。ユーザーの2026-10-20公開承認と今後の記事への標準化指示。",
+      "inherit": [
+        "画風",
+        "文字",
+        "余白"
+      ],
+      "do_not_inherit": [
+        "人物同一性",
+        "構図",
+        "位置",
+        "動作",
+        "コピー"
+      ]
+    },
+    {
+      "id": "study-sapuri-price-20260929-h2-01",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog/study-sapuri-price-20260929/images/h2-01-v2-20261019.webp",
+      "sha256": "2418615f89c16557b116f2f86faf79d458522d99c51b04ebfb6c6cf1f382d5f8",
+      "width": 1536,
+      "height": 864,
+      "role": "style_example",
+      "state": "approved",
+      "source": "採用10記事v2。ユーザーの2026-10-20公開承認と今後の記事への標準化指示。",
+      "inherit": [
+        "画風",
+        "文字",
+        "余白"
+      ],
+      "do_not_inherit": [
+        "人物同一性",
+        "構図",
+        "位置",
+        "動作",
+        "コピー"
+      ],
+      "usage": "inspection_only_h2_contract_calibration"
+    }
+  ],
+  "profile_character_references": [
+    {
+      "id": "approved-mother-elementary-daughter",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/public/site-art/hero.webp",
+      "sha256": "4a17897b6e6827b655df76c5242aec5d774613643cf353d799824fb845ba8690",
+      "role": "character_sheet",
+      "state": "active_profile_limited",
+      "scope": "cream-manga-mustard-v1限定。このブログの母親、または小学生の娘。中学生/高校生への流用不可。",
+      "source": "ユーザー採用トップ画像および採用10記事v2。今後も同デザインを使う明示指示。"
+    }
+  ],
+  "h2_direct_style_images_allowed": false,
+  "trial_images_are_approved_examples": false
+}

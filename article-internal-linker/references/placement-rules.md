@@ -1,5 +1,9 @@
 # 候補選定・配置・再実行規則
 
+## 外観契約の分岐
+
+対象ブログの新規記事で `articleDesign.profile: cream-manga-mustard-v1` を受け取った場合は [外観プロファイル](article-design-profile.md)を併読する。以下の固定URL・講座・DOM・計測・属性・配置・件数・案内文・カードの役割は維持し、オレンジ/緑のCTA配色とカードの外観だけをprofile側へ切り替える。profile未指定では従来表示を使う。実装が未確認なら元本文を保持して停止し、本スキルでは共通CSSを作らない。
+
 ## 候補のハードゲート
 
 候補は次の全条件を満たす場合だけ採用する。
@@ -160,11 +164,11 @@ CTAは3件を標準値として検討するが、必須数・上限ではない�
 - `data-course`は`preschool`、`elementary`、`junior_high`、`high`のいずれかとし、計画済み講座と一致させる
 - `href`、計測画像`src`、`rel`、`border`、`width`、`height`、`alt`は講座表と固定属性を保持する
 - ボタン文は対象講座名と「資料を請求する」を含める。ボタン下の遷移先補足行は追加しない
-- `smile-zemi-cta__button`は緑色の共通CSSで表示し、5幅の実表示でCTA枠外へはみ出さないことを監査する
+- `smile-zemi-cta__button`はprofile未指定では緑色の共通CSSで表示する。`cream-manga-mustard-v1`では外観プロファイルのからし色/黒文字に切り替える。いずれも5幅の実表示でCTA枠外へはみ出さないことを監査する
 
 ### CTAの表示契約
 
-`shinken_zemi_cta_v1` の共通CSSは次を満たす。サイト側のCSS実装は本スキルの責任範囲外とし、未実装時に自動作成・変更しない。
+profile未指定の `shinken_zemi_cta_v1` の共通CSSは次を満たす。`cream-manga-mustard-v1`では[外観プロファイル](article-design-profile.md)の配色・枠・角丸へ分岐する。サイト側のCSS実装は本スキルの責任範囲外とし、未実装時に自動作成・変更しない。
 
 - CTA枠は本文幅以内の `width: 100%`、最大幅720px、中央配置、背景 `#fffaf5`、境界線 `#f4d6b5`、角丸12pxを基本とする
 - ボタンは幅100%以内・最大420px、最小高さ56px、白文字、`#f6ad49` から `#f08300` のオレンジ系グラデーション、角丸50pxを基本とする
@@ -198,7 +202,7 @@ URL: /公開済み正規URL/
 カード形式を使う場合は、次の表示を固定仕様とする。
 
 - 画像を左、ラベル・記事タイトル・紹介文を右に置く
-- 画像枠は `16 / 9` とし、画像は枠内を `object-fit: cover` で表示する
+- 画像枠は `16 / 9` とし、profile未指定では `object-fit: cover`、`cream-manga-mustard-v1`では画像全体を表示する `object-fit: contain` とする
 - 画面幅680px以下では、画像列の幅を `clamp(84px, 25.6vw, 100px)` とする
   - 320px幅では84px
   - 375px幅では96px
@@ -260,6 +264,7 @@ article_key + intent_id + destination_id
 - `traffic`では`required: true`かつ`primary_destination: true`の成約記事画像カードが1件存在し、成約用役割の確認証拠と一致する
 - `affiliate_link_manifest` にあるCTAは、プロバイダー、対象講座、`href`、計測用画像の `src`、`rel="nofollow"`、リード文、ボタン文、配置セクションが一致する
 - プロバイダー別CTAでは、固定クラス、`data-course`、CTA数、リード文、ボタン文、コンポーネントIDが一致する
+- `cream-manga-mustard-v1`では、現在のprofile実装確認と実DOM/外観の一致、対象外記事への非漏出を[外観プロファイル](article-design-profile.md)で監査する
 - プロバイダー別CTAでは、320・375・390・768・1280pxの実表示記録が揃い、ページとCTAの横はみ出し、ボタンの最小高さ・最大幅、計測画像の1px寸法、CTA起因のコンソールエラーがない。記録が欠ける場合は `affiliate_cta_render_unverified`
 
 ## 最低限の受入テスト
@@ -300,3 +305,8 @@ article_key + intent_id + destination_id
 32. 同じURLを複数回使う場合でも、各`lead_text`と確認目的が異なり、CTAが連続または近接していない
 33. `cta_strategy.planned_count`、公式確認場面、配置計画、マニフェスト、実CTAのいずれかが不一致なら`cta_strategy_mismatch`で失敗する
 34. 各CTAの直前文脈が`reader_question`と`official_information_needed`を説明していない場合は`cta_context_mismatch`で失敗する
+
+35. 新profileの成約用と集客用がA〜Eにかかわらず従来の目的別導線を維持する
+36. 新profileでは使用する各プロバイダーの対応を現在実行で確認し、未確認なら元本文を保持して `article_design_profile_component_missing` で停止する
+37. 新profileのCTAがからし色/黒文字で、固定DOM・URL・計測画像・講座・件数・案内文を維持し、profile未指定の旧記事へ表示が漏れない
+38. profile/design/由来の不一致又はprofile用の5幅実表示不足があれば監査を失敗させる

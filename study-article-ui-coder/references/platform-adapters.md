@@ -36,6 +36,8 @@
 
 ## astro-markdown
 
+対象ブログで`articleDesign.profile: cream-manga-mustard-v1`を使用する場合は[cream-manga-adapter.md](cream-manga-adapter.md)を読む。新規記事は`parent_directed`、親が確定したA〜Eと全ブロック割当に従う。新profileを旧standalone HTMLの見た目で代替しない。以下の旧部品説明は維持し、新profileの具体部品・配色・境界・画像・目次は専用アダプターを優先する。
+
 初期対応先:
 
 - プロジェクト: `/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ`
@@ -55,6 +57,8 @@
 H1はfrontmatterの`title`からレイアウトが1回だけ生成する。
 
 ### 現行の原稿記法
+
+新profileのfrontmatterはstrictな`articleDesign`、導入境界はトップレベルの実コメント`<!--article-lead-end-->`1個を使用する。H2/H3は標準Markdown、各H2直下は`h2-*.webp`のMarkdown画像とする。自動目次や`edition-lead`等のレイアウト所有部品を原稿へ書かない。本文は登録された具体classだけを使い、`edition-*`を一括で許可しない。
 
 実装状況を確認できた場合だけ、正本に従って次を使う。
 

@@ -620,12 +620,33 @@ evidence_capture:
 
 次工程は、対応スキーマ、ファイル存在、SHA-256、`article_publication_allowed: true`、帰属表示、加工可否を再検証する。引継ぎデータを失った画像や、ファイル名からしか出典を判断できない画像を使用しない。この契約は記事編集・画像配置の権限を付与しない。
 
+## 新記事の表示契約
+
+[A〜Eデザイン標準](article-design-standard.md) を正本とする。親は `article_visual_design` を保持し、UIへ完全な `ui_design.article_design`、画像へ `visual_profile`、リンクへ `articleDesign` を渡す。事業目的・article_profileと表示型を同一視しない。`site_rendering_capabilities.article_design` はmetadata/部品対応、`.article_design_profile` はCTA外観対応の実証であり、互いの代用にしない。
+
 ## 教育記事UIコーディング契約
 
 `$study-article-ui-coder`へ次を渡す。
 
 ```yaml
-design_mode: autonomous
+design_mode: parent_directed # 新記事。既存修正の従来autonomousは別分岐
+design_version: 1 # 現行版
+ui_design: # 記法例。本文の全ブロックを列挙した現行設計で置換
+  article_id: "<同じ記事ID>"
+  design_version: 1
+  audience: "<確定した検索者と利用者>"
+  search_intent: "<主質問>"
+  article_type: "<調査後に確定した記事型>"
+  article_design: {profile: cream-manga-mustard-v1, design: C, label: 料金の比較ガイド, showMaterialFinder: false}
+  section_order: [lead, H2-01] # 実際の全章IDを順番に記録
+  component_assignments:
+    - section_id: H2-01
+      source_block: H2-01-P01 # 原文の一意な範囲へ対応
+      component: plain
+      purpose: "条件と理由を通常本文で説明する"
+      placement: "H2画像・短答の後"
+      preserve: [結論, 条件, 根拠]
+  allowed_adjustments: [意味を変えない段落分け]
 article_text: "body_with_internal_links"
 primary_keyword: ""
 audience: ""
@@ -670,7 +691,7 @@ publication_state: draft
 
 `audience`には検索者とサービス利用者の違いを、`article_goal`には主要評価軸と主質問を、`desired_reader_action`には読後の到達点を含める。`required_elements`・`forbidden_elements`は本文の意味保持条件とする。`emphasis_plan`は固定件数を持たず、短い完全一致語句、章、回答ID、役割、理由を渡す。`preserve_elements`でCTAの固定DOMと属性、および内部リンクの`destination_role`、`presentation`、URL、配置を保持する。旧固定評価軸を併記しない。本文とUIの両接続で、回答・出典・適用条件・不明点・評価軸、強調語句、CTA、内部リンク表示形式が失われていないか確認する。依存スキル自身の固定指示と競合する場合は接続を合格にせず、変更が必要な依存スキル箇所を提示して権限を確認する。
 
-依存スキルはファイルを書かず、`coded_content`、`component_map`、`validation_report`、`unresolved_items`、`change_summary`を返す。採用画像は、パス・ハッシュ・掲載可否・加工可否・帰属表示・alt・対応見出しと主張・モバイル可読性が確認できる場合だけ配置する。条件を満たさない保存画像は`unresolved_items`へ`saved_unplaced`として理由を返す。受理済み`coded_content`だけを保存して差分を確認する。`autonomous`実行では子が返さない`used_design_version`を要求せず、親が保持する現行設計と`validation_report.emphasis`、本文、保持対象を照合する。`needs_parent_input`なら親が設計入力を補完する。`unsupported_component`は既存部品で再設計して直接再変換する。共通CSS変更が必要なら`design_migration_required`として停止する。
+依存スキルはファイルを書かず、`coded_content`、`component_map`、`validation_report`、`unresolved_items`、`change_summary`を返す。採用画像は、パス・ハッシュ・掲載可否・加工可否・帰属表示・alt・対応見出しと主張・モバイル可読性が確認できる場合だけ配置する。条件を満たさない保存画像は`unresolved_items`へ`saved_unplaced`として理由を返す。受理済み`coded_content`だけを保存して差分を確認する。新記事の `parent_directed` では `used_design_version` と `component_map` の全block対応、画像挿入後の最終block対応を必ず照合する。標準対象外の `autonomous` 実行では子が返さない`used_design_version`を要求せず、親が保持する現行設計と`validation_report.emphasis`、本文、保持対象を照合する。`needs_parent_input`なら親が設計入力を補完する。`unsupported_component`は既存部品で再設計して直接再変換する。共通CSS変更が必要なら`design_migration_required`として停止する。
 
 ## アフィリエイトと外部リンク契約
 
@@ -720,6 +741,7 @@ external_link_policy:
 
 ```yaml
 image_asset_request:
+  visual_profile: {id: cream-manga-mustard-v1, revision: 1} # 新記事、両資産共通
   execution_mode: full
   asset_scope: thumbnail_and_h2
   authorization_mode: orchestrated_prepublication
@@ -783,7 +805,7 @@ section_images:
   applicability: applicable
   not_applicable_reason: null
   status: null # 未生成はnull。生成後PREVIEW_READY | FINAL_ASSET_READY | BLOCKED
-  style_profile_id: h2_style_profile_v1
+  style_profile_id: cream-manga-mustard-v1 # 新記事。旧profileは標準対象外のみ
   style_profile_revision: 1
   style_profile_sha256: ""
   direct_style_images_sent_to_generator: false
@@ -833,6 +855,9 @@ section_images:
 
 ```powershell
 -ValidationMode parent
+-RequireArticleDesign # 対象ブログの新記事で必須
+-ExpectedArticleDesignJson <profile/design/label/showMaterialFinderのJSON>
+-ExpectedArticleDesignStateJson <design_version/ui_used_design_version/thumbnail_accepted_design_version/section_images_accepted_design_versionのJSON>
 -ExpectedArticleBusinessPurpose <conversion | traffic>
 -ArticlePath <正本index.md>
 -ProjectRoot <project_root>

@@ -13,6 +13,12 @@ description: Cloudflare/Astro教育ブログの記事内容と対象学年に合
 
 同じ対象の依頼単位の詳細履歴は`$article-production-log`へ記録する。親経由では渡された`article_log_context.log_id`を使用して品質軸`images | audience | ui_mobile | workflow`の該当結果だけを返し、子で新規ログを作らない。本スキルを単独利用したユーザー発言では生成・編集前に`start-log`、実画像・実表示検査後に`finish-log`を行う。未承認候補から人物、コピー、構図、画風、枚数、保存権限を変更しない。
 
+## ブログ固有の画像プロファイル
+
+親の`visual_profile: {id: cream-manga-mustard-v1, revision: 1}`を受けたら[新デザイン契約](references/cream-manga-mustard-v1.md)とJSONを読む。サムネイル/H2双方で同じID/版/固定ブロックSHAを使用し、旧配色・水彩を混ぜない。本体・スタイル文法・品質ゲートの水彩固有指示は従来profileだけに適用する。文字・人物・意味・差別化・実表示の品質条件は維持する。省略既存入力は従来仕様、既存記事/別ブログを自動移行しない。
+
+新profileはサムネイルでも`section_style_contract: {profile_id, revision, sha256}`を設計/生成要求/親承認/最終報告で一致させる。不明ID/版/SHA、両資産の不一致は親へ返す。本文結論・数値・見出し変更時は資産との意味対応を再照合する。新profileの人物正本/明暗変換/見本/改訂試験は新デザイン契約を優先する。
+
 ## 資産範囲
 
 入力の `asset_scope` は次を使う。
@@ -41,7 +47,7 @@ description: Cloudflare/Astro教育ブログの記事内容と対象学年に合
 - 毎回 [差別化・品質ゲート](references/diversity-quality-gates.md) を読む。
 - 人物を使う場合は生成前に [キャラクターシート](references/character-sheets.md) を読む。
 - サムネイルを設計する前に [スタイル文法](references/style-grammar.md) を読む。記事から構図候補を作った後、通常実行でも登録済みの承認見本を1〜2枚目視し、画風・文字・余白を合わせる。人物同一性の正本とは区別する。
-- H2画像では [スタイル文法](references/style-grammar.md) の `h2_style_profile_v1` を文章契約として使う。画風見本、完成サムネイル、過去のH2画像を画像生成へ直接渡さず、画風見本の目視可否をH2資産の完成条件にしない。
+- H2画像では親指定profileの文章契約を使う。省略既存入力だけ [スタイル文法](references/style-grammar.md) の `h2_style_profile_v1` を使う。画風見本、完成サムネイル、過去のH2画像を画像生成へ直接渡さず、画風見本の目視可否をH2資産の完成条件にしない。
 - 参照の役割を `character_sheet`、`style_example`、`composition_guide`、`comparison_image` に分ける。人物の同一性、完成画風、構図候補、差別化比較を相互に代用しない。優先順位と詳細は各参照文書に従う。
 - 画像の新規生成・編集は `$imagegen` に委ねる。このスキルは記事分析、参照選択、プロンプト固定、差別化判定、検品、保存境界を担当し、画像生成ツール固有の手順を複製しない。
 - 記事へ保存・統合する前は `/Users/yudaikato/Documents/AIフォルダ/ブログ/運用資料/デザイン・制作ルール/記事装飾ルールブック.md` の現行版も読む。読めない場合は保存・統合を止める。
@@ -83,6 +89,8 @@ parent_run_id: null
 allowed_output_directory: ""
 execution_mode: full | design_only | render_from_plan
 asset_scope: thumbnail_only | thumbnail_and_h2 | h2_only
+visual_profile: null # 新デザインは{id: cream-manga-mustard-v1, revision: 1}
+section_style_contract: null # profile_id, revision, sha256（両資産で保持）
 thumbnail_design: null
 section_image_designs: []
 generation_approval: null
@@ -160,7 +168,7 @@ image_plan:
   primary_prop: ""
   background_structure: ""
   focus_position: ""
-  style: "clean editorial line art with very subtle watercolor texture"
+  style: "selected visual_profile contract; do not merge legacy watercolor into cream-manga-mustard-v1"
   crop_and_safe_margin: ""
   elements_to_exclude: []
 ```
@@ -185,6 +193,8 @@ pre_generation_review:
 ```
 
 ## 5.5 親設計からの生成承認
+
+新profileでは以下の要求・承認にも`visual_profile`と`section_style_contract`を追加し、ID/版/SHAを完全一致させる。`style_profile_sha256`を併記する場合は`section_style_contract.sha256`と同値にする。この追加はサムネイル/H2両方に適用する。従来入力は既存形式を維持する。
 
 `render_from_plan`では、`thumbnail_design.design_version`、`used_design_version`、`generation_request.design_version`が一致し、`pre_generation_review.result: pass`であっても、画像生成・画像編集を始めない。最初に次を親へ返す。
 
@@ -215,14 +225,14 @@ generation_approval: null
 - `image_plan.exact_copy` の確定した日本語文字列をすべて画像内へ描き、指定外の文字は追加しないこと。文字なし指定は [文字の契約](references/diversity-quality-gates.md#6-文字) の例外が有効な場合だけ使う
 - 使用するキャラクターシートの絶対パスと参照モード
 - 人物の同一性、学年感、ポーズ、表情、主役小物
-- [スタイル文法](references/style-grammar.md) の薄い水彩を含む標準画風、継承要素、固定してはいけない要素。ユーザーが別画風を明示した場合はその指示を優先する
+- 選択profileの固定文、継承要素、固定してはいけない要素。従来profileだけは [スタイル文法](references/style-grammar.md) の薄い水彩を含む標準画風を使い、新profileは白黒・からし色の固定文を使う。ユーザー明示指示を優先する
 - 顔、制服・服、主役小物へ文字を重ねない。文字・顔・意味を担う小物には各辺8%を目安に安全余白を取り、机・背景は端まで広げられる。実際の切り抜きで確かめること
 - 見本ごとの役割と参照状態、継承する特徴、今回変える表現。文字は見本の自然な丸みと読みやすさを基準に、主見出しと補足を分け、絵の線・色の強さと釣り合わせること
 - 実在ロゴ、透かし、未確認の数値・評価・キャンペーンを入れないこと
 
 生成後の報告に使えるよう、実際に渡した最終プロンプトと生成モードを保持する。
 
-初回から一律に二段階生成しない。構図、文字、人物が合格し、水彩質感だけが不足する場合に限り、構図、文字、人物、小物を保持して背景紙と色面だけへ薄い水彩質感を加える編集を候補にする。
+初回から一律に二段階生成しない。従来profileで構図、文字、人物が合格し、水彩質感だけが不足する場合に限り、構図、文字、人物、小物を保持して背景紙と色面だけへ薄い水彩質感を加える編集を候補にする。
 
 ## 7. 生成画像を検品し、修正前にもレビューする
 
@@ -236,7 +246,7 @@ generation_approval: null
 - 文字切れ、顔・服・主役小物への重なり、安全余白
 - ロゴ、透かし、未承認情報がない
 - 16:9、構図、焦点位置
-- 水彩が背景紙と色面に限定され、文字と輪郭がシャープである
+- 従来profileでは水彩が背景紙と色面に限定され、文字と輪郭がシャープである。新profileでは水彩検査をnot_applicableとし、白黒線画と小さなからし色を検査する
 - 既存比較対象との6項目の観察と意味面の照合、小さいカード表示での識別性。一致数だけでは不採用にしない
 - 承認見本との画風・文字の釣り合い、場面の一体感、見本からの配置・動作の無批判な転用がないこと
 - 画像と実際の記事カードだけを根拠に `image_only_readback` を先に記録し、その後で `thumbnail_message.one_glance_meaning` と比較する。同じ担当者が行う場合は独立評価とは呼ばない。
@@ -272,7 +282,7 @@ revision_plan:
 - `scripts/check-thumbnail.ps1` で形式、寸法、比率、容量を検査する。
 - 記事カードまたは同等のレンダリングで320px、375px、390px、768px、PC幅を確認する。
 - 各幅で、画像内の確定文字列を読め、対象テーマと最重要メッセージを再記述でき、第一読解、第二読解、補足の順が維持されることを確認する。カード外の見出しやサイトの重ね文字で画像内の文字不足を補って合格にしない。文字切れだけで実表示合格にしない。
-- 現行CSSに `-thumbnail.` を含む画像を右寄せする規則があるため、ファイル名と実際の切り抜きを確認する。画像単体の確認だけで実表示合格にしない。
+- 従来profileでは現行CSSの `-thumbnail.` 右寄せを含め、ファイル名と切り抜きを確認する。新profileではcontainで画像全体が表示されることを検査する。画像単体の確認だけで実表示合格にしない。
 - 本スキルは`coverImage`を更新しない。サムネイルは`standalone_interactive`では別承認を得た掲載工程へ、`orchestrated_prepublication`では親スキルへ最終画像パスを引き渡す。H2画像は承認範囲内に限り、[H2見出し画像](references/h2-heading-images.md) の条件で本文へ限定挿入できる。
 
 ## 9. 状態と報告
@@ -328,6 +338,8 @@ thumbnail:
     composition: ""
     style: ""
   thumbnail_design:
+    visual_profile: null
+    section_style_contract: null
     article_id: ""
     design_version: ""
     thumbnail_message: {}
@@ -395,7 +407,13 @@ thumbnail:
     height: null
     format: null
     bytes: null
+  visual_profile: null
+  section_style_contract: null
+  character_color_transform: none | monochrome_values_only
+  semantic_binding: {} # article_id, section_id, heading, section_summary, exact_copy, facts_allowed, source_section
   checks:
+    palette_profile: pending
+    monochrome_linework: pending
     exact_japanese: pending
     character_identity: pending
     watercolor_strength: pending
@@ -414,7 +432,7 @@ thumbnail:
 
 実施していない検査は `pass` にしない。`checks.exact_japanese` は空配列の形式一致だけで合格にせず、[文字の契約](references/diversity-quality-gates.md#6-文字) に従い実画像の文字を照合する。判定の観測箇所と理由は既存の `visual_review` に、各表示幅の結果は `checks.rendered_widths` に保持する。人物なしの場合、`character_sheet_paths` は空配列、`reference_mode` は `not_applicable` とする。
 
-`style_references[].mode` は `direct_image_reference`（目視・実際に生成へ引渡し済み）、`viewed_and_transcribed`（目視し特徴を指示へ変換）、`reference_unavailable`（目視不可）を使い、人物の `reference_mode` と別に記録する。`examples_opened` は実際の目視から設定する。全承認見本が目視不可なら `BLOCKED` とし、既存の試作は未検証として提示できるが `PREVIEW_READY` / `FINAL_ASSET_READY` にしない。
+`style_references[].mode` は `direct_image_reference`（目視・実際に生成へ引渡し済み）、`viewed_and_transcribed`（目視し特徴を指示へ変換）、`reference_unavailable`（目視不可）を使い、人物の `reference_mode` と別に記録する。`examples_opened` は実際の目視から設定する。選択profileの全承認見本が目視不可なら `BLOCKED` とし、既存の試作は未検証として提示できるが `PREVIEW_READY` / `FINAL_ASSET_READY` にしない。
 
 上の画風見本要件は `asset_type: thumbnail` に適用する。H2画像は文章スタイル契約を正本とするため、`examples_opened: not_required` とし、画風見本が開けないことだけでは停止しない。人物または任意の構図見本を使う場合は、それぞれの参照整合性を別途確認する。
 
@@ -424,4 +442,4 @@ thumbnail:
 
 H2画像の最終報告は [H2見出し画像](references/h2-heading-images.md) の `section_images` スキーマを使う。すべての対象H2について保存、限定挿入、本文幅の実表示検証まで完了した場合だけ `FINAL_ASSET_READY` とする。
 
-スキル改訂の完了報告では、実装・形式確認、生成試験、ユーザーの好みとの適合確認を分ける。[改訂時の生成試験](references/diversity-quality-gates.md#11-スキル改訂時の生成試験)は試験を実施する際に使い、通常の記事1件ごとに6枚生成しない。
+スキル改訂の完了報告では、実装・形式確認、生成試験、ユーザーの好みとの適合確認を分ける。[改訂時の生成試験](references/diversity-quality-gates.md#11-スキル改訂時の生成試験)は試験を実施する際に使い、通常の記事1件ごとに6枚/12枚生成しない。新profileは改訂時にサムネイルとH2双方で3条件×2回を検査する。

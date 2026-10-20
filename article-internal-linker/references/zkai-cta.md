@@ -3,6 +3,7 @@
 Z会の記事では、ユーザーが提供した3講座のリンクを [承認済みリンクデータ](zkai-affiliate-links.json)から読み取る。別のASP・教材・幼児講座等へ一般化しない。
 
 - `provider: zkai`、`component_id: zkai_cta_v1`とする。
+- `cream-manga-mustard-v1`指定では[外観プロファイル](article-design-profile.md)を追加で読み、Z会としての対応を現在実行で確認する。旧オレンジ系表示はこのprofileへ適用せず、共通DOM・URL・計測・件数・案内文は維持する。未対応なら `article_design_profile_component_missing` で停止する。
 - 既存サイトでZ会にも使われている`shinken-zemi-cta`と、その`__lead`、`__button`の共通CSSを再利用する。部品IDは広告主を表し、CSS名は既存実装との互換用である。新しいCSSは作らない。
 - `conversion`でだけ挿入する。`traffic`では他社と同じくCTA・計測URLを0件にする。
 - 配置ごとに、小学生は`elementary`、中学生は`junior_high`、高校生・大学受験生は`high`へ確定する。学年横断記事では各CTAの直前説明と対象講座を一致させ、単一のリンクを全学年共通として案内しない。資料請求・入会の条件を本文で確認した対象講座だけに案内する。
