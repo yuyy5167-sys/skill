@@ -2,7 +2,7 @@
 
 ## 適用と互換性
 
-親が`visual_profile: {id: cream-manga-mustard-v1, revision: 1}`をサムネイルとH2の両方へ渡す。このブログの親記事スキルが`article_visual_design.profile`から解決する。単独利用・既存設計で指定がない場合は従来契約を維持し、既存記事・別プロジェクトを自動移行しない。未知のID/版/SHA、両資産のprofile不一致は`needs_parent_input`とする。
+親が`visual_profile: {id: cream-manga-mustard-v1, revision: 1}`をサムネイルとH2の両方へ渡す。このブログの親記事スキルが`article_visual_design.profile`から解決する。単独利用・既存設計で指定がない場合は従来契約を維持し、既存記事・別プロジェクトを自動移行しない。未知のID/版/SHA、各資産内の契約不一致は`needs_parent_input`とする。2026-10-21以降の新記事は資産別マップによりH2だけ本profile、thumbnailは `bw-manga-thumbnail-v1`。異なる資産間で同じprofile/SHAを要求せず、本書の画風・人物・差分は本profileの資産だけへ適用する。旧単一profile依頼は両資産で保持できる。
 
 正本は`cream-manga-mustard-v1.json`。`fixed_prompt`をLF・末尾改行1個・UTF-8 BOMなしで計算したSHA-256は`3cb3d9d218477e3a4d653824be6ada9cc4845e674ee6433f9b9b711114745517`。サムネイル・H2の設計、生成要求、親承認、最終報告へ`visual_profile`と`section_style_contract: {profile_id, revision, sha256}`を保持する（名称はサムネイルにも再利用）。最終プロンプト内へ固定ブロックを改変せず1回だけ挿入する。変更は旧承認を失効させる。
 

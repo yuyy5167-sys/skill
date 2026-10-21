@@ -8,7 +8,7 @@ Cloudflare/Astro教育ブログの記事で、サムネイルの画風が確定�
 
 ## プロファイルの選択と優先
 
-`visual_profile.id: cream-manga-mustard-v1`なら[新デザイン契約](cream-manga-mustard-v1.md)の固定ブロック、revision 1、SHAを使う。以下の`h2_style_profile_v1`/revision 2は省略既存入力の従来例で、新profileへ合成しない。各スキーマのID/版/SHAは選択契約の実値を保持する。サムネイル/H2でprofile不一致なら親へ返す。
+`visual_profile.id: cream-manga-mustard-v1`なら[新デザイン契約](cream-manga-mustard-v1.md)の固定ブロック、revision 1、SHAを使う。以下の`h2_style_profile_v1`/revision 2は省略既存入力の従来例で、新profileへ合成しない。各スキーマのID/版/SHAは選択契約の実値を保持する。資産別マップでは `section_image` の値を解決し、その資産の設計/生成/承認/報告を照合する。thumbnailと異なるID/SHAは不一致ではない。thumbnail専用 `bw-manga-thumbnail-v1` がH2に指定されたら親へ返す。
 
 新profileでは水彩検査はnot_applicable、palette_profile/monochrome_lineworkを観察する。画風・サムネイル・過去H2・構図画像を直接生成へ渡さない。人物active正本だけ参照でき、同一性を保った白黒明暗変換を許可する。
 
@@ -67,7 +67,7 @@ section_style_contract:
   examples_opened: not_required
 ```
 
-サムネイルの承認済み設計と生成後検品から、必要な差分だけを文章化する。
+同じprofileの場合だけ、サムネイルの承認済み設計と検品から必要な差分を文章化する。異なるprofile（白黒サムネイル/クリームH2等）では `source: base_profile_only` として差分を空にし、H2自身の固定文だけを使う。白地・極太文字・コマ枠・人物なし方針を転送せず、この分岐ではサムネイル待ちを理由にH2の最終プロンプトを未確定にしない。
 
 ```yaml
 runtime_style_delta:

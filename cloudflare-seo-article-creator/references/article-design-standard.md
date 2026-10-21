@@ -1,6 +1,6 @@
 # 新記事のA〜Eデザイン標準
 
-2026-10-20承認。対象ブログで今後開始する**新規記事**の表示標準は `cream-manga-mustard-v1`。記事の事業目的、`article_profile.type`、文章の内容評価は独立して維持する。この標準を既存記事への一括適用、共通実装変更、本番公開の許可へ拡張しない。
+2026-10-20承認。対象ブログで今後開始する**新規記事**の本文UIの表示標準は `cream-manga-mustard-v1`。2026-10-21の採用指示によりサムネイルだけは `bw-manga-thumbnail-v1@1`（白黒漫画・原則人物なし・教材名は②と同程度）とし、H2・本文のprofileは保持する。記事の事業目的、`article_profile.type`、文章の内容評価は独立して維持する。この標準を既存記事への一括適用、共通実装変更、本番公開の許可へ拡張しない。
 
 ## 選択と版管理
 
@@ -39,7 +39,7 @@ articleDesign:
 ## 子スキルとの接続
 
 - UI: `design_mode: parent_directed`。子の完全な `ui_design`（全必須フィールド・全blockへのcomponent割当、plainを含む）を親が作る。`ui_design.article_design` へ上の4項目、`design_version` へ現行版を渡す。A〜Eだけ渡して設計完了にしない。受理後、画像挿入で追加された最終ブロックもcomponent mapと照合する。
-- 画像: `visual_profile: {id: cream-manga-mustard-v1, revision: 1}` をサムネイルと全H2に共通適用。子の新profile固定文・SHA・参照契約を正本とし、旧ネイビー・コーラル・ミント・水彩の色指定を混ぜない。人物の顔・髪・年齢・体格・服の形は現行学年シートを保持し、変更許可は色→グレースケールだけ。承認済み母子の追加参照は任意で、役割・承認・path・SHAが確認できる場合だけ使用する。
+- 画像: `asset_visual_profiles.thumbnail: {id: bw-manga-thumbnail-v1, revision: 1}`、`.section_image: {id: cream-manga-mustard-v1, revision: 1}`。サムネイルは[白黒漫画契約](../../education-blog-thumbnail-creator/references/bw-manga-thumbnail-v1.md)、H2は既存クリーム契約。サムネイルは原則人物なし、ユーザー指定時だけ原文・出典付きで人物ありにする。教材名は採用②と同程度。各資産の設計/生成/承認/報告のID・版・固定文SHAを照合し、異なる資産間の同一profile/SHAは要求しない。異なるprofile間の画風差分を転送しない。H2の人物正本・明暗変換・参照規則は保持する。
 - リンク: `articleDesign` に上の4項目。CTAの外観対応は `site_rendering_capabilities.article_design_profile`、各CTA部品の `appearance_profiles`、`rendered_page_checks.article_design_profile` で証明する。DOM・講座・href・1px計測・rel・件数・意味別配置は既存正本どおり。新profile限定の色変更をURL変更の許可へ広げない。
 
 ## 原稿と画像の統合順序
@@ -56,4 +56,4 @@ sourceとレイアウト入力HTMLは境界コメント1個。コード例・エ
 
 新ID A〜E、旧10件・他の旧記事、invalid metadata、境界0/2、コード例、H2/画像欠落、未登録editionクラス、Eの注意書き、目次順変更、古い設計版、成約/集客、3教材CTAを回帰確認する。サムネイル640px・H2画像560px上限、全体表示、本文760px、スマホ16px/PC17px、320/375/390/768/1280px、キーボード・拡大・画像欠落時の意味・全記事の反復と縦の長さを実表示で確認する。検査未実施をPASSで埋めない。
 
-今回の移行受入では3記事条件×2独立生成でサムネイルとH2の実生成・実画像を確認する。通常記事ごとに6回生成を要求する規則ではない。未合格項目があれば原因工程へ戻し、ローカル実装・画像QA・実表示・スキルGitHub保存・本番公開を分けて報告する。
+本文/H2も変えた2026-10-20の移行受入では両資産を確認する。サムネイルだけを変える2026-10-21の更新は画像子の白黒漫画契約に従い、H2固定文SHAを保持する回帰確認と分ける。通常記事ごとに6回生成を要求する規則ではない。未合格項目があれば原因工程へ戻し、ローカル実装・画像QA・実表示・スキルGitHub保存・本番公開を分けて報告する。

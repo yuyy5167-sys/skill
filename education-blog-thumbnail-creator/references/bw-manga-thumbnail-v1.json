@@ -1,0 +1,155 @@
+{
+  "profile_id": "bw-manga-thumbnail-v1",
+  "revision": 1,
+  "assets": [
+    "thumbnail"
+  ],
+  "fixed_prompt": "Use case: Japanese education-blog editorial illustration, one finished thumbnail.\nHorizontal 16:9 Japanese education-blog thumbnail, ideally 1536 x 864.\nREFERENCE ROLE: The supplied approved thumbnail is a STYLE EXAMPLE ONLY. Inherit the bold Japanese type, slightly irregular black ink contours, neutral-gray screentone, airy pure-white paper, faint room detail, pale gray headline underlines, and thin inset hand-drawn rectangular manga panel border. Do not inherit its topic, words, service name, props, layout or exact scene. Never render any text from the reference. Render only EXACT COPY below.\nFIXED VISUAL LANGUAGE: Pure white, black and neutral gray ONLY; no cream, yellow, mustard or other tint. Confident manga pen outlines, crisp foreground detail, restrained screen-tone shading, no photo or 3D treatment. The type and large relevant ordinary objects jointly fill the composition; retain an airy white region behind text. Background may suggest a quiet study space with very faint window, shelf or desk lines, subordinate to the foreground. Draw a thin slightly irregular black inset panel border around the whole image. A subtle light-gray underline may sit beneath key text lines; it is an accent, never a heavy text box.\nTYPE: Strong, dense, rounded Japanese gothic lettering, opaque black, sharp and correctly spaced, as bold and readable as the reference. One dominant main message; topic identifies the subject; supporting line is smaller but still easy to read at 320 px. Maximum three semantic text groups. Line breaks may follow the specified breaks, never change, duplicate or omit characters. Avoid long tiny text. Text and primary objects must stay separate with generous breathing room and safe margins; frame and desk may approach the edge. Do not mechanically shrink the entire composition to create margins.\nOnly EXACT COPY may be readable. No extra letters, labels, fake handwriting, invented UI, prices, statistics, scores, ranks, reviews, dates, badges, logos, watermark or service screenshots. Props may have a few nonverbal rules, blank keys, neutral bars or simple geometric marks as specified; no words or numerals. No gradients, heavy shadows, dramatic speed-line bursts or decorative symbols unrelated to the article.\nDo not reuse any other newly generated trial thumbnail as a reference.\nFor each service name, MATCH the preferred typography reference at equal canvas width: similar apparent glyph height (about 12% of image height, roughly 22px at 320px width). This is the preferred STANDARD, not a minimum to exceed. Do not make a giant brand headline. Keep the name intact; wrap qualifiers such as の料金 or の解約, or reflow the layout rather than shrinking or over-enlarging the name. Follow the separately supplied character policy exactly.\n",
+  "fixed_prompt_sha256": "261d6eb62981d6cc5f173e6d0d480da208d59f84445d9b2966e2e5f6d6f45230",
+  "default_character_mode": "personless",
+  "person_requires_explicit_user_instruction": true,
+  "character_policy_prompts": {
+    "personless": "Object-only, ZERO characters anywhere: no people, faces, heads, bodies, hands, silhouettes, portraits, mascots, animals, creatures or anthropomorphic objects, including inside screens, books, photos and icons. Use only the specified ordinary inanimate objects.\n",
+    "person": "Use ONLY the people explicitly requested by the user. Preserve the confirmed active character sheets: face, hair, age, body and clothing shapes; convert character colors to black/white/neutral-gray values only. Specify identities, roles and count. Add no other people, faces, hands, mascots or portraits. Missing required references must be reported, not invented.\n"
+  },
+  "character_policy_sha256": {
+    "personless": "6b949b73c8c86cd30e1918bf0243a45c544f5d74cd54565940cea437ed16aae8",
+    "person": "363e34538209278d0a8f0d6fa3bbb69164ae498b2fec1bb38b23db81760ec2c3"
+  },
+  "approved_examples": [
+    {
+      "id": "tablet-comparison-02-preferred-type-size",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/SNS/漫画/サムネイル/20261021-新デザイン試作5枚/02-タブレット教材比較.png",
+      "sha256": "79c9af5e6b02222a53d37428f4fb1eec5723b3677e71746c6d192f09d73b3d30",
+      "role": "style_example",
+      "state": "approved",
+      "usage": "style_and_typography",
+      "source": "ユーザー「2枚目のチャレンジタッチとスマイルゼミ…ぐらいの文字の大きさぐらいが一番ベスト」。最低値としてさらに拡大する解釈を撤回。",
+      "inherit": [
+        "白黒画風",
+        "同じ表示幅での教材名字高"
+      ],
+      "do_not_inherit": [
+        "教材名",
+        "コピー",
+        "比較構図",
+        "タブレット"
+      ]
+    },
+    {
+      "id": "01-Z会の添削-人物なし",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/SNS/漫画/サムネイル/20261017-Z会5枚-白黒漫画-人物なし/01-Z会の添削-人物なし.png",
+      "sha256": "8ef275b7d21731f73d3a2e6623cfa9b9b0d6f62c031b2712a316181bfc979f40",
+      "role": "style_example",
+      "state": "approved",
+      "usage": "style_only",
+      "source": "ユーザーがこの会話で白黒・人物なし5枚を今後の新規記事サムネイルの標準として明示。",
+      "inherit": [
+        "白黒漫画の線と網点",
+        "文字の系統",
+        "小物と余白",
+        "細いコマ枠"
+      ],
+      "do_not_inherit": [
+        "教材名",
+        "コピー",
+        "構図",
+        "小物",
+        "文字サイズの下限"
+      ]
+    },
+    {
+      "id": "02-Z会の小学生英語-人物なし",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/SNS/漫画/サムネイル/20261017-Z会5枚-白黒漫画-人物なし/02-Z会の小学生英語-人物なし.png",
+      "sha256": "25f184c33ef7e3bebd3b96212f2be6b15cb65dd69176ce84e427983141ccbd55",
+      "role": "style_example",
+      "state": "approved",
+      "usage": "style_only",
+      "source": "ユーザーがこの会話で白黒・人物なし5枚を今後の新規記事サムネイルの標準として明示。",
+      "inherit": [
+        "白黒漫画の線と網点",
+        "文字の系統",
+        "小物と余白",
+        "細いコマ枠"
+      ],
+      "do_not_inherit": [
+        "教材名",
+        "コピー",
+        "構図",
+        "小物",
+        "文字サイズの下限"
+      ]
+    },
+    {
+      "id": "03-Z会の高校生向け講座-人物なし",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/SNS/漫画/サムネイル/20261017-Z会5枚-白黒漫画-人物なし/03-Z会の高校生向け講座-人物なし.png",
+      "sha256": "7a551357cf87746ba5f756769d024a42babc2a4c19e524699c2eedc7a73d9667",
+      "role": "style_example",
+      "state": "approved",
+      "usage": "style_only",
+      "source": "ユーザーがこの会話で白黒・人物なし5枚を今後の新規記事サムネイルの標準として明示。",
+      "inherit": [
+        "白黒漫画の線と網点",
+        "文字の系統",
+        "小物と余白",
+        "細いコマ枠"
+      ],
+      "do_not_inherit": [
+        "教材名",
+        "コピー",
+        "構図",
+        "小物",
+        "文字サイズの下限"
+      ]
+    },
+    {
+      "id": "04-Z会のお試し-人物なし",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/SNS/漫画/サムネイル/20261017-Z会5枚-白黒漫画-人物なし/04-Z会のお試し-人物なし.png",
+      "sha256": "e0b4428062a7eea4eb17a8685b8011ab26bcc051db621416137e6eca54189183",
+      "role": "style_example",
+      "state": "approved",
+      "usage": "style_only",
+      "source": "ユーザーがこの会話で白黒・人物なし5枚を今後の新規記事サムネイルの標準として明示。",
+      "inherit": [
+        "白黒漫画の線と網点",
+        "文字の系統",
+        "小物と余白",
+        "細いコマ枠"
+      ],
+      "do_not_inherit": [
+        "教材名",
+        "コピー",
+        "構図",
+        "小物",
+        "文字サイズの下限"
+      ]
+    },
+    {
+      "id": "05-Z会の中学受験-人物なし",
+      "path": "/Users/yudaikato/Documents/AIフォルダ/SNS/漫画/サムネイル/20261017-Z会5枚-白黒漫画-人物なし/05-Z会の中学受験-人物なし.png",
+      "sha256": "841070f670052f39d55ff5c1ecd42c3aa0e1491c112f9656ead63817f701606e",
+      "role": "style_example",
+      "state": "approved",
+      "usage": "style_only",
+      "source": "ユーザーがこの会話で白黒・人物なし5枚を今後の新規記事サムネイルの標準として明示。",
+      "inherit": [
+        "白黒漫画の線と網点",
+        "文字の系統",
+        "小物と余白",
+        "細いコマ枠"
+      ],
+      "do_not_inherit": [
+        "教材名",
+        "コピー",
+        "構図",
+        "小物",
+        "文字サイズの下限"
+      ]
+    }
+  ],
+  "profile_character_references": [],
+  "brand_name_reference_id": "tablet-comparison-02-preferred-type-size",
+  "brand_name_size_policy": "match_reference_not_minimum",
+  "h2_direct_style_images_allowed": false,
+  "trial_images_are_approved_examples": false
+}

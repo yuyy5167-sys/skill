@@ -15,9 +15,9 @@ description: Cloudflare/Astro教育ブログの記事内容と対象学年に合
 
 ## ブログ固有の画像プロファイル
 
-親の`visual_profile: {id: cream-manga-mustard-v1, revision: 1}`を受けたら[新デザイン契約](references/cream-manga-mustard-v1.md)とJSONを読む。サムネイル/H2双方で同じID/版/固定ブロックSHAを使用し、旧配色・水彩を混ぜない。本体・スタイル文法・品質ゲートの水彩固有指示は従来profileだけに適用する。文字・人物・意味・差別化・実表示の品質条件は維持する。省略既存入力は従来仕様、既存記事/別ブログを自動移行しない。
+親の `asset_visual_profiles` を資産別に解決する。新規記事のサムネイルは[白黒漫画契約](references/bw-manga-thumbnail-v1.md)とJSON（`bw-manga-thumbnail-v1@1`）、H2は[クリーム契約](references/cream-manga-mustard-v1.md)とJSON（`cream-manga-mustard-v1@1`）。旧単一 `visual_profile` は対応資産に保持し、入力なしの既存依頼は従来仕様。既存記事・別ブログを自動移行しない。
 
-新profileはサムネイルでも`section_style_contract: {profile_id, revision, sha256}`を設計/生成要求/親承認/最終報告で一致させる。不明ID/版/SHA、両資産の不一致は親へ返す。本文結論・数値・見出し変更時は資産との意味対応を再照合する。新profileの人物正本/明暗変換/見本/改訂試験は新デザイン契約を優先する。
+個別資産の `visual_profile` と `section_style_contract: {profile_id, revision, sha256}` は、その資産に解決したID/版/固定文SHAを設計・生成要求・親承認・報告で照合する。資産間で同じID/SHAは要求しない。不明ID/版/SHA、旧新の矛盾、H2へのthumbnail専用profileは親へ返す。選択profileの固定文・人物方針・参照・試験が従来の配色/水彩指示より優先する。本文の結論や条件を変えたら資産との意味を再照合する。
 
 ## 資産範囲
 
@@ -89,7 +89,10 @@ parent_run_id: null
 allowed_output_directory: ""
 execution_mode: full | design_only | render_from_plan
 asset_scope: thumbnail_only | thumbnail_and_h2 | h2_only
-visual_profile: null # 新デザインは{id: cream-manga-mustard-v1, revision: 1}
+asset_visual_profiles: null # 新記事: thumbnail=bw-manga-thumbnail-v1@1, section_image=cream-manga-mustard-v1@1
+thumbnail_character_mode: personless # 白黒profile。personはユーザー明示指定時だけ
+thumbnail_character_instruction: null # person時: {user_instruction, source_ref}
+visual_profile: null # 旧入力、または個別資産に解決した値
 section_style_contract: null # profile_id, revision, sha256（両資産で保持）
 thumbnail_design: null
 section_image_designs: []
@@ -141,7 +144,7 @@ reference_mode: direct_image_reference | viewed_and_transcribed | reference_unav
 
 [差別化・品質ゲート](references/diversity-quality-gates.md) に従い、記事タイプに対応する視覚モチーフと構図を選ぶ。
 
-- 人物は必須ではない。人物なし案を常に有効な選択肢にする。
+- 人物は必須ではない。白黒サムネイルprofileは原則人物なしで、ユーザーが人物を明示した場合だけ人物ありにする。他profileの裁量は維持する。
 - 記事から導出した `thumbnail_message` を基に、成立する複数の方向があれば意味の異なる軽量なコンセプト案を検討する。ユーザー指定の比較案数を優先し、通常時は案数を埋めるために不要な案を作らない。これは生成前の設計案であり、生成枚数ではない。
 - 各案では `narrative_angle` と `information_structure` を分け、少なくとも一方に意味上の違いを持たせる。記事適合性、事実・権利の安全性、小型カード耐性、視覚化可能性、差別化、生成可能性がすべて合格した案から、独自性より明快さと記事適合性を優先して1案を選ぶ。
 - 色、数字、装飾の変更だけで別案にしない。
@@ -156,6 +159,7 @@ reference_mode: direct_image_reference | viewed_and_transcribed | reference_unav
 ```yaml
 image_plan:
   article_message: ""
+  brand_name_layout: null # 白黒profileで教材名あり: service_name, qualifier, topic_lines, size_reference_path
   exact_copy: []
   textless_exception: null # 明示ユーザー指示がある場合だけ {user_instruction, asset_scope: [対象asset_id]}
   target_grade: ""
@@ -225,7 +229,7 @@ generation_approval: null
 - `image_plan.exact_copy` の確定した日本語文字列をすべて画像内へ描き、指定外の文字は追加しないこと。文字なし指定は [文字の契約](references/diversity-quality-gates.md#6-文字) の例外が有効な場合だけ使う
 - 使用するキャラクターシートの絶対パスと参照モード
 - 人物の同一性、学年感、ポーズ、表情、主役小物
-- 選択profileの固定文、継承要素、固定してはいけない要素。従来profileだけは [スタイル文法](references/style-grammar.md) の薄い水彩を含む標準画風を使い、新profileは白黒・からし色の固定文を使う。ユーザー明示指示を優先する
+- 選択profileの固定文、継承/非継承、人物ブロック。白黒サムネイルは白地・黒灰・②と同程度の教材名字高・原則人物なし、クリームprofileは既存のからし色、従来profileだけ水彩を使う。ユーザーの明示指示が優先。
 - 顔、制服・服、主役小物へ文字を重ねない。文字・顔・意味を担う小物には各辺8%を目安に安全余白を取り、机・背景は端まで広げられる。実際の切り抜きで確かめること
 - 見本ごとの役割と参照状態、継承する特徴、今回変える表現。文字は見本の自然な丸みと読みやすさを基準に、主見出しと補足を分け、絵の線・色の強さと釣り合わせること
 - 実在ロゴ、透かし、未確認の数値・評価・キャンペーンを入れないこと
@@ -246,7 +250,7 @@ generation_approval: null
 - 文字切れ、顔・服・主役小物への重なり、安全余白
 - ロゴ、透かし、未承認情報がない
 - 16:9、構図、焦点位置
-- 従来profileでは水彩が背景紙と色面に限定され、文字と輪郭がシャープである。新profileでは水彩検査をnot_applicableとし、白黒線画と小さなからし色を検査する
+- 従来profileは水彩の場所と文字/輪郭、クリームprofileは白黒線画と小さなからし色、白黒サムネイルは白地・黒灰・②と同程度の教材名字高・人物方針を確認する。両漫画profileの水彩検査はnot_applicable。
 - 既存比較対象との6項目の観察と意味面の照合、小さいカード表示での識別性。一致数だけでは不採用にしない
 - 承認見本との画風・文字の釣り合い、場面の一体感、見本からの配置・動作の無批判な転用がないこと
 - 画像と実際の記事カードだけを根拠に `image_only_readback` を先に記録し、その後で `thumbnail_message.one_glance_meaning` と比較する。同じ担当者が行う場合は独立評価とは呼ばない。
@@ -409,6 +413,9 @@ thumbnail:
     bytes: null
   visual_profile: null
   section_style_contract: null
+  character_instruction: null # 人物指定時のユーザー原文と出典
+  character_policy_sha256: null
+  brand_name_size: {} # 正本path、表示幅、観測、判定。教材名なしならnot_applicable
   character_color_transform: none | monochrome_values_only
   semantic_binding: {} # article_id, section_id, heading, section_summary, exact_copy, facts_allowed, source_section
   checks:
@@ -416,6 +423,8 @@ thumbnail:
     monochrome_linework: pending
     exact_japanese: pending
     character_identity: pending
+    character_policy: pending
+    brand_name_size: pending
     watercolor_strength: pending
     outline_crispness: pending
     typography_crispness: pending
@@ -442,4 +451,4 @@ thumbnail:
 
 H2画像の最終報告は [H2見出し画像](references/h2-heading-images.md) の `section_images` スキーマを使う。すべての対象H2について保存、限定挿入、本文幅の実表示検証まで完了した場合だけ `FINAL_ASSET_READY` とする。
 
-スキル改訂の完了報告では、実装・形式確認、生成試験、ユーザーの好みとの適合確認を分ける。[改訂時の生成試験](references/diversity-quality-gates.md#11-スキル改訂時の生成試験)は試験を実施する際に使い、通常の記事1件ごとに6枚/12枚生成しない。新profileは改訂時にサムネイルとH2双方で3条件×2回を検査する。
+スキル改訂の完了報告では、実装・形式確認、生成試験、ユーザーの好みとの適合確認を分ける。[改訂時の生成試験](references/diversity-quality-gates.md#11-スキル改訂時の生成試験)は試験を実施する際に使い、通常の記事1件ごとに6枚/12枚生成しない。白黒サムネイルだけの更新は同契約の3条件×2回の生成試験を使い、未変更H2は固定文SHAと接続の回帰確認に分ける。試作・独立反復・実表示の実施有無を分けて報告する。

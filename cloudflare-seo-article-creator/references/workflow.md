@@ -423,10 +423,14 @@ draft: true
 
 ## 10. サムネイルと各H2見出し画像
 
-`$education-blog-thumbnail-creator`の`execution_mode: full`、`asset_scope: thumbnail_and_h2`を直接実行する。完成本文からサムネイルを設計・生成・検品し、その画風が確定した後に全Markdown H2の見出し画像を設計・生成・検品・限定挿入する。サムネイルではキャラクター正本、スタイル文法、承認見本、比較画像を確認し、H2画像では依存スキルの文章スタイル契約と参照分離規則を守る。新記事は両資産へ同じ新profileを指定し、旧配色の固定指示を混ぜない。
+`$education-blog-thumbnail-creator`の`execution_mode: full`、`asset_scope: thumbnail_and_h2`を直接実行する。完成本文からサムネイルを設計・生成・検品し、その画風が確定した後に全Markdown H2の見出し画像を設計・生成・検品・限定挿入する。サムネイルではキャラクター正本、スタイル文法、承認見本、比較画像を確認し、H2画像では依存スキルの文章スタイル契約と参照分離規則を守る。新記事はサムネイルへ白黒、H2へ既存クリームのprofileを指定し、固定文や画風差分を混ぜない。
 
 ```yaml
-visual_profile: {id: cream-manga-mustard-v1, revision: 1} # 新記事
+asset_visual_profiles:
+  thumbnail: {id: bw-manga-thumbnail-v1, revision: 1}
+  section_image: {id: cream-manga-mustard-v1, revision: 1}
+thumbnail_character_mode: personless # personは明示ユーザー指定時のみ
+thumbnail_character_instruction: null # person時: {user_instruction, source_ref}
 article_title: ""
 article_path: ""
 target_grade: elementary | junior_high | high_school | multi_grade | unknown
@@ -437,7 +441,7 @@ article_conclusion: ""
 desired_action: ""
 thumbnail_copy: [] # 未指定なら画像スキルがタイトル文字を設計する
 textless_exception: null # ユーザー指示原文と対象asset_idがある場合だけ
-character_mode: person | personless | undecided
+character_mode: null # サムネイルはthumbnail_character_mode。H2の人物方針とは分離
 visual_motif: ""
 layout_archetype: ""
 primary_prop: ""

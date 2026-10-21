@@ -2,6 +2,8 @@
 
 ## プロファイルの選択
 
+資産別マップを先に解決する。thumbnailの `bw-manga-thumbnail-v1` は[白黒漫画契約](bw-manga-thumbnail-v1.md)を唯一の画風・人物・教材名字高契約にし、以下のクリーム/からし色/従来配色/水彩を混ぜない。H2は自身のprofileに従い、異なるprofile間の画風差分を引き継がない。
+
 親の`visual_profile.id: cream-manga-mustard-v1`では[新デザイン契約](cream-manga-mustard-v1.md)を唯一の画風契約にする。本書の従来配色・水彩・旧見本を合成しない。省略既存入力では従来仕様を維持する。H2にも同じprofileを渡し、固定ブロックを一つだけ使う。
 
 ## 目的（従来プロファイル）

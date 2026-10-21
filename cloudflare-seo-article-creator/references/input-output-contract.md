@@ -622,7 +622,7 @@ evidence_capture:
 
 ## 新記事の表示契約
 
-[A〜Eデザイン標準](article-design-standard.md) を正本とする。親は `article_visual_design` を保持し、UIへ完全な `ui_design.article_design`、画像へ `visual_profile`、リンクへ `articleDesign` を渡す。事業目的・article_profileと表示型を同一視しない。`site_rendering_capabilities.article_design` はmetadata/部品対応、`.article_design_profile` はCTA外観対応の実証であり、互いの代用にしない。
+[A〜Eデザイン標準](article-design-standard.md) を正本とする。親は `article_visual_design` を保持し、UIへ完全な `ui_design.article_design`、画像へ資産別 `asset_visual_profiles`、リンクへ `articleDesign` を渡す。事業目的・article_profileと表示型を同一視しない。`site_rendering_capabilities.article_design` はmetadata/部品対応、`.article_design_profile` はCTA外観対応の実証であり、互いの代用にしない。
 
 ## 教育記事UIコーディング契約
 
@@ -741,7 +741,11 @@ external_link_policy:
 
 ```yaml
 image_asset_request:
-  visual_profile: {id: cream-manga-mustard-v1, revision: 1} # 新記事、両資産共通
+  asset_visual_profiles:
+    thumbnail: {id: bw-manga-thumbnail-v1, revision: 1}
+    section_image: {id: cream-manga-mustard-v1, revision: 1}
+  thumbnail_character_mode: personless # personは明示ユーザー指定時のみ
+  thumbnail_character_instruction: null # person時: {user_instruction, source_ref}
   execution_mode: full
   asset_scope: thumbnail_and_h2
   authorization_mode: orchestrated_prepublication
@@ -751,13 +755,17 @@ image_asset_request:
   article_edit_authorized: true
 ```
 
-出力は兄弟要素の`thumbnail`と`section_images`として保持し、参照モード、検査状態、最終プロンプト、件数を要約で置き換えない。
+出力は兄弟要素の`thumbnail`と`section_images`として保持し、参照モード、検査状態、最終プロンプト、件数を要約で置き換えない。個別資産の`visual_profile`/`section_style_contract`を資産別マップのID/版/固定文SHAと照合する。矛盾する旧新入力やH2へのthumbnail専用profileは受理しない。旧単一profile依頼と既存記事は自動移行しない。
 
 ```yaml
 thumbnail:
   execution_mode: full
   status: null # 未生成はnull。生成後PREVIEW_READY | FINAL_ASSET_READY | BLOCKED
   used_design_version: 1
+  visual_profile: {id: bw-manga-thumbnail-v1, revision: 1}
+  section_style_contract: null # 画像子JSONからprofile_id/revision/sha256を解決
+  character_instruction: null
+  brand_name_size: {} # 正本path、比較幅、観測、判定
   thumbnail_design: null
   pre_generation_review: null
   image_only_readback: null
