@@ -1,4 +1,4 @@
 interface:
-  display_name: "勉強記事の漫画制作"
-  short_description: "勉強記事を漫画に構成し、人物の差し替えとページごとの品質確認に対応"
-  default_prompt: "$study-article-manga-creator を使い、指定記事をもとにキャラクターを差し替えられる漫画を制作してください。"
+  display_name: "勉強・学校・日常の漫画制作"
+  short_description: "記事や学校・日常の創作を本編4ページ以上の漫画にし、実画像で品質を確認"
+  default_prompt: "$study-article-manga-creator を使い、記事または創作テーマから本編4ページ以上の漫画を設計・生成し、実画像を確認して完成させてください。"
