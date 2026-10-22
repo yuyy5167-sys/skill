@@ -4,7 +4,7 @@
 
 2026-10-20にユーザーが承認した修正版設計書v3を、このブログの今後の新規記事へ適用する。対象は正規化後の `/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ` に一致し、親から `articleDesign.profile: cream-manga-mustard-v1` を受け取った記事だけ。別ブログ、未指定の旧記事、既存下書きへ自動適用しない。今回の既存10記事は個別設定の互換経路を維持し、新規記事用設定へ書き換えない。
 
-この文書はCTAと内部リンクカードの外観だけを扱う。`article_business_purpose`、対象講座、固定URL、1px計測画像、rel等の属性、件数、配置、案内文、画像カードの役割・上限は既存の契約を維持する。A〜Eから事業目的やCTA件数を推定しない。`conversion`は承認済みCTA、通常の`traffic`はCTA0件と主成約記事カード1件の契約を保ち、明示承認済み既存記事の限定例外を新規記事へ広げない。CTA補足行を出さない[表示方針](cta-caption-policy.md)も維持する。
+この文書は外観だけを扱い、件数・配置・意味は[共通配置方針](affiliate-placement-policy.md)を正本とする。両目的とも最低2CTA、集客用は主成約記事カード1件を維持する。A〜Eから目的や件数を推定せず、過去の個別0/1件指定を新規実行へ適用しない。URL・計測・属性・ボタン下補足行禁止は維持する。
 
 - `articleDesign` は記事frontmatterと同じオブジェクトを親が渡す。`profile`、`design: A | B | C | D | E`、空でない`label`、`showMaterialFinder`（省略時false）を保持する。ラベルは案内コピーや事業目的ではない。
 - profile未指定では従来のプロバイダー別表示契約を使う。未知のprofile、親の指定と最終DOMの不一致、既定への黙示的な退避は許可しない。
@@ -34,7 +34,7 @@
 | 計測画像 | 元のDOMと固定属性を保持し、表示寸法も1px×1px。本文画像用の幅100%や16:9を適用しない |
 | 操作状態 | 下線や枠・明確なフォーカスを併用し、色だけに依存しない。動きを設ける場合はreduced-motionを尊重 |
 
-進研ゼミは `shinken-zemi-cta`、スマイルゼミは `smile-zemi-cta`、Z会は互換用の `shinken-zemi-cta` を使う。広告主ごとの `component_id` はそれぞれ `shinken_zemi_cta_v1`・`smile_zemi_cta_v1`・`zkai_cta_v1` のまま。profile用の独自CTA DOM、クラス、記事内CSSを作らない。URLや計測画像を新しい部品の都合で削除・変更しない。
+スタディサプリは専用契約のstudy_sapuri_cta_v1で既存shinken-zemi-ctaを再利用する（URL承認と現行表示確認が前提）。進研ゼミは `shinken-zemi-cta`、スマイルゼミは `smile-zemi-cta`、Z会は互換用の `shinken-zemi-cta` を使う。広告主ごとの `component_id` はそれぞれ `shinken_zemi_cta_v1`・`smile_zemi_cta_v1`・`zkai_cta_v1` のまま。profile用の独自CTA DOM、クラス、記事内CSSを作らない。URLや計測画像を新しい部品の都合で削除・変更しない。
 
 ## 内部リンクカード
 

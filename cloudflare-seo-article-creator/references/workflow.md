@@ -10,7 +10,7 @@
 6. 対象プロジェクトの`AGENTS.md`、`src\content.config.ts`、記事ルート、現在のfrontmatterを読み、実装時点のスキーマを確認する。事業目的は実行状態とログへ保持し、未対応のfrontmatterフィールドを追加しない。
 7. 既存の未コミット変更を読み取り確認し、ユーザーの作業へ触れない。
 8. 必要な依存スキルと表示手段を確認し、現行`SKILL.md`と必要な参照文書を工程直前に読む。PowerShell 5.1以上、Node.js、Python、既存`node_modules`のsatteriとAstroを確認する。PS5.1ではUTF-8 BOM付きps1を`powershell.exe -NoProfile -ExecutionPolicy Bypass -File <script>`で実行できる。`Bypass`は当該子プロセスだけとし、永続ポリシー変更や依存関係の自動インストールをしない。
-9. `$article-internal-linker`の現行契約を読み、成約用では講座別アフィリエイトURLとCTA共通CSS、集客用では主リンク先が公開確認済み成約用記事である証拠と内部リンクカード機能を確認する。仮リンクや仮CTAを作らない。
+9. `$article-internal-linker`の現行契約を読み、両目的で講座別アフィリエイトURLとCTA共通部品を確認し、集客用ではさらに主リンク先が公開確認済み成約用記事である証拠と内部リンクカード機能を確認する。仮リンクや仮CTAを作らない。
 10. 確認済み事業目的、記事ID、`index.md`、サムネイルと各H2見出し画像を含む画像フォルダ、作成理由、主要導線、`draft: true`、上書き・公開禁止を実行範囲通知として示す。ここから1記事分の`orchestrated_prepublication`一括承認が成立し、通知後は最終プレビューのユーザー表示まで進める。
 
 一括承認の範囲内では、計画、タイトル選定、調査、見出し、本文、内部リンク、権利条件を満たす画像、サムネイル、各H2見出し画像、保存、検査、修正、隔離プレビューについて途中承認を追加しない。計画書、TODO、進捗、検収結果は進行共有として提示する。ユーザーが停止または区切りでの一時停止を指示した場合は、安全な区切りで止めて状態を保持し、再開指示を待つ。
@@ -250,7 +250,7 @@ UI工程では、受理した判断理由・対象・条件・限界を既存の
 
 確認済み`article_business_purpose`、`article_profile`、`cta_strategy`、確定したリンク意図と`approved_destination_id`、リンク先の`destination_role`と`presentation`、完成Markdown、現在実行で公開確認した候補、目的別の`affiliate_link_plan`、現在確認した`site_rendering_capabilities`と新記事の`articleDesign`を`$article-internal-linker`の`insert`へ渡す。対象章・目的・採用先・表示形式・対象講座を変更せず、許可範囲で段落と誘導文を調整する。
 
-- 成約用ではCTAと必要な内部リンクを含む`pass`だけを受理する。集客用ではアフィリエイトCTAが0件で、主成約記事カードを含む`pass`だけを受理する。
+- 成約用ではCTAと必要な内部リンクを含む`pass`だけを受理する。集客用では承認済み本文CTAが最低2件あり、主成約記事カードを含む`pass`だけを受理する。
 - `blocked`または`blocks_draft: true`なら後工程へ進まない。
 - 挿入前本文、`expected_link_manifest`、`affiliate_link_manifest`を分けて保持する。
 - `expected_link_manifest.new_links`に確定した各リンクが、UI化後のMarkdownと最終HTMLの両方で同じ`href`と表示形式を保つまで、完成にしない。マニフェストが空の場合に内部リンク件数を作る目的でリンクを追加しない。
@@ -331,9 +331,9 @@ cta_strategy:
   official_confirmation_moments: []
 ```
 
-- 成約用では`required: true`とする。CTAは3件を標準値として検討するが固定せず、検索意図、文章量、判断段階、独立した公式確認理由の数から1件以上へ増減する。`planned_count`と`official_confirmation_moments`へ採用数と全配置を記録し、各配置に異なる`reader_question`、`official_information_needed`、`destination_purpose`、`lead_copy`を持たせる。
+- 成約用では`required: true`とする。CTAは3件を標準値として検討するが固定せず、検索意図、文章量、判断段階、独立した公式確認理由の数から2件以上へ増減する。`planned_count`と`official_confirmation_moments`へ採用数と全配置を記録し、各配置に異なる`reader_question`、`official_information_needed`、`destination_purpose`、`lead_copy`を持たせる。
 - 口コミ・料金記事では教材内容・良い口コミ、料金・支払・端末条件、悪い口コミ・注意点・向き不向きの説明後が候補になる。お試し・キャンペーン記事では、試せる内容、対象・期間、費用・返却・継続条件の説明後が候補になる。いずれも固定見出しではなく、本文を読んで公式情報を確認したくなる実際の場面だけを採用する。
-- 1〜2件へ減らす場合、4件以上へ増やす場合は`count_reason`を具体的に記録する。文章量だけ、見出し数だけ、過去記事の件数だけを理由に増やさない。5件以上は確認目的の独立性を全配置で説明する。
+- 2件へ減らす場合、4件以上へ増やす場合は`count_reason`を具体的に記録する。文章量だけ、見出し数だけ、過去記事の件数だけを理由に増やさない。5件以上は確認目的の独立性を全配置で説明する。
 - 成約用で対象講座が一意でない、承認済みアフィリエイト契約がない、自然な公式確認場面が1件もない、講座・URL・共通部品・計画件数が一致しない、または挿入・監査が不合格の場合は`blocked`とする。記事範囲をCTAのために変更せず、CTAなしの完成状態へ変換しない。
 - 集客用では`required: false`、`disposition: not_applicable`、`affiliate_link_manifest.links: []`とする。本文・最終HTML・期待マニフェストにアフィリエイトCTA、計測画像、ASP URLが1件でもあれば不合格にする。主導線は公開確認済み成約用記事の画像付き内部リンクカードとする。
 
@@ -475,7 +475,7 @@ H2画像は全対象を生成・目視してから未使用名へ保存し、保
 5. 元プロジェクトの`node_modules`をWindowsではジャンクション、macOS/Linuxではシンボリックリンクから再利用し、再インストールしない。出力`process_environment`にある`TMPDIR`、`TEMP`、`TMP`、`npm_config_cache`を、ビルド・配信・検証など今回の作業プロセスにだけ渡す。ユーザー環境の永続設定は変えない。作業ディレクトリを`preview_root`へ変更し、設定ファイル名`preview_config_argument`（`codex-preview.config.mjs`）を指定して`npm run build -- --config codex-preview.config.mjs`を実行する。設定の絶対パス`preview_config`は検証記録に残し、CLIには作業ディレクトリからの相対ファイル名を渡す。サイト全体のビルド確認とプレビュー用ビルドをこの1回で行い、プレビュー確認だけのために正規プロジェクト側へ新しい`dist`やキャッシュを作らない。既存の通常ビルド出力には触れない。
 6. 隔離コピーのビルド結果から手順2の親完成検査へ最終記事HTMLを渡す。原稿とHTMLのリンク検査合格後、同じ作業ディレクトリ・環境で`npm run preview -- --config codex-preview.config.mjs --host 127.0.0.1 --port <空きポート>`を実行し、利用可能なブラウザで記事URLを開く。配信に必要なコピー・ビルド結果・キャッシュ・補助ファイルはすべて同じ`run_root`内に置く。URL提示だけを表示済みにしない。
 7. 320px、375px、390px、768px、1280pxで、表以外の横はみ出し、画像、見出しID、アンカー、コンソールエラーを実査する。保存する検証画像・ログは、同じ一時実行フォルダの`verification_directory`配下へ置く。強調計画の全語句が指定章の表示本文で太字になり通常文字と見分けられること、Markdown記法が露出していないことを確認する。各強調箇所の実際の折返しも確認し、原則1行、最大2行に収める。3行以上になる場合は短い単語・句へ直して再検証する。各H2画像では画像全体、文字、数字、矢印、主役、縦横比、不要な枠を記事本文幅で確認する。
-8. レンダリング済みHTMLを`$article-internal-linker`の`audit`へ事業目的、新記事の`articleDesign`と検証済み`site_rendering_capabilities`、`cta_strategy`、`expected_link_manifest`、`affiliate_link_manifest`、5画面幅の表示記録とともに渡す。成約用は計画件数どおりのCTA、集客用は主成約記事カードとアフィリエイト0件を、内部リンクの表示形式・画像読込み・URL・属性・重複・表示とともに子スキルの正本契約で監査する。
+8. レンダリング済みHTMLを`$article-internal-linker`の`audit`へ事業目的、新記事の`articleDesign`と検証済み`site_rendering_capabilities`、`cta_strategy`、`expected_link_manifest`、`affiliate_link_manifest`、5画面幅の表示記録とともに渡す。成約用は計画件数どおりのCTA、集客用は主成約記事カード1件と承認済み本文CTA最低2件を、内部リンクの表示形式・画像読込み・URL・属性・重複・表示とともに子スキルの正本契約で監査する。
 9. 統合検査TODOを除く全必須TODOが一度`accepted`になった後、タイトル、導入、見出し、本文、結論、事実と出典、内部リンク、公式画像、サムネイルの表示文字、各H2画像の意味と配置、装飾の役割、スマートフォン表示を一つの記事として横断検査する。不合格なら原因となったTODOを`revision_requested`へ戻し、その成果物に依存するTODOを`revalidation_scope`へ追加する。必要な範囲の再検証と統合検査の再実行が終わるまで完成状態を返さない。
 10. 正本SHA-256を最終取得して静的検査結果と照合する。隔離コピーの`source_article_sha256`が同じ正本を指し、コピーのfrontmatterの`draft`以外が正本と一致することを確認する。記事・コピー・画像に変更があれば影響する検査を無効化して再確認する。統合検査が合格したら、最終操作として完成版の記事URLをユーザーが見えるアプリ内ブラウザへ開くか、既存タブをそのURLへ移動する。表示後に現在URLと記事画面を確認し、`preview.presented_to_user: true`、`preview.presentation_stage: after_final_audit`を記録する。URLの報告、スクリーンショット、検査中に開いた履歴だけで代替しない。
 11. 利用可能な表示手段がない、最終URLへ移動できない、または記事画面を確認できない場合は`preview.status: display_blocked`、`preview.presented_to_user: false`とし、完成状態を返さない。
@@ -485,7 +485,7 @@ H2画像は全対象を生成・目視してから未使用名へ保存し、保
 
 ## 12. 最終報告
 
-統合検査後の完成版プレビューをユーザーへ表示でき、成約用はアフィリエイトCTA、集客用は主成約記事カードとアフィリエイト0件の挿入・監査、およびすべての品質ゲートが合格した場合に、状態表に従って最終結果を返す。最終報告はプレビュー表示の後に行う。
+統合検査後の完成版プレビューをユーザーへ表示でき、成約用はアフィリエイトCTA、集客用は主成約記事カード1件と承認済み本文CTA最低2件の挿入・監査、およびすべての品質ゲートが合格した場合に、状態表に従って最終結果を返す。最終報告はプレビュー表示の後に行う。
 
 - 記事ファイル、サムネイル、全H2見出し画像の絶対パス
 - キーワード、確認済み事業目的、主要行動、タイトル、カテゴリー、記事ID
@@ -495,7 +495,7 @@ H2画像は全対象を生成・目視してから未使用名へ保存し、保
 - 使用した装飾部品とサムネイル参照画像
 - 画像スキルの`thumbnail`と`section_images`の状態、H2件数、生成・保存・挿入件数、各画像の最終プロンプトと検査結果、実際に確認した画面幅
 - メタディスクリプション案
-- 成約用では`article_profile`、口コミ・料金証拠計画の適用結果、`cta_strategy`の標準数・採用数・増減理由・公式確認場面、対象講座、CTA件数、共通部品確認、挿入・最終監査。集客用では主成約記事、役割確認根拠、カード監査、アフィリエイト0件。両方で許可外部リンクと理由
+- 成約用では`article_profile`、口コミ・料金証拠計画の適用結果、`cta_strategy`の標準数・採用数・増減理由・公式確認場面、対象講座、CTA件数、共通部品確認、挿入・最終監査。集客用では主成約記事、役割確認根拠、カード監査、承認済みCTA最低2件の計画・前後文脈・最終HTML監査。両方で許可外部リンクと理由
 - 未実施の画面確認や人間確認
 - プレビューURL、表示状態、確認幅、`presented_to_user: true`、表示時点が統合検査後であること、正本が`draft: true`のままであること
 - 削除可能な一時実行フォルダと`CLEANUP-INFO.txt`の絶対パス、閲覧・確認後に配信・作業プロセスを停止すれば実行フォルダ全体を削除できること

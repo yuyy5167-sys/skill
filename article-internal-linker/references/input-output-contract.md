@@ -2,10 +2,10 @@
 
 ## 共通契約
 
-新しい実行はすべてのモードで `schema_version: "1.2"` を使う。旧1.0・1.1は履歴の読取りだけに使い、1.1の通常1件CTAを新しい`plan | insert | audit`の完成入力にはしない。未対応のバージョンは `unsupported_schema_version` で停止する。
+新しい実行はschema_version: "1.3"を使い、[共通配置方針](affiliate-placement-policy.md)を適用する。旧1.0〜1.2は履歴の読取り専用で、新しい完成入力として受理しない。
 
 ```yaml
-schema_version: "1.2"
+schema_version: "1.3"
 run_id: "現在実行を一意に識別する値"
 mode: "plan | insert | audit"
 article_business_purpose: "conversion | traffic"
@@ -24,7 +24,7 @@ site_rendering_capabilities:
     style_source: "現在実行で確認した内部リンクカード変換と共通CSSの識別子"
   affiliate_cta_component:
     supported: true
-    component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
+    component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1 | study_sapuri_cta_v1"
     style_source: "現在実行で確認した共通CSSまたはコンポーネントの識別子"
   affiliate_cta_components: [] # 複数プロバイダーが明示された記事では各provider・component_id・supported・style_sourceを記録
 ```
@@ -33,7 +33,7 @@ site_rendering_capabilities:
 
 ## 記事デザインの条件付き追加契約
 
-schema 1.2に次の任意項目を追加する。旧profile未指定入力の従来契約は維持するが、対象ブログの今後の新規記事を親から受け取る場合は `articleDesign` を必須とする。未知のprofile、A〜E以外、空ラベル、未知の設定項目、非booleanの末尾表示指定は `article_design_profile_unconfirmed` で停止し、既定表示へ退避しない。
+schema 1.3に次の任意項目を追加する。旧profile未指定入力の従来契約は維持するが、対象ブログの今後の新規記事を親から受け取る場合は `articleDesign` を必須とする。未知のprofile、A〜E以外、空ラベル、未知の設定項目、非booleanの末尾表示指定は `article_design_profile_unconfirmed` で停止し、既定表示へ退避しない。
 
 ```yaml
 articleDesign:
@@ -51,7 +51,7 @@ site_rendering_capabilities:
     scope_selector: '.article-edition[data-article-profile="cream-manga-mustard-v1"][data-article-design-origin="frontmatter"]'
   affiliate_cta_component:
     supported: true
-    component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
+    component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1 | study_sapuri_cta_v1"
     style_source: "現在実行で確認した共通CSSの識別子"
     appearance_profiles: ["cream-manga-mustard-v1"]
   affiliate_cta_components: [] # 複数providerでは各項目へ同じappearance_profiles確認を持たせる
@@ -105,10 +105,11 @@ policy:
   max_links_per_destination: 1
   max_image_cards: 2
 cta_strategy:
+  policy_version: "minimum-two-v1"
   default_count: 3
   planned_count: 3
-  count_mode: "standard | decreased | increased | explicit_override | not_applicable"
-  count_reason: "標準3件を採用または増減した理由"
+  count_mode: "standard | decreased | increased | explicit_override"
+  count_reason: "目的別標準（traffic=2/conversion=3）から採用件数を決めた理由"
   explicit_user_count_override: null
   official_confirmation_moments:
     - placement_id: "CTA-01"
@@ -122,20 +123,20 @@ cta_strategy:
 
 `site_rendering_capabilities` は `plan` では省略できる。外観profileを指定した記事の`insert`では、上記の条件付き追加契約も必須とする。`image_card`を`insert`する場合は`internal_link_card.supported: true`とリンク先画像を解決できることを、承認済みの講座別CTAを`insert`する場合はプロバイダーに対応する`supported: true`と`component_id`（進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`、Z会は専用契約の`zkai_cta_v1`）を現在実行で確認する。確認できなければ、それぞれ`internal_link_card_component_missing`または`affiliate_cta_component_missing`で停止する。成約直結記事をカード非対応のため`text_link`へ変更してはならない。
 
-`conversion`で進研ゼミ・スマイルゼミ・Z会の記事を扱い、タイトル・想定読者・結論・承認済み設計から対象講座を一意に確認できる場合は、`plan` 出力に次を加える。`cta_strategy.default_count`は3だが固定件数ではなく、`planned_count`は独立した公式確認場面の数と一致させる。対象講座、承認済みURL、各配置の意味と自然な配置章を確定できなければ`conversion_affiliate_unresolved`で停止する。`traffic`は常に`status: "not_applicable"`、`planned_count: 0`とし、CTAを計画しない。
+両事業目的で対応広告主の承認済みURL・対象講座・最低2つの自然な配置を確認し、eligibleなaffiliate_link_planを返す。集客用default_count=2、成約用=3。未確認ならaffiliate_unresolvedでblocked。
 
 ```yaml
 affiliate_link_plan:
   status: "eligible | not_applicable"
-  provider: "shinken_zemi | smile_zemi | zkai"
-  target_course: "preschool | elementary | junior_high | high | null"
+  provider: "shinken_zemi | smile_zemi | zkai | study_sapuri"
+  target_course: "preschool | elementary | junior_high | high | elementary_junior | toeic_basic | null"
   presentation: "cta_button | null"
   planned_count: 3
   rationale: "対象講座と件数を判断した根拠"
   placements:
     - placement_id: "CTA-01"
-      provider: "shinken_zemi | smile_zemi | zkai"
-      target_course: "preschool | elementary | junior_high | high"
+      provider: "shinken_zemi | smile_zemi | zkai | study_sapuri"
+      target_course: "preschool | elementary | junior_high | high | elementary_junior | toeic_basic"
       section_id: "h2-1"
       section_heading: "実際のH2見出し"
       reader_question: "読者の疑問"
@@ -147,7 +148,7 @@ affiliate_link_plan:
 
 ## `plan` 出力
 
-成約用のCTAは件数にかかわらず`affiliate_link_plan.placements`へ全配置を列挙し、各プロバイダーの対象講座を一意に確認する。`planned_count`、`cta_strategy.official_confirmation_moments`、`placements`の件数と`placement_id`を一致させる。複数のプロバイダーを含む`insert`では`site_rendering_capabilities.affiliate_cta_components`に各共通部品の現在確認結果を入れる。
+両事業目的のCTAをaffiliate_link_plan.placementsへ全件列挙する。planned_count、確認場面、placements、マニフェスト、実配置の一意なIDと件数を一致させる。
 
 ```yaml
 result:
@@ -165,7 +166,7 @@ link_intents:
     primary_destination: false
     candidate_destination_ids: []
     rationale: "読者に必要な理由"
-affiliate_link_plan: null # 成約用で対象講座と全CTA配置を一意に確定できた場合だけ出力
+affiliate_link_plan: null # 両事業目的で承認済みURLと最低2配置が確定した場合にeligibleな計画を返す
 ```
 
 `plan` は `blocks_draft` を返さない。`blocked` の場合は `unresolved_inputs` に理由コードと必要な入力を入れ、親スキルの記事設計承認を止める。
@@ -191,13 +192,14 @@ approved_link_intents:
     approved_destination_id: "候補IDまたはnull"
 approved_affiliate_link_plan:
   status: "eligible"
-  provider: "shinken_zemi | smile_zemi | zkai"
-  target_course: "preschool | elementary | junior_high | high"
+  provider: "shinken_zemi | smile_zemi | zkai | study_sapuri"
+  target_course: "preschool | elementary | junior_high | high | elementary_junior | toeic_basic"
   presentation: "cta_button"
   planned_count: 3
   rationale: "planで承認済みの講座・件数根拠"
   placements: [] # 件数にかかわらず承認済みの全配置と意味情報を列挙する
 cta_strategy:
+  policy_version: "minimum-two-v1"
   default_count: 3
   planned_count: 3
   count_mode: "standard | decreased | increased | explicit_override"
@@ -256,7 +258,7 @@ expected_link_manifest:
   new_links: [] # destination_roleとpresentationを含める
 affiliate_link_manifest:
   appearance_profile: null # profile指定時は cream-manga-mustard-v1
-  links: [] # 進研ゼミ・スマイルゼミ・Z会の承認済み講座別リンクだけ。内部リンクとは別に記録する
+  links: [] # 進研ゼミ・スマイルゼミ・Z会・スタディサプリの承認済み講座別リンクだけ。内部リンクとは別に記録する
 body_with_internal_links: "合格時の本文。blocked時は元本文と同一"
 unresolved_intents: []
 ```
@@ -275,11 +277,11 @@ unresolved_intents: []
 `conversion`では`approved_affiliate_link_plan.status: eligible`を必須とする。対象講座、承認済みURL、`cta_strategy`、自然な全配置章、共通部品のいずれかが欠ける場合は`conversion_affiliate_unresolved`で停止する。[CTA補足表記の方針](cta-caption-policy.md)に従い、`destination_text`は新規出力せず、旧フィールドがあっても表示しない。`planned_count`と計画の全配置に従い、`affiliate_link_manifest.links` に次を記録する。
 
 ```yaml
-- provider: "shinken_zemi | smile_zemi | zkai"
+- provider: "shinken_zemi | smile_zemi | zkai | study_sapuri"
   placement_id: "承認済み配置の一意なID。件数にかかわらず必須"
-  target_course: "preschool | elementary | junior_high | high"
+  target_course: "preschool | elementary | junior_high | high | elementary_junior | toeic_basic"
   presentation: "cta_button"
-  component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
+  component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1 | study_sapuri_cta_v1"
   href: "ユーザー提供値をそのまま使う"
   tracking_image_src: "ユーザー提供値をそのまま使う"
   rel: "nofollow"
@@ -296,7 +298,9 @@ unresolved_intents: []
 
 HTMLソースではURL中の `&` を `&amp;` と直列化できる。`audit` ではソース文字列ではなくDOMで復元した `href` と `src` をユーザー提供値と比較し、クエリやパラメータの変更を許可しない。
 
-`traffic`では`approved_affiliate_link_plan.status: not_applicable`とし、`affiliate_link_manifest.links: []`を返す。CTA、計測画像、ASP URLが入力本文に既にある場合も自動削除せず`traffic_affiliate_contamination`で停止する。主成約記事カードが挿入後本文と`expected_link_manifest.new_links`に1件なければ`primary_conversion_card_missing`で停止する。
+`traffic`もapproved_affiliate_link_plan.status: eligibleを受け取り最低2CTAを挿入し、主成約記事カード1件を保持する。未確認・未計画の既存CTAは自動削除せず、承認・計画との不一致として停止する。
+
+各affiliate_link_manifest.links[]には共通配置方針のplacement_context（before/after/rationale）を必須追加し、plan→insert→UI→auditで保持する。最初が後半ならcta_strategy.first_cta_position_noteも保持する。before/afterの一致だけで意味の自然さを合格にしない。
 
 ## `audit` 入力
 
@@ -326,7 +330,7 @@ rendered_page_checks:
     card_appearance_matches: true # image_cardを使わない場合はnull
     unprofiled_pages_unchanged: true
     regression_reference: "共通実装変更時の旧10記事/未指定記事の回帰記録と現在のスコープ確認"
-  component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1"
+  component_id: "shinken_zemi_cta_v1 | smile_zemi_cta_v1 | zkai_cta_v1 | study_sapuri_cta_v1"
   internal_link_cards:
     actual_count: 0
     images_loaded: true
@@ -344,7 +348,7 @@ rendered_page_checks:
 
 `affiliate_link_manifest.links` に `presentation: cta_button` がある場合、`rendered_page_checks` は必須であり、320・375・390・768・1280pxの5幅をすべて含める。欠落または未確認なら `affiliate_cta_render_unverified` とする。`expected_link_manifest.new_links`に`image_card`がある場合は、実カード数が期待件数と一致して2件以下であること、各カードに画像・正式タイトル・紹介文があり、画像が読み込まれ、表示形式がマニフェストと一致することも記録する。
 
-`traffic`では、CTA固定クラス、アフィリエイトリンク、計測画像URLが0件であること、`required: true`かつ`primary_destination: true`の`conversion_direct`画像カードが1件存在し、画像・正式タイトル・紹介文が表示されることを必須監査にする。
+両目的で最低2CTAの原稿・最終HTMLの配置ID、講座、URL、案内文、前後引用、計測画像を監査する。集客用は必須主成約記事画像カード1件と、その画像・正式タイトル・紹介文も監査する。
 
 profile指定時は上記の `article_design_profile`、5幅の `profile_appearance_matches`、各マニフェストの `appearance_profile` も照合する。profile/design/由来が親指定と一致しない場合は `article_design_profile_mismatch`、実表示記録が不足する場合は `article_design_profile_render_unverified` とする。profile未対応は `article_design_profile_component_missing` であり、見えていない状態と混同しない。`traffic`でも主成約記事カードを使うため、このprofile実表示確認を省略しない。旧10記事と未指定記事への非漏出は共通実装変更時の回帰記録を参照し、現在の適用スコープを再確認する。
 
@@ -388,7 +392,7 @@ checks:
 - `conversion_affiliate_unresolved`
 - `primary_conversion_destination_missing`
 - `primary_conversion_card_missing`
-- `traffic_affiliate_contamination`
+- `affiliate_unresolved`
 - `unsupported_schema_version`
 - `site_identity_missing`
 - `source_conflict`

@@ -22,7 +22,7 @@ frontmatterの`articleDesign`は`profile`、`design`（A〜E）、trim後の非�
 
 サムネイルは導入へ1回、最大640px。各H2直下画像は最大560px、16:9、`object-fit: contain`。画像全体を見せ、記事一覧・OGの`coverImage`と同じサムネイルを使用する。画像そのものの生成・`coverImage`の書換えは親の統合工程で行う。
 
-新profileの内部リンクカードは画像全体を表示し、既存の最大2枚・PC画像幅160px・横並び契約を維持する。成約用/集客用の導線条件はデザインから推定しない。進研ゼミ・Z会の`shinken-zemi-cta`、スマイルゼミの`smile-zemi-cta`は固定DOM、URL、rel、data属性、1px計測画像を保持し、共通CSSだけでからし地・濃色文字にする。ボタン下の「リンク先：〜」は追加しない。
+新profileの内部リンクカードは画像全体を表示し、既存の最大2枚・PC画像幅160px・横並び契約を維持する。成約用/集客用の導線条件はデザインから推定しない。進研ゼミ・Z会・承認済みスタディサプリの`shinken-zemi-cta`、スマイルゼミの`smile-zemi-cta`は固定DOM、URL、rel、data属性、1px計測画像を保持し、共通CSSだけでからし地・濃色文字にする。ボタン下の「リンク先：〜」は追加しない。
 
 ## 原稿・DOMの構造
 

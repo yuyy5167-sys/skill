@@ -80,6 +80,7 @@ price_evidence_plan:
   coverage: []
   items: []
 cta_strategy:
+  policy_version: minimum-two-v1
   default_count: 3
   planned_count: null
   count_mode: standard | decreased | increased | explicit_override | not_applicable
@@ -98,8 +99,8 @@ title_contract:
 affiliate:
   required: true | false
   disposition: eligible | not_applicable | blocked
-  provider: shinken_zemi | smile_zemi | zkai | null
-  target_course: preschool | elementary | junior_high | high | null
+  provider: shinken_zemi | smile_zemi | zkai | study_sapuri | null
+  target_course: preschool | elementary | junior_high | high | elementary_junior | toeic_basic | null
   affiliate_link_plan: null
   affiliate_link_manifest: null
   component_check: pending
@@ -246,10 +247,11 @@ price_evidence_plan:
 
 料金は公式情報を正本にし、月額だけでなく検索判断に影響する支払方法、タブレット代、継続・退会、キャンペーン条件を`coverage`で判定する。該当しない項目は理由付き`not_applicable`、確認できない項目は調査範囲と影響を持つ`unverified`とし、創作で埋めない。
 
-成約用のCTAは次の戦略を必須にする。
+両事業目的のCTAは[共通配置方針](../../article-internal-linker/references/affiliate-placement-policy.md)と次の戦略を必須にする。
 
 ```yaml
 cta_strategy:
+  policy_version: minimum-two-v1
   default_count: 3
   planned_count: 3
   count_mode: standard # standard | decreased | increased | explicit_override
@@ -265,7 +267,7 @@ cta_strategy:
       lead_copy: "直前本文に合う固有の案内文"
 ```
 
-`default_count: 3`は設計開始値であり、必須数・上限ではない。短く狭い記事は1〜2件、独立した確認理由が多い記事は4件以上にできる。`planned_count`は`official_confirmation_moments`と`affiliate_link_plan.placements`と`affiliate_link_manifest.links`の件数に一致させる。増減は`count_reason`へ記録し、5件以上は各配置の確認目的が独立していることを具体的に説明する。文章量だけ、見出し数だけ、過去記事の件数だけを理由に増減しない。`traffic`は`planned_count: 0`、`count_mode: not_applicable`、確認場面とCTAマニフェストを空にする。
+共通配置方針minimum-two-v1を適用する。default_countはtraffic=2/conversion=3、planned_countは両目的2以上。計画・確認場面・placements・マニフェスト・原稿・最終HTMLの件数と配置IDを一致させる。count_reasonと各配置のplacement_contextを保持し、最初が後半ならfirst_cta_position_noteを持つ。
 
 候補位置は固定見出しではなく、本文の流れで決める。口コミ・料金記事では教材内容や良い口コミの後、料金・支払・端末条件の後、悪い口コミ・注意点・向き不向きの後が候補になる。お試し・キャンペーン記事では、試せる内容、対象・期間、費用・返却・継続条件の説明後が候補になる。各CTAは異なるリード文を持ち、本文説明の途中、同じ確認理由の反復、隣接配置にはしない。
 
@@ -701,8 +703,8 @@ publication_state: draft
 affiliate:
   required: true | false
   disposition: eligible | not_applicable | blocked
-  provider: shinken_zemi | smile_zemi | zkai | null
-  target_course: preschool | elementary | junior_high | high | null
+  provider: shinken_zemi | smile_zemi | zkai | study_sapuri | null
+  target_course: preschool | elementary | junior_high | high | elementary_junior | toeic_basic | null
   affiliate_link_plan: null
   affiliate_link_manifest: null
   component_check: pending
@@ -721,7 +723,7 @@ external_link_policy:
 
 - `conversion`では`required: true`とする。`eligible`は、子スキルの`affiliate_link_plan.status: eligible`、対象講座、`cta_strategy`の全配置章、プロバイダー対応の共通部品確認がそろう場合だけ使用する。標準3件を起点に意味から増減した全配置を、子の`affiliate_link_plan.placements`と`affiliate_link_manifest.links`へ列挙し、HTML化後の件数・教材・位置・意味別`audit`合格を必要とする。
 - `conversion`の`blocked`は、対象講座を一意に確定できない、承認済みアフィリエイトURLがない、自然な配置章がない、講座不一致、未承認URL、共通部品欠落、または挿入・監査不合格の場合に使う。記事範囲をCTAのために変更せず、CTAなしの完成状態へ変換しない。
-- `traffic`では`required: false`、`disposition: not_applicable`、`provider: null`、`target_course: null`、`affiliate_link_plan.status: not_applicable`、`affiliate_link_manifest.links: []`とする。本文・HTML・マニフェストにCTA、計測画像、ASP URLを残さない。主成約記事の画像付き内部リンクカードを必須にする。
+- `traffic`もrequired: true、disposition: eligibleとし、承認済みCTAを最低2件計画する。主成約記事の画像カード1件も必須とする。
 
 すべての状態で禁止する。
 
@@ -730,8 +732,8 @@ external_link_policy:
 - リンク先がないCTAや申込み誘導
 - 内部リンクへの計測URL混入
 - `eligible`で監査前に「アフィリエイト対応済み」と報告すること
-- `conversion`でCTAを省略したまま完成状態にすること
-- `traffic`へCTA、計測画像、ASP URLを混入させること
+- 両目的で最低2CTAを満たさないまま完成状態にすること
+- 両目的で未承認・計画外CTA、計測画像、ASP URLを混入させること
 
 リンク掲載は [本文リンク制限と検査](article-link-policy.md) に従う。公式FAQ・規約・論文を含む外部URLは根拠記録へ保持し、本文へ出力しない。`allowed_external_links`は通常空配列であり、ユーザーの当該記事・URLの明示許可原文と出典がある場合だけ記入する。手続き上の必要性・情報の権威性を理由にAIが例外を作らない。`allow_task_required_only`という既存の引数名も、今後はこの明示許可の意味で扱う。
 
@@ -857,7 +859,7 @@ section_images:
 
 ## 静的検査入力契約
 
-成約用のアフィリエイト期待マニフェストは`cta_strategy.planned_count`と同数にし、各`placement_id`・プロバイダー・講座・配置先H2の`section_heading`・意味情報を全件渡す。CTA外側DOMには対応する`data-placement-id`を付ける。複数配置では単独の`ExpectedAffiliateProvider`と`ExpectedAffiliateCourse`を全件の代用にせず、マニフェストの各項目を検証する。これら二つの単独指定は1件の親検査で必要、複数件では省略できる。集客用では`cta_strategy.planned_count: 0`、`affiliate_link_manifest.links`を空配列で渡し、内部リンク期待マニフェストに`required: true`の`conversion_direct`画像カードを1件置く。
+両目的のアフィリエイト期待マニフェストはplanned_countと同数（最低2件）とし、一意なplacement_id・講座・URL・前後文脈を全件渡す。集客用は内部リンク期待マニフェストに必須主成約記事画像カード1件も置く。
 
 `scripts/validate-cloudflare-article.ps1`には中間ファイルを作らず、実行状態から次の名前付き引数を直接渡す。`basic`（既定）はビルド前の事前検査であり、本スキルの完成判定には、ビルド後に最終記事HTMLの`RenderedHtmlPath`を伴う`parent`を使う。HTMLパス未提供は完成検査の入力不足として失敗する。
 
@@ -874,9 +876,9 @@ section_images:
 -ExpectedCtaStrategyJson <cta_strategy全体のJSON文字列>
 -ExpectedReviewEvidencePlanJson <conversion_review_priceのreview_evidence_plan。扱わない場合もapplicability: not_applicableを渡す>
 -ExpectedPriceEvidencePlanJson <conversion_review_priceのprice_evidence_plan。扱わない場合もapplicability: not_applicableを渡す>
--ExpectedAffiliateDisposition <conversionではeligible、trafficではnot_applicable>
--ExpectedAffiliateProvider <conversionの単独CTAだけ: shinken_zemi | smile_zemi | zkai>
--ExpectedAffiliateCourse <conversionの単独CTAだけ: preschool | elementary | junior_high | high>
+-ExpectedAffiliateDisposition <両目的ともeligible。未確認はblocked>
+-ExpectedAffiliateProvider <basicの単独CTA事前検査だけ: shinken_zemi | smile_zemi | zkai | study_sapuri>
+-ExpectedAffiliateCourse <basicの単独CTA事前検査だけ: preschool | elementary | junior_high | high | elementary_junior | toeic_basic>
 -ExpectedEmphasisPlanJson <emphasis_plan.itemsを配列JSONとして渡す文字列>
 -ExpectedInternalLinkManifestJson <expected_link_manifest全体のJSON文字列>
 -ExpectedAffiliateLinkManifestJson <affiliate_link_manifest全体のJSON文字列>
@@ -888,7 +890,7 @@ section_images:
 
 JSONをシェルのコマンド文字列へ直接連結せず、同じPowerShell内の変数で渡す。強調計画は1件だけでも配列として直列化する。単独`basic`の既存`-ExpectedEmphasisPhrase`は維持するが、`parent`の章付き計画・内部リンク期待マニフェスト・アフィリエイト期待マニフェストを代替しない。
 
-親の受入条件は、`status: PASS`、`validation_mode: parent`、`article_business_purpose`が確認済み値と一致、`parent_contract_pass: true`、`checks`の`input_contract`・`article_profile`・`review_price_evidence`・`cta_strategy`・`article_structure`・`title_contract`・`internal_links`・`affiliate`・`external_links`・`emphasis`・`article_integrity`がすべて`pass`、`article_path`と`article_sha256`が最終正本と一致すること。成約用では`planned_count`とCTAマニフェストが1件以上で一致し、集客用では計画・マニフェスト・実CTAが0件かつ必須の主成約記事カード1件を必要とする。未実施・項目欠落・`basic`の`PASS`を完成にしない。`rendered_emphasis: not_checked`は静的検査の範囲表示であり、実表示で別途全語句を確認する。
+親の受入条件はstatus: PASS、validation_mode: parent、parent_contract_pass: true、全必須checks: pass、現在の正本・最終HTMLとの一致。両目的で計画・マニフェスト・原稿・完成HTMLのCTAが同数で最低2件あり、リンクauditが前後文脈・誘導の集中・遷移先と実表示を検収済みであること。集客用は必須主成約記事カード1件も必要。basicのPASSや一部checksだけで完成にしない。
 
 強調の静的検査は既存のNode.jsと対象プロジェクトのsatteriでMarkdown/HTMLを解析し、章と表示本文の`strong`を照合する。コメント・コード・明示的な非表示要素を除外し、解析に失敗した場合は正規表現だけで`PASS`へ切り替えない。
 
@@ -961,4 +963,4 @@ human_review:
   publication_approved: false
 ```
 
-成約用は標準3件を起点に記事ごとの公式確認場面から増減したCTAが、計画・マニフェスト・本文・最終HTMLで一致し、挿入と最終監査が合格した場合だけ`READY_FOR_HUMAN_REVIEW`へ進める。集客用はアフィリエイトが0件で、主成約記事の画像付き内部リンクカード1件が計画どおりにあり、記事内で検索意図へ十分回答し、挿入と最終監査が合格した場合だけ進める。目的別主要導線がない、`blocked`、またはその他の必須工程不合格は`BLOCKED`にする。本文プレビューを開けたがサムネイルまたはH2見出し画像が未完了なら、`preview.status: opened_with_asset_pending`を返し、完成状態にはしない。統合検査後の最終記事画面をユーザーへ表示できない場合は`preview.status: display_blocked`、`preview.presented_to_user: false`とし、URL提示だけで完成扱いにしない。
+両目的で共通配置方針の最低2CTAと意味・計画・マニフェスト・原稿・最終HTMLが一致し、集客用は主成約記事カード1件もあり、全品質ゲートと最終auditが合格して完成プレビューをユーザーへ表示した場合だけREADY_FOR_HUMAN_REVIEWとする。未解決ならBLOCKED。画像未完了やURL提示だけでは完成としない。

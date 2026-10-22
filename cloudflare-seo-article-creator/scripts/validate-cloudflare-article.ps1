@@ -21,10 +21,10 @@ param(
     [ValidateSet('eligible', 'not_applicable', 'deferred', 'blocked')]
     [string]$ExpectedAffiliateDisposition,
 
-    [ValidateSet('preschool', 'elementary', 'junior_high', 'high')]
+    [ValidateSet('preschool', 'elementary', 'junior_high', 'high', 'elementary_junior', 'toeic_basic')]
     [string]$ExpectedAffiliateCourse,
 
-    [ValidateSet('shinken_zemi', 'smile_zemi', 'zkai')]
+    [ValidateSet('shinken_zemi', 'smile_zemi', 'zkai', 'study_sapuri')]
     [string]$ExpectedAffiliateProvider,
 
     [string[]]$ExpectedEmphasisPhrase = @(),
@@ -99,10 +99,10 @@ $matchedEmphasisCount = 0
 $disallowedExternalLinks = [System.Collections.Generic.List[string]]::new()
 $externalLinkAudit = $null
 $effectiveAffiliateProvider = if ([string]::IsNullOrWhiteSpace($ExpectedAffiliateProvider)) { 'shinken_zemi' } else { $ExpectedAffiliateProvider }
-$affiliateComponentId = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'smile_zemi_cta_v1' } elseif ($effectiveAffiliateProvider -eq 'zkai') { 'zkai_cta_v1' } else { 'shinken_zemi_cta_v1' }
+$affiliateComponentId = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'smile_zemi_cta_v1' } elseif ($effectiveAffiliateProvider -eq 'zkai') { 'zkai_cta_v1' } elseif ($effectiveAffiliateProvider -eq 'study_sapuri') { 'study_sapuri_cta_v1' } else { 'shinken_zemi_cta_v1' }
 $affiliateRootClass = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'smile-zemi-cta' } else { 'shinken-zemi-cta' }
 $affiliateButtonClass = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'smile-zemi-cta__button' } else { 'shinken-zemi-cta__button' }
-$affiliateLabel = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'スマイルゼミ' } elseif ($effectiveAffiliateProvider -eq 'zkai') { 'Z会' } else { '進研ゼミ' }
+$affiliateLabel = if ($effectiveAffiliateProvider -eq 'smile_zemi') { 'スマイルゼミ' } elseif ($effectiveAffiliateProvider -eq 'zkai') { 'Z会' } elseif ($effectiveAffiliateProvider -eq 'study_sapuri') { 'スタディサプリ' } else { '進研ゼミ' }
 
 function Add-ValidationError {
     param([string]$Message)
@@ -202,8 +202,8 @@ if ($ValidationMode -eq 'parent') {
     if ($ExpectedArticleBusinessPurpose -eq 'conversion' -and $ExpectedAffiliateDisposition -ne 'eligible') {
         Add-ValidationError '成約用記事の親完成検査には、挿入・監査済みのアフィリエイトCTAが必要です。ExpectedAffiliateDispositionはeligibleにしてください。'
     }
-    if ($ExpectedArticleBusinessPurpose -eq 'traffic' -and $ExpectedAffiliateDisposition -ne 'not_applicable') {
-        Add-ValidationError '集客用記事では直接のアフィリエイトCTAを禁止します。ExpectedAffiliateDispositionはnot_applicableにしてください。'
+    if ($ExpectedArticleBusinessPurpose -eq 'traffic' -and $ExpectedAffiliateDisposition -ne 'eligible') {
+        Add-ValidationError '集客用記事も最低2件の承認済みCTAが必要です。ExpectedAffiliateDispositionはeligibleにしてください。'
     }
     if ($ExternalLinkPolicy -ne 'allow_task_required_only') {
         Add-ValidationError '新記事の親完成検査では、ただの公式サイト誘導を禁止するためExternalLinkPolicyはallow_task_required_onlyが必要です。'
@@ -324,8 +324,8 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedCtaStrategyJson)) {
     try {
         $ctaStrategy = $ExpectedCtaStrategyJson | ConvertFrom-Json -ErrorAction Stop
         $defaultCount = 0
-        if (-not [int]::TryParse([string]$ctaStrategy.default_count, [ref]$defaultCount) -or $defaultCount -ne 3) {
-            throw 'cta_strategy.default_countは3である必要があります。'
+        if (-not [int]::TryParse([string]$ctaStrategy.default_count, [ref]$defaultCount) -or $defaultCount -ne $(if ($ExpectedArticleBusinessPurpose -eq 'traffic') { 2 } else { 3 })) {
+            throw 'cta_strategy.default_countは集客用2、成約用3である必要があります。'
         }
         if (-not [int]::TryParse([string]$ctaStrategy.planned_count, [ref]$plannedCtaCount) -or $plannedCtaCount -lt 0) {
             throw 'cta_strategy.planned_countは0以上の整数が必要です。'
@@ -338,18 +338,14 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedCtaStrategyJson)) {
             throw "cta_strategy.planned_countと公式確認場面の件数が一致しません: $plannedCtaCount / $($ctaStrategyMoments.Count)"
         }
 
-        if ($ExpectedArticleBusinessPurpose -eq 'traffic') {
-            if ($plannedCtaCount -ne 0 -or $ctaStrategy.count_mode -cne 'not_applicable') {
-                throw '集客用記事のCTA計画はplanned_count: 0、count_mode: not_applicableが必要です。'
-            }
-        }
-        elseif ($ExpectedArticleBusinessPurpose -eq 'conversion') {
-            if ($plannedCtaCount -lt 1) { throw '成約用記事には1件以上のCTA計画が必要です。' }
+        if ($ExpectedArticleBusinessPurpose -in @('traffic', 'conversion')) {
+            if ($plannedCtaCount -lt 2) { throw '両事業目的で最低2件のCTA計画が必要です。' }
+            if ($ctaStrategy.policy_version -cne 'minimum-two-v1') { throw 'cta_strategy.policy_versionはminimum-two-v1が必要です。' }
             if ($ctaStrategy.count_reason -isnot [string] -or [string]::IsNullOrWhiteSpace($ctaStrategy.count_reason)) {
-                throw '成約用cta_strategyにはcount_reasonが必要です。'
+                throw 'cta_strategyにはcount_reasonが必要です。'
             }
             $hasOverride = $ctaStrategy.PSObject.Properties['explicit_user_count_override'] -and $null -ne $ctaStrategy.explicit_user_count_override
-            $expectedMode = if ($hasOverride) { 'explicit_override' } elseif ($plannedCtaCount -lt 3) { 'decreased' } elseif ($plannedCtaCount -gt 3) { 'increased' } else { 'standard' }
+            $expectedMode = if ($hasOverride) { 'explicit_override' } elseif ($plannedCtaCount -lt $defaultCount) { 'decreased' } elseif ($plannedCtaCount -gt $defaultCount) { 'increased' } else { 'standard' }
             if ($ctaStrategy.count_mode -cne $expectedMode) {
                 throw "cta_strategy.count_modeが採用件数と一致しません。期待値: $expectedMode / 実値: $($ctaStrategy.count_mode)"
             }
@@ -462,17 +458,11 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedAffiliateLinkManifestJson)) {
             throw 'アフィリエイト期待マニフェストにはlinks配列が必要です。'
         }
         $affiliateManifestLinks = @($affiliateLinkManifest.links)
-        if ($ValidationMode -eq 'parent' -and $ExpectedArticleBusinessPurpose -eq 'conversion' -and $affiliateManifestLinks.Count -lt 1) {
-            throw "親完成検査にはアフィリエイト期待マニフェストのlinksが1件以上必要です: $($affiliateManifestLinks.Count)"
+        if ($ValidationMode -eq 'parent' -and $ExpectedArticleBusinessPurpose -in @('conversion', 'traffic') -and $affiliateManifestLinks.Count -lt 2) {
+            throw "親完成検査にはアフィリエイト期待マニフェストのlinksが2件以上必要です: $($affiliateManifestLinks.Count)"
         }
-        if ($ValidationMode -eq 'parent' -and $ExpectedArticleBusinessPurpose -eq 'traffic' -and $affiliateManifestLinks.Count -ne 0) {
-            throw "集客用記事のアフィリエイト期待マニフェストは空である必要があります: $($affiliateManifestLinks.Count)"
-        }
-        if ($ValidationMode -eq 'parent' -and $ExpectedArticleBusinessPurpose -eq 'conversion' -and $null -ne $plannedCtaCount -and $affiliateManifestLinks.Count -ne $plannedCtaCount) {
+        if ($ValidationMode -eq 'parent' -and $ExpectedArticleBusinessPurpose -in @('conversion','traffic') -and $null -ne $plannedCtaCount -and $affiliateManifestLinks.Count -ne $plannedCtaCount) {
             throw "CTA戦略のplanned_countとアフィリエイト期待マニフェスト件数が一致しません: $plannedCtaCount / $($affiliateManifestLinks.Count)"
-        }
-        if ($ValidationMode -eq 'parent' -and $ExpectedArticleBusinessPurpose -eq 'traffic' -and $null -ne $plannedCtaCount -and $plannedCtaCount -ne 0) {
-            throw "集客用記事のplanned_countは0である必要があります: $plannedCtaCount"
         }
         if ($ValidationMode -eq 'parent' -and $ExpectedArticleBusinessPurpose -eq 'conversion' -and $affiliateManifestLinks.Count -eq 1 -and
             ([string]::IsNullOrWhiteSpace($ExpectedAffiliateProvider) -or [string]::IsNullOrWhiteSpace($ExpectedAffiliateCourse))) {
@@ -481,7 +471,7 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedAffiliateLinkManifestJson)) {
         $multiPlacementIds = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
         $manifestLeadTexts = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
         foreach ($link in $affiliateManifestLinks) {
-            $expectedComponent = if ($link.provider -ceq 'smile_zemi') { 'smile_zemi_cta_v1' } elseif ($link.provider -ceq 'shinken_zemi') { 'shinken_zemi_cta_v1' } elseif ($link.provider -ceq 'zkai') { 'zkai_cta_v1' } else { '' }
+            $expectedComponent = if ($link.provider -ceq 'smile_zemi') { 'smile_zemi_cta_v1' } elseif ($link.provider -ceq 'shinken_zemi') { 'shinken_zemi_cta_v1' } elseif ($link.provider -ceq 'zkai') { 'zkai_cta_v1' } elseif ($link.provider -ceq 'study_sapuri') { 'study_sapuri_cta_v1' } else { '' }
             if ($null -eq $link -or [string]::IsNullOrWhiteSpace($expectedComponent) -or
                 ($affiliateManifestLinks.Count -eq 1 -and $link.provider -cne $effectiveAffiliateProvider) -or
                 $link.presentation -cne 'cta_button' -or $link.component_id -cne $expectedComponent -or $link.target_course -isnot [string] -or
@@ -489,6 +479,18 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedAffiliateLinkManifestJson)) {
                 $link.tracking_image_src -isnot [string] -or [string]::IsNullOrWhiteSpace($link.tracking_image_src) -or
                 $link.rel -cne 'nofollow') {
                 throw 'アフィリエイト期待マニフェストには講座別のプロバイダー、部品、講座、href、計測画像、nofollowが必要です。'
+            }
+            if ($link.provider -in @('shinken_zemi','smile_zemi')) {
+                # Read the existing authoritative tables; do not duplicate affiliate URLs.
+                $rules = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot '../../article-internal-linker/references/placement-rules.md') -Encoding UTF8
+                $heading = if ($link.provider -ceq 'shinken_zemi') { '進研ゼミ' } else { 'スマイルゼミ' }
+                $sectionPattern = '(?ms)^## ' + [regex]::Escape($heading) + '講座別アフィリエイトCTA\s*\r?\n(?<text>.*?)(?=^## |\z)'
+                $sectionMatch = [regex]::Match($rules,$sectionPattern)
+                $rowPattern = '(?m)^\|\s*`(?<course>preschool|elementary|junior_high|high)`\s*\|\s*`(?<href>[^`]+)`\s*\|\s*`(?<pixel>[^`]+)`\s*\|'
+                $approvedRows = @([regex]::Matches($sectionMatch.Groups['text'].Value,$rowPattern) | Where-Object { $_.Groups['course'].Value -ceq $link.target_course })
+                if ($approvedRows.Count -ne 1 -or -not (Test-ExactHref $approvedRows[0].Groups['href'].Value $link.href) -or -not (Test-ExactHref $approvedRows[0].Groups['pixel'].Value $link.tracking_image_src)) {
+                    throw '講座別CTAのURL・計測画像が承認済み正本と一致しません。'
+                }
             }
             if ($link.provider -ceq 'zkai') {
                 # Z会の承認URLは子スキル内の正本データ1か所から読む。
@@ -499,6 +501,14 @@ if (-not [string]::IsNullOrWhiteSpace($ExpectedAffiliateLinkManifestJson)) {
                     -not (Test-ExactHref $approved[0].href $link.href) -or
                     -not (Test-ExactHref $approved[0].tracking_image_src $link.tracking_image_src)) {
                     throw 'Z会の講座・リンクURL・計測画像がユーザー提供の正本と一致しません。'
+                }
+            }
+            if ($link.provider -ceq 'study_sapuri') {
+                $registryPath = Join-Path $PSScriptRoot '../../article-internal-linker/references/study-sapuri-affiliate-links.json'
+                $registry = Get-Content -Raw -LiteralPath $registryPath -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+                $approved = @($registry.links | Where-Object { $_.target_course -ceq $link.target_course -and $_.approved_by_user -eq $true -and $_.source_ref -and $_.user_instruction })
+                if ($approved.Count -ne 1 -or -not (Test-ExactHref $approved[0].href $link.href) -or -not (Test-ExactHref $approved[0].tracking_image_src $link.tracking_image_src)) {
+                    throw 'スタディサプリの対象講座・承認済みURL・計測画像の確認が必要です。学校講座とENGLISHを読み替えないでください。'
                 }
             }
             if ($affiliateManifestLinks.Count -eq 1 -and -not [string]::IsNullOrWhiteSpace($ExpectedAffiliateCourse) -and $link.target_course -cne $ExpectedAffiliateCourse) {
@@ -1016,6 +1026,10 @@ const { pathToFileURL } = require('node:url');
             article_path = $resolvedArticlePath
             affiliate_manifest = @{ links = @($affiliateManifestLinks) }
             allowed_external_links = @($externalApprovals)
+            placement_contract_required = ($ValidationMode -eq 'parent')
+            article_business_purpose = $ExpectedArticleBusinessPurpose
+            cta_strategy = $ctaStrategy
+            expected_internal_links = @($expectedInternalLinks)
         }
         if (-not [string]::IsNullOrWhiteSpace($RenderedHtmlPath)) { $linkAuditInput.rendered_html_path = $RenderedHtmlPath }
         $linkAuditJson = $linkAuditInput | ConvertTo-Json -Depth 30 -Compress
@@ -1030,6 +1044,9 @@ const { pathToFileURL } = require('node:url');
                 $disallowedExternalLinks.Add($violation.href)
                 Add-ValidationError "許可されていない外部誘導があります: $($violation.phase) / $($violation.href)"
             }
+        }
+        foreach ($placementError in @($externalLinkAudit.placement_errors)) {
+            if ($null -ne $placementError) { Add-ValidationError $placementError }
         }
         foreach ($caption in @($externalLinkAudit.cta_destination_violations)) {
             if ($null -ne $caption) {

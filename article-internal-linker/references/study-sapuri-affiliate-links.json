@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "provider": "study_sapuri",
+  "links": [],
+  "status": "approval_required",
+  "historical_source": {
+    "reference": "article-production-log:34537b8b-083d-487b-b5b4-59f1557b6ee7",
+    "provenance": "unverified",
+    "scope": "過去2記事への学校講座リンク追加。新規記事への承認とENGLISH/TOEICのURLは未確認。候補を承認済みへ自動昇格しない。"
+  }
+}

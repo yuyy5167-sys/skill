@@ -1,3 +1,4 @@
+import { auditPlacements } from './affiliate-placement-audit.mjs';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
@@ -97,6 +98,7 @@ export async function auditText(input, source, renderedHtml) {
     sourceAudit.inspectHref(match[1].trim(), 'card');
   }
   let renderedAudit;
+  let renderedRoots;
   if (renderedHtml !== undefined) {
     const roots = [];
     function select(node) {
@@ -109,8 +111,14 @@ export async function auditText(input, source, renderedHtml) {
     }
     select(htmlToHast(renderedHtml));
     if (!roots.length) throw new Error('最終HTMLに記事本文領域がありません。空の検査結果を合格にできません。');
+    renderedRoots = roots;
     renderedAudit = inspectRoots(roots, policy, 'rendered');
   }
+  const placementChecks = input.placement_contract_required ? {
+    source: auditPlacements([tree],input,'source'),
+    rendered: renderedRoots ? auditPlacements(renderedRoots,input,'rendered') : {status:'NOT_CHECKED',errors:['最終HTMLの配置検査が未実施です']}
+  } : null;
+  const placementErrors = placementChecks ? [...placementChecks.source.errors,...placementChecks.rendered.errors] : [];
   const violations = [...sourceAudit.violations, ...(renderedAudit?.violations ?? [])];
   const ctaLabels = [...sourceAudit.ctaLabels, ...(renderedAudit?.ctaLabels ?? [])];
   const summarize = audit => audit ? {
@@ -120,7 +128,7 @@ export async function auditText(input, source, renderedHtml) {
     user_approved_exception: audit.links.filter(link => link.classification === 'user_approved_exception').length,
     links: audit.links,
   } : { status: 'NOT_CHECKED' };
-  return { status: violations.length || ctaLabels.length ? 'FAIL' : 'PASS', source: summarize(sourceAudit), rendered: summarize(renderedAudit),
+  return { status: violations.length || ctaLabels.length || placementErrors.length ? 'FAIL' : 'PASS', placement_checks: placementChecks, placement_errors: placementErrors, source: summarize(sourceAudit), rendered: summarize(renderedAudit),
     disallowed_external_link_count: violations.length, violations,
     cta_destination_label_count: ctaLabels.length, cta_destination_violations: ctaLabels };
 }

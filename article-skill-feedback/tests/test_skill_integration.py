@@ -1,11 +1,13 @@
 import json
+import importlib.util
+import os
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
 
-SKILLS = Path(r"/Users/yudaikato/.codex/skills")
+SKILLS = Path(__file__).resolve().parents[2]
 SITE_BLOG = Path(r"/Users/yudaikato/Documents/AIフォルダ/ブログ/公開サイト・教材/勉強ブログ/src/content/blog")
 
 
@@ -65,81 +67,27 @@ class SkillIntegrationTests(unittest.TestCase):
                 self.assertIn("この許可を", text)
                 self.assertIn("広げない", text)
 
-    def test_parent_affiliate_validation_uses_explicit_six_placement_manifest(self):
-        validator = SKILLS / "cloudflare-seo-article-creator/scripts/validate-cloudflare-article.ps1"
-        placements = [
-            ("チャレンジタッチに合う子", "touch-fit", "shinken_zemi"),
-            ("チャレンジタッチに合う子", "touch-compare", "shinken_zemi"),
-            ("チャレンジタッチに合う子", "touch-final", "shinken_zemi"),
-            ("スマイルゼミに合う子", "smile-fit", "smile_zemi"),
-            ("スマイルゼミに合う子", "smile-compare", "smile_zemi"),
-            ("スマイルゼミに合う子", "smile-final", "smile_zemi"),
-        ]
-        manifest = []
-        sections = {}
-        for heading, placement_id, provider in placements:
-            root_class = "smile-zemi-cta" if provider == "smile_zemi" else "shinken-zemi-cta"
-            component = "smile_zemi_cta_v1" if provider == "smile_zemi" else "shinken_zemi_cta_v1"
-            href = f"https://testing.invalid/{provider}/elementary"
-            pixel = f"https://testing.invalid/{provider}/pixel"
-            block = f'<div class="{root_class}" data-course="elementary" data-placement-id="{placement_id}"><a class="{root_class}__button" href="{href}" rel="nofollow"><img src="{pixel}" height="1" width="1" border="0" alt="">資料を見る</a></div>'
-            sections.setdefault(heading, []).append(block)
-            manifest.append({"provider": provider, "placement_id": placement_id, "section_heading": heading, "section_id": "h2-1", "target_course": "elementary", "presentation": "cta_button", "component_id": component, "href": href, "tracking_image_src": pixel, "rel": "nofollow"})
-        body = "\n".join(f"## {heading}\n説明文\n" + "\n".join(blocks) for heading, blocks in sections.items())
-        with tempfile.TemporaryDirectory(prefix="codex-cta-validator-", dir=SITE_BLOG) as tmp:
-            article = Path(tmp) / "index.md"
-            images = Path(tmp) / "images"
-            images.mkdir()
-            (images / "cover.webp").write_bytes(b"test")
-            frontmatter = '---\ntitle: "CTA配置の検証"\ndate: 2026-09-16\ncategories: [education]\ncoverImage: "images/cover.webp"\ndraft: true\n---\n'
-            article.write_text(frontmatter + body, encoding="utf-8")
-            args = ["pwsh", "-NoProfile", "-File", str(validator), "-ArticlePath", str(article), "-ValidationMode", "parent", "-ExpectedArticleBusinessPurpose", "conversion", "-ExpectedTitle", "CTA配置の検証", "-ExpectedAffiliateDisposition", "eligible", "-ExternalLinkPolicy", "allow_task_required_only", "-ExpectedEmphasisPlanJson", json.dumps([{"section_id": "H2-01", "exact_text": "説明文", "role": "conclusion"}], ensure_ascii=False), "-ExpectedInternalLinkManifestJson", '{"new_links":[]}', "-ExpectedAffiliateLinkManifestJson", json.dumps({"links": manifest}, ensure_ascii=False)]
-            complete = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", check=False)
-            result = json.loads(complete.stdout)
-            self.assertEqual(result["affiliate_manifest_link_count"], 6)
-            self.assertEqual(result["affiliate_markup_count"], 6, result["errors"])
-            self.assertEqual(result["checks"]["affiliate"], "pass", result["errors"])
-            single_body = f"## {placements[0][0]}\n説明文\n{sections[placements[0][0]][0]}"
-            article.write_text(frontmatter + single_body, encoding="utf-8")
-            single_args = args[:-2] + ["-ExpectedAffiliateLinkManifestJson", json.dumps({"links": manifest[:1]}, ensure_ascii=False), "-ExpectedAffiliateProvider", "shinken_zemi", "-ExpectedAffiliateCourse", "elementary"]
-            single = json.loads(subprocess.run(single_args, capture_output=True, text=True, encoding="utf-8", check=False).stdout)
-            self.assertEqual(single["affiliate_markup_count"], 1)
-            self.assertEqual(single["checks"]["affiliate"], "pass", single["errors"])
-            article.write_text(frontmatter + body.replace('data-placement-id="smile-final"', 'data-placement-id="wrong-final"'), encoding="utf-8")
-            mismatch = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", check=False)
-            invalid = json.loads(mismatch.stdout)
-            self.assertEqual(invalid["checks"]["affiliate"], "fail")
-            self.assertTrue(any("smile-final" in message for message in invalid["errors"]))
 
-    def test_parent_traffic_validation_requires_primary_conversion_card_and_zero_affiliate(self):
-        validator = SKILLS / "cloudflare-seo-article-creator/scripts/validate-cloudflare-article.ps1"
-        with tempfile.TemporaryDirectory(prefix="codex-traffic-validator-", dir=SITE_BLOG) as tmp:
-            article = Path(tmp) / "index.md"
-            images = Path(tmp) / "images"
-            images.mkdir()
-            (images / "cover.webp").write_bytes(b"test")
-            frontmatter = '---\ntitle: "集客記事の検証"\ndate: 2026-09-17\ncategories: [education]\ncoverImage: "images/cover.webp"\ndraft: true\n---\n'
-            body = "## 選び方\n**判断基準**を説明します。\n\n【内部リンクカード】\nURL: /conversion-article/\n紹介文: 成約用記事で料金と申込み条件を確認できます。\n"
-            article.write_text(frontmatter + body, encoding="utf-8")
-            internal = {"new_links": [{"href": "/conversion-article/", "destination_role": "conversion_direct", "presentation": "image_card", "card_description": "成約用記事で料金と申込み条件を確認できます。", "required": True, "primary_destination": True}]}
-            args = ["pwsh", "-NoProfile", "-File", str(validator), "-ArticlePath", str(article), "-ValidationMode", "parent", "-ExpectedArticleBusinessPurpose", "traffic", "-ExpectedTitle", "集客記事の検証", "-ExpectedAffiliateDisposition", "not_applicable", "-ExternalLinkPolicy", "allow_task_required_only", "-ExpectedEmphasisPlanJson", json.dumps([{"section_id": "H2-01", "exact_text": "判断基準", "role": "conclusion"}], ensure_ascii=False), "-ExpectedInternalLinkManifestJson", json.dumps(internal, ensure_ascii=False), "-ExpectedAffiliateLinkManifestJson", '{"links":[]}']
-            passed = json.loads(subprocess.run(args, capture_output=True, text=True, encoding="utf-8", check=False).stdout)
-            self.assertEqual(passed["article_business_purpose"], "traffic")
-            self.assertEqual(passed["checks"]["affiliate"], "pass", passed["errors"])
-            self.assertEqual(passed["checks"]["internal_links"], "pass", passed["errors"])
+    def parent_fixture(self, **kwargs):
+        test_path=SKILLS/"cloudflare-seo-article-creator/scripts/test_validate_cloudflare_article.py"
+        spec=importlib.util.spec_from_file_location("parent_cta_fixture",test_path)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        os.environ.setdefault("ARTICLE_TEST_PROJECT_ROOT",str(SITE_BLOG.parents[2]))
+        os.environ.setdefault("ARTICLE_TEST_WORK_ROOT",str(Path(__file__).resolve().parents[3]))
+        return module.ParentValidation().run_fixture(**kwargs)
 
-            contaminated = body + '\n<div class="smile-zemi-cta"><a href="https://px.a8.net/svt/ejp?x=1">資料請求</a></div>\n'
-            article.write_text(frontmatter + contaminated, encoding="utf-8")
-            failed = json.loads(subprocess.run(args, capture_output=True, text=True, encoding="utf-8", check=False).stdout)
-            self.assertEqual(failed["checks"]["affiliate"], "fail")
-            self.assertTrue(any("集客用記事" in message or "not_applicable" in message for message in failed["errors"]))
+    def test_parent_traffic_validation_requires_two_placements_and_primary_card(self):
+        report,code=self.parent_fixture(traffic=True,new_design=True)
+        self.assertEqual((code,report["status"],report["parent_contract_pass"]),(0,"PASS",True),report)
+        self.assertEqual(report["affiliate_markup_count"],2,report)
+        self.assertEqual(report["internal_link_card_count"],1,report)
 
-            missing_primary_args = args.copy()
-            manifest_index = missing_primary_args.index("-ExpectedInternalLinkManifestJson") + 1
-            missing_primary_args[manifest_index] = '{"new_links":[]}'
-            article.write_text(frontmatter + "## 選び方\n**判断基準**を説明します。\n", encoding="utf-8")
-            missing = json.loads(subprocess.run(missing_primary_args, capture_output=True, text=True, encoding="utf-8", check=False).stdout)
-            self.assertTrue(any("主成約記事画像カード" in message for message in missing["errors"]))
+    def test_parent_completion_rejects_one_cta_and_rendered_loss(self):
+        for mutation in ("one_cta","rendered_missing_cta","rendered_duplicate_id","context_mismatch"):
+            with self.subTest(mutation=mutation):
+                report,code=self.parent_fixture(traffic=True,mutation=mutation)
+                self.assertNotEqual(code,0,report)
+                self.assertFalse(report["parent_contract_pass"],report)
 
 
 if __name__ == "__main__":

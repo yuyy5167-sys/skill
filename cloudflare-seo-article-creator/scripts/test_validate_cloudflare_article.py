@@ -20,7 +20,7 @@ REGISTRY = SCRIPT.parents[2] / 'article-internal-linker/references/zkai-affiliat
 
 
 class ParentValidation(unittest.TestCase):
-    def run_fixture(self, provider='zkai', course='elementary', mutation=None, new_design=False, traffic=False):
+    def run_fixture(self, provider='zkai', course='elementary', mutation=None, new_design=False, traffic=False, approved_sapuri_fixture=False):
         project = Path(os.environ['ARTICLE_TEST_PROJECT_ROOT'])
         with tempfile.TemporaryDirectory(dir=os.environ['ARTICLE_TEST_WORK_ROOT'], prefix='parent-test-') as work:
             root = Path(work)
@@ -38,13 +38,17 @@ class ParentValidation(unittest.TestCase):
                 link = {'href': 'https://px.a8.net/svt/ejp?a8mat=3H9NZ4+HVBQA+2P76+60WN6',
                         'tracking_image_src': 'https://www16.a8.net/0.gif?a8mat=3H9NZ4+HVBQA+2P76+60WN6'}
                 component, css = 'smile_zemi_cta_v1', 'smile-zemi-cta'
+            elif provider == 'study_sapuri':
+                link = {'href':'https://fixture.test/study-sapuri/'+course, 'tracking_image_src':'https://fixture.test/pixel/'+course+'.gif'}
+                component, css = 'study_sapuri_cta_v1','shinken-zemi-cta'
             else:
                 link = {'href': '//ck.jp.ap.valuecommerce.com/servlet/referral?sid=3613518&pid=892693444',
                         'tracking_image_src': '//ad.jp.ap.valuecommerce.com/servlet/gifbanner?sid=3613518&pid=892693444'}
-                component, css = 'shinken_zemi_cta_v1', 'shinken-zemi-cta'
+                component, css = ('study_sapuri_cta_v1' if provider=='study_sapuri' else 'shinken_zemi_cta_v1'), 'shinken-zemi-cta'
             moment = {'placement_id': 'CTA-01', 'section_id': 'H2-01', 'section_heading': '教材を確認する',
                       'reader_question': 'どんな教材か', 'official_information_needed': '対象学年の教材見本',
-                      'destination_purpose': '教材見本を確認する', 'lead_copy': '学年に合う教材と受講条件を公式サイトで確認できます。'}
+                      'destination_purpose': '教材見本を確認する', 'lead_copy': '学年に合う教材と受講条件を公式サイトで確認できます。',
+                      'placement_context': {'before':'教材と解説','after':'利用条件を確認する','rationale':'教材の範囲を説明した後に確認するため'}}
             manifest = {**link, 'provider': provider, 'target_course': course, 'presentation': 'cta_button',
                         'component_id': component, 'rel': 'nofollow', 'lead_text': moment['lead_copy'],
                         'button_text': '対象講座の資料を請求する',
@@ -97,8 +101,8 @@ draft: true
             params = {'ArticlePath': str(article), 'ProjectRoot': str(root), 'ValidationMode': 'parent',
                       'ExpectedTitle': title, 'ExpectedArticleBusinessPurpose': 'conversion',
                       'ExpectedArticleProfileJson': json.dumps({'type': 'conversion_other', 'classification_reason': '教材選択の説明'}),
-                      'ExpectedCtaStrategyJson': json.dumps({'default_count': 3, 'planned_count': 1,
-                        'count_mode': 'decreased', 'count_reason': '単一の疑問に答える短い記事で確認場面が1件',
+                      'ExpectedCtaStrategyJson': json.dumps({'policy_version':'minimum-two-v1','default_count': 3, 'planned_count': 2,
+                        'count_mode': 'decreased', 'count_reason': '教材と受講条件の独立した疑問に答えるため2件',
                         'official_confirmation_moments': [moment]}),
                       'ExpectedAffiliateDisposition': 'eligible', 'ExpectedAffiliateProvider': provider,
                       'ExpectedAffiliateCourse': manifest['target_course'],
@@ -120,26 +124,81 @@ draft: true
                 rendered.write_text('<main class="article-page article-edition" data-article-design="C" data-article-design-origin="frontmatter" data-article-profile="cream-manga-mustard-v1"><div data-article-lead><figure class="edition-thumbnail"><img src="/assets/cover.webp" alt="教材の選び方"></figure><p>導入です。</p></div><nav class="edition-outline"><p class="edition-outline__title">目次</p><a href="#test"><span>01</span><span>教材を確認する</span><span>›</span></a></nav>' + new_html_body + '</main>')
                 params.update({'RequireArticleDesign': True, 'ExpectedArticleDesignJson': json.dumps(metadata),
                   'ExpectedArticleDesignStateJson': json.dumps({'design_version':1,'ui_used_design_version':1,'thumbnail_accepted_design_version':1,'section_images_accepted_design_version':1})})
+
+            moment2 = {**copy.deepcopy(moment), 'placement_id':'CTA-02','section_id':'H2-02',
+                       'section_heading':'利用条件を確認する','reader_question':'継続条件はどうか',
+                       'official_information_needed':'受講期間と継続条件','destination_purpose':'受講条件を確認する',
+                       'lead_copy':'学習内容と合わせて受講期間・継続条件を公式サイトで確認できます。',
+                       'placement_context':{'before':'料金と継続条件','after':'','rationale':'継続条件の説明が完結したため'}}
+            manifest2 = {**copy.deepcopy(manifest), **{k:v for k,v in moment2.items() if k!='lead_copy'},
+                         'lead_text':moment2['lead_copy'],'button_text':'受講条件を公式サイトで確認する'}
+            source1 = article.read_text()
+            cta1 = source1[source1.index('<div class="' + css):]
+            cta2 = cta1.replace('CTA-01','CTA-02').replace(manifest['lead_text'],manifest2['lead_text']).replace(manifest['button_text'],manifest2['button_text'])
+            image2='![教材と解説](./images/h2-01.webp)\n\n' if new_design else ''
+            second_source = '\n\n## 利用条件を確認する\n\n'+image2+'**料金と継続条件**を確認することも大切です。\n\n'+cta2
+            article.write_text(source1+second_source)
+            current_html=rendered.read_text()
+            second_html='<h2 id="conditions">利用条件を確認する</h2>'+('<p><img src="/assets/h2.webp" alt="教材と解説"></p>' if new_design else '')+'<p><strong>料金と継続条件</strong>を確認することも大切です。</p>'+cta2
+            closing='</div></main>' if new_design else '</article>'
+            index=current_html.rfind(closing)
+            rendered.write_text(current_html[:index]+second_html+current_html[index:])
+            if new_design:
+                rendered.write_text(rendered.read_text().replace('</nav>','<a href="#conditions"><span>02</span><span>利用条件を確認する</span><span>›</span></a></nav>',1))
+            params['ExpectedEmphasisPlanJson']=json.dumps([{'section_id':'H2-01','heading_text':'教材を確認する','exact_text':'教材と解説','role':'conclusion'},{'section_id':'H2-02','heading_text':'利用条件を確認する','exact_text':'料金と継続条件','role':'conclusion'}])
+            all_moments=[moment,moment2];all_links=[manifest,manifest2]
+            strategy={'policy_version':'minimum-two-v1','default_count':3,'planned_count':2,'count_mode':'decreased',
+                      'first_cta_position_note':'短い検証原稿でも、最初に教材説明を完結してから案内するため','count_reason':'教材と受講条件の独立した確認目的が2つあるため','official_confirmation_moments':all_moments}
             if traffic:
-                destination = '/2026/10/02/study-sapuri-junior-20261002/'
-                description = '講座の内容と受講条件を確認できます。'
-                card = '\n\n【内部リンクカード】\nURL: ' + destination + '\n紹介文: ' + description + '\n'
-                current = article.read_text()
-                current = current[:current.index('<div class="' + css)] + card
-                article.write_text(current)
-                current_html = rendered.read_text()
-                start = current_html.index('<div class="' + css)
-                rendered.write_text(current_html[:start] + '<a href="' + destination + '"><img src="/fixture.webp" alt="講座の解説">' + description + '</a></div></main>')
-                params.update({'ExpectedArticleBusinessPurpose':'traffic','ExpectedAffiliateDisposition':'not_applicable',
-                  'ExpectedArticleProfileJson':json.dumps({'type':'traffic','classification_reason':'疑問へ回答して解説記事へ案内'}),
-                  'ExpectedCtaStrategyJson':json.dumps({'default_count':3,'planned_count':0,'count_mode':'not_applicable','official_confirmation_moments':[]}),
-                  'ExpectedAffiliateLinkManifestJson':'{"links":[]}',
+                destination='/2026/10/02/study-sapuri-junior-20261002/'
+                description='講座の内容と受講条件を確認できます。'
+                bridge='学習内容と受講条件を整理してから、次の解説も参考にできます。'
+                moment2['placement_context']['after']=bridge
+                manifest2['placement_context']['after']=bridge
+                article.write_text(article.read_text()+'\n\n'+bridge+'\n\n【内部リンクカード】\nURL: '+destination+'\n紹介文: '+description+'\n')
+                current_html=rendered.read_text();index=current_html.rfind(closing)
+                card='<p>'+bridge+'</p><a class="article-link-card" href="'+destination+'"><img src="/fixture.webp" alt="講座の解説">'+description+'</a>'
+                rendered.write_text(current_html[:index]+card+current_html[index:])
+                params.update({'ExpectedArticleBusinessPurpose':'traffic',
+                  'ExpectedArticleProfileJson':json.dumps({'type':'traffic','classification_reason':'疑問へ回答して成約記事へ案内する'}),
                   'ExpectedInternalLinkManifestJson':json.dumps({'new_links':[{'href':destination,'destination_role':'conversion_direct','presentation':'image_card','required':True,'primary_destination':True,'card_description':description}]})})
-                params.pop('ExpectedAffiliateProvider',None);params.pop('ExpectedAffiliateCourse',None)
+                strategy.update({'default_count':2,'count_mode':'standard'})
+            params['ExpectedCtaStrategyJson']=json.dumps(strategy)
+            params['ExpectedAffiliateLinkManifestJson']=json.dumps({'links':all_links})
+            if mutation=='one_cta':
+                strategy.update({'planned_count':1,'official_confirmation_moments':[moment]})
+                params['ExpectedCtaStrategyJson']=json.dumps(strategy)
+                params['ExpectedAffiliateLinkManifestJson']=json.dumps({'links':[manifest]})
+            if mutation=='old_policy':
+                strategy.pop('policy_version')
+                params['ExpectedCtaStrategyJson']=json.dumps(strategy)
+            if mutation=='rendered_missing_card':
+                rendered.write_text(rendered.read_text().replace(card,''))
+            if mutation=='rendered_missing_cta':
+                rendered.write_text(rendered.read_text().replace(cta2,''))
+            if mutation=='rendered_duplicate_id':
+                rendered.write_text(rendered.read_text().replace('CTA-02','CTA-01'))
+            if mutation=='rendered_hidden':
+                rendered.write_text(rendered.read_text().replace('data-placement-id="CTA-02"','data-placement-id="CTA-02" hidden'))
+            if mutation=='context_mismatch':
+                manifest2['placement_context']['before']='原稿に存在しない別の話題'
+                params['ExpectedAffiliateLinkManifestJson']=json.dumps({'links':all_links})
+            if mutation=='rendered_wrong_course':
+                rendered.write_text(rendered.read_text().replace('data-course="'+manifest['target_course']+'"','data-course="wrong-course"'))
+            if mutation=='double_buttons':
+                rendered.write_text(rendered.read_text().replace('</a>','</a><a href="'+manifest['href']+'">追加ボタン</a>',1))
             if mutation == 'missing_manifest':
                 del params['ExpectedAffiliateLinkManifestJson']
             driver = root / 'driver.ps1'
-            script_path = str(SCRIPT).replace("'", "''")
+            validator_script=SCRIPT
+            if approved_sapuri_fixture:
+                isolated=root/'test-skills'
+                shutil.copytree(SCRIPT.parent,isolated/'cloudflare-seo-article-creator/scripts',ignore=shutil.ignore_patterns('__pycache__'))
+                shutil.copytree(SCRIPT.parents[2]/'article-internal-linker/references',isolated/'article-internal-linker/references')
+                registry=isolated/'article-internal-linker/references/study-sapuri-affiliate-links.json'
+                registry.write_text(json.dumps({'links':[{'target_course':course,**link,'approved_by_user':True,'user_instruction':'隔離テスト用の架空タグのみ','source_ref':'isolated-test-fixture'}]}))
+                validator_script=isolated/'cloudflare-seo-article-creator/scripts/validate-cloudflare-article.ps1'
+            script_path = str(validator_script).replace("'", "''")
             driver.write_text("$params = ConvertFrom-Json -AsHashtable ([Console]::In.ReadToEnd())\n& '" + script_path + "' @params\nexit $LASTEXITCODE\n")
             env = {**os.environ, 'POWERSHELL_TELEMETRY_OPTOUT': '1'}
             result = subprocess.run(['pwsh', '-NoLogo', '-NoProfile', '-NonInteractive', '-File', str(driver)],
@@ -165,16 +224,35 @@ draft: true
                 report, code = self.run_fixture(provider=provider, new_design=True)
                 self.assertEqual((code, report['status'], report['checks']['article_design']), (0, 'PASS', 'pass'), report)
 
-    def test_comparison_design_traffic_keeps_zero_affiliate_funnel(self):
+    def test_comparison_design_traffic_has_two_cta_and_primary_card(self):
         report, code = self.run_fixture(new_design=True, traffic=True)
         self.assertEqual((code, report['status'], report['checks']['article_design']), (0, 'PASS', 'pass'), report)
-        self.assertEqual(report['affiliate_markup_count'], 0, report)
+        self.assertEqual(report['affiliate_markup_count'], 2, report)
         self.assertEqual(report['internal_link_card_count'], 1, report)
 
     def test_new_design_does_not_weaken_pixel_validation(self):
         report, code = self.run_fixture(mutation='wrong_pixel_size', new_design=True)
         self.assertNotEqual(code, 0, report)
         self.assertFalse(report['parent_contract_pass'], report)
+
+    def test_registered_provider_url_and_pixel_pairs_cannot_be_forged(self):
+        for provider in ('shinken_zemi','smile_zemi'):
+            for mutation in ('wrong_course_url','wrong_tracking'):
+                with self.subTest(provider=provider,mutation=mutation):
+                    report,code=self.run_fixture(provider=provider,mutation=mutation)
+                    self.assertNotEqual(code,0,report)
+                    self.assertFalse(report['parent_contract_pass'],report)
+
+    def test_registered_sapuri_courses_work_only_with_isolated_approved_fixture(self):
+        for course in ('high','elementary_junior','toeic_basic'):
+            with self.subTest(course=course):
+                report,code=self.run_fixture(provider='study_sapuri',course=course,traffic=True,approved_sapuri_fixture=True)
+                self.assertEqual((code,report['status'],report['parent_contract_pass']),(0,'PASS',True),report)
+
+    def test_unregistered_study_sapuri_is_blocked(self):
+        report,code=self.run_fixture(provider='study_sapuri')
+        self.assertNotEqual(code,0,report)
+        self.assertIn('スタディサプリ',str(report))
 
     def test_legacy_manifest_does_not_require_a_caption(self):
         report, code = self.run_fixture(mutation='legacy_manifest')
@@ -188,6 +266,14 @@ draft: true
                     self.assertNotEqual(code, 0, report)
                     self.assertFalse(report['parent_contract_pass'], report)
                     self.assertIn('CTAボタン下のリンク先補足表記は禁止', str(report))
+
+
+    def test_two_cta_contract_rejects_missing_duplicate_and_context_failures(self):
+        for mutation in ('one_cta','old_policy','rendered_missing_cta','rendered_duplicate_id','rendered_hidden','context_mismatch','rendered_wrong_course','double_buttons','rendered_missing_card'):
+            with self.subTest(mutation=mutation):
+                report,code=self.run_fixture(mutation=mutation,traffic=True)
+                self.assertNotEqual(code,0,report)
+                self.assertFalse(report['parent_contract_pass'],report)
 
     def test_invalid_inputs_cannot_pass(self):
         for mutation in ('wrong_course_url', 'wrong_tracking', 'unsupported_course', 'missing_nofollow',

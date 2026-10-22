@@ -1,21 +1,23 @@
 ---
 name: article-internal-linker
-description: 確認済みの事業目的と記事設計、公開確認済みの自サイト記事候補を使い、成約用では講座別アフィリエイトCTA、集客用では主成約記事の画像カードを中心に、内部リンクを計画・挿入・監査する。本文全体の新規執筆、URL探索・推測、その他の広告リンク、WordPress投稿には使わない。ユーザーが明示した既存記事一括修正の限定例外を除き、目的別導線契約を緩和しない。
+description: 確認済みの記事設計と承認済みリンクを使い、集客用・成約用とも文脈に合うアフィリエイトCTAを最低2件設計・挿入・監査する。集客用の主成約記事カードも扱う。本文全体の執筆、URL推測、公開には使わない。
 ---
 
 # 記事内部リンク設計・挿入・監査
 
+新しい実行では[アフィリエイト共通配置方針](references/affiliate-placement-policy.md)を必ず読む。スタディサプリは[専用契約](references/study-sapuri-cta.md)も読む。URLや計測タグが未登録なら停止する。
+
 ## 役割
 
-親の記事作成スキルから渡された確認済み`article_business_purpose`を必須入力とし、目的別の主要導線と内部リンクを扱う。通常の関連記事は本文中の関連語句へ設定するテキストリンク、成約用記事は画像付き内部リンクカードとして区別し、画像付きカードは記事全体で最大2件にする。`conversion`ではユーザーが提供・承認した進研ゼミ・スマイルゼミ・Z会の講座別アフィリエイトリンクを主導線として設置・監査する。`traffic`では原則として直接のアフィリエイトCTAを禁止し、公開確認済み成約用記事1件を主導線の画像カードとして設置・監査する。ただし、親から `approved_existing_rewrite` として明示された記事6・8の限定例外では、小学生講座CTAを各記事ちょうど1件だけ許可し、画像カード1件を併設する。記事4・5およびその他の集客用記事ではCTAを0件とする。アフィリエイトCTAは内部リンクや内部リンクカードとは別種として扱う。次の3モードを持つ。
+親が確認したarticle_business_purposeを入力とし、目的別のCTAと内部リンクをplan・insert・auditで扱う。集客用・成約用とも本文CTAを最低2件とし、集客用は基本2件、成約用は標準3件を起点に意味から調整する。計画・原稿・最終HTMLの一意な配置を照合し、全文の文脈監査と実表示を必須にする。集客用は公開確認済み主成約記事の画像カード1件も維持する。 通常の関連記事はtext_link、成約用記事はimage_cardとし、画像カードは最大2件。過去の個別0/1件指定は履歴として読み、現行制作へ一般化しない。
 
-- `plan`: 記事設計書の承認前に、内部リンクと、成約用では読者が公式情報を確認したくなる場面ごとのCTAを設計する
+- `plan`: 記事設計書の承認前に、内部リンクと、両事業目的で読者が公式情報を確認したくなる場面ごとのCTAを設計する
 - `insert`: 承認済みリンク意図と公開確認済み候補を使い、完成Markdownへ最小限の誘導文とリンクを挿入する
 - `audit`: HTML化後に、期待した内部リンクが壊れず残っているかを監査する
 
 入出力・状態・理由コードは `references/input-output-contract.md`、候補選定・配置・URL比較・再実行規則は `references/placement-rules.md` を正本とする。実行するモードに関係する節を読み、正本と異なる独自判断を加えない。
 
-進研ゼミ・スマイルゼミ・Z会のアフィリエイトCTAを扱う場合は、上記2つの正本にあるプロバイダー別CTA関連節も読む。この例外は、ユーザー提供済みのリンク以外の広告主・ASP・URLへ一般化してはならない。
+進研ゼミ・スマイルゼミ・Z会・スタディサプリのアフィリエイトCTAを扱う場合は、上記2つの正本にあるプロバイダー別CTA関連節も読む。この例外は、ユーザー提供済みのリンク以外の広告主・ASP・URLへ一般化してはならない。
 
 Z会を扱う場合は [Z会専用CTA契約](references/zkai-cta.md)を追加で読む。Z会の講座・URL・共通CSSの対応はこの専用契約を正本とし、他社の条件を機械的に読み替えない。
 
@@ -32,7 +34,7 @@ Z会を扱う場合は [Z会専用CTA契約](references/zkai-cta.md)を追加で
 - 内部リンク先は、同一 `site_id` かつ許可ホスト内の公開確認済み記事だけにする
 - `article_business_purpose`は`conversion | traffic`の確認済み値だけを受理し、不明なら`business_purpose_unconfirmed`で停止する
 - `traffic`では、記事管理情報、対応する制作ログ、またはユーザー承認済み一覧により成約用と確認できた記事だけを主リンクにする。タイトルや「口コミ・料金・比較」などの語だけで役割を推測しない
-- 一般のアフィリエイトリンク、外部リンク、WordPress投稿、本文全体の新規執筆を行わない。進研ゼミ・スマイルゼミの承認済み講座リンクと、Z会のユーザー提供3リンクは講座別CTAの例外として扱う
+- 一般のアフィリエイトリンク、外部リンク、WordPress投稿、本文全体の新規執筆を行わない。対応する広告主の承認済み講座リンクだけを講座別CTAとして扱う
 - Z会は専用契約に従い配置先の学年を確定する。他のプロバイダーの対象講座は、対象節・読者・結論・承認済み設計が同じ幼児・小学・中学・高校講座を指す場合だけ確定する。複数学年向け、講座横断、または判定不能な対象プロバイダーには追加しない。二つの教材を比較する記事では、各教材の対象講座がそれぞれ一意で、記事別の複数CTA配置が明示された場合だけ併用する
 - 例外CTAを追加する場合も、講座の `href`、計測用1px画像の `src`、`rel="nofollow"`、`height="1"`、`width="1"`、`border="0"` を変更しない。HTMLソースでは `&` を `&amp;` と安全に直列化できるが、DOMで復元したURLはユーザー提供値と完全一致させる。読者に表示するリード文、ボタン文だけは、記事の内容に合う具体的な案内へ置き換えられる
 - 例外CTAは、サイト側にプロバイダー対応の共通CSS（進研ゼミは`shinken_zemi_cta_v1`、スマイルゼミは`smile_zemi_cta_v1`、Z会は`zkai_cta_v1`）が実装済みと現在実行で確認できた場合だけ挿入する。記事ごとのインラインCSSや、未承認の共通CSS編集は行わない
@@ -78,9 +80,9 @@ Z会を扱う場合は [Z会専用CTA契約](references/zkai-cta.md)を追加で
 - 正確な挿入段落は承認対象にせず、承認対象はセクション・読者の疑問・目的・リンク先範囲とする
 - `plan` が `blocked` の場合は未解決入力を返し、親スキルの記事設計承認へ進ませない
 
-`conversion`では、進研ゼミ・スマイルゼミ・Z会の対象講座が一意に確定するか、親から渡された`cta_strategy`が本文の検索意図と判断段階に対応しているかを確認する。CTAは3件を標準値として検討するが固定せず、短く狭い記事では1〜2件、独立した公式確認理由が多い長い記事では4件以上にできる。文字数だけでは増やさず、各配置に異なる`reader_question`、`official_information_needed`、`destination_purpose`、`lead_copy`が必要である。採用した全配置の`placement_id`、プロバイダー、対象講座、予定セクション、根拠を`affiliate_link_plan.placements`へ記録する。スマイルゼミでは資料請求への誘導をCTAの目的にする。講座、配置理由、または計画件数を確定できなければ`conversion_affiliate_unresolved`で停止する。
+`conversion`では、進研ゼミ・スマイルゼミ・Z会・スタディサプリの対象講座が一意に確定するか、親から渡された`cta_strategy`が本文の検索意図と判断段階に対応しているかを確認する。CTAは3件を標準値として検討するが固定せず、短く狭い記事でも最低2件、独立した公式確認理由が多い長い記事では4件以上にできる。文字数だけでは増やさず、各配置に異なる`reader_question`、`official_information_needed`、`destination_purpose`、`lead_copy`が必要である。採用した全配置の`placement_id`、プロバイダー、対象講座、予定セクション、根拠を`affiliate_link_plan.placements`へ記録する。スマイルゼミでは資料請求への誘導をCTAの目的にする。講座、配置理由、または計画件数を確定できなければ`conversion_affiliate_unresolved`で停止する。
 
-`traffic`では通常`affiliate_link_plan.status: not_applicable`とし、主リンク先の`destination_business_purpose: conversion`を信頼できる候補情報源で確認する。主リンク意図を`required: true`、`destination_role: conversion_direct`、`presentation: image_card`として1件設計する。適格なリンク先がなければ`primary_conversion_destination_missing`で停止する。補助の成約記事カードはユーザーの明示計画がある場合だけ追加し、主リンクを含め最大2件とする。親から明示された記事6・8の限定例外では、例外理由・対象講座・CTAちょうど1件・主成約記事カード1件をマニフェストへ固定し、他の集客用記事へ波及させない。
+`traffic`もeligibleなCTA計画を最低2件設計し、主成約記事をrequired: true、primary_destination: true、destination_role: conversion_direct、presentation: image_cardとして1件設計する。成約記事や承認URLがなければblocked。過去の個別記事番号による例外を新しい制作へ適用しない。
 
 ### 3. `insert` を実行する
 
@@ -95,9 +97,9 @@ Z会を扱う場合は [Z会専用CTA契約](references/zkai-cta.md)を追加で
 7. 期待リンク一覧を含む `expected_link_manifest` を作る
 8. 全検証に合格した場合だけ `body_with_internal_links` を返す
 
-`conversion`で承認済みの `affiliate_link_plan` がある場合は、`references/placement-rules.md` の講座別アフィリエイトCTA契約に従う。`cta_strategy.planned_count`と承認済み全配置の件数を一致させ、各CTAを対応する公式確認場面の直後に配置する。スマイルゼミは資料請求への誘導だけにする。CTAは内部リンク数の上限に数えず、`affiliate_link_manifest.links` に各`placement_id`と意味情報を記録する。計画と異なる講座・位置・件数、同じ配置への重複、同じ案内文の反復、近接配置、共通コンポーネント未確認は不合格とする。既存リンクが承認外URLでも自動置換せず、理由コード付きで停止する。
+両事業目的で承認済みの `affiliate_link_plan` がある場合は、`references/placement-rules.md` の講座別アフィリエイトCTA契約に従う。`cta_strategy.planned_count`と承認済み全配置の件数を一致させ、各CTAを対応する公式確認場面の直後に配置する。スマイルゼミは資料請求への誘導だけにする。CTAは内部リンク数の上限に数えず、`affiliate_link_manifest.links` に各`placement_id`と意味情報を記録する。計画と異なる講座・位置・件数、同じ配置への重複、同じ案内文の反復、近接配置、共通コンポーネント未確認は不合格とする。既存リンクが承認外URLでも自動置換せず、理由コード付きで停止する。
 
-`traffic`では原則`affiliate_link_manifest.links: []`を返し、本文へCTA、計測画像、ASP URLを追加しない。記事6・8の限定例外だけは小学生講座のCTAを1件に固定し、例外以外のCTAや別講座リンクがないことを監査する。必須の主成約記事カードを挿入できない場合は部分挿入せず元本文を返し、`primary_conversion_destination_missing | primary_conversion_card_missing`で停止する。
+`traffic`にも承認済みCTAを計画件数どおり挿入し、最低2件と必須の主成約記事カードを満たす。未解決なら部分挿入せず元本文を返す。
 
 承認済みセクション内では最終本文に合わせて段落を選び直せる。ただし、セクション・読者の疑問・目的・リンク先範囲を変える場合は `plan` に戻り、ユーザーの再承認を得る。
 
@@ -121,10 +123,10 @@ HTML化後の本文と `expected_link_manifest` を比較し、次を確認す�
 - `affiliate_link_manifest` がある場合、講座・`href`・計測用画像の `src`・`rel="nofollow"`・リード文・ボタン文が期待値と一致し、別講座のリンクや重複がない
 - アフィリエイトCTAがある場合、固定DOMクラス、`data-course`、リード文、ボタン文、CTA数、共通コンポーネントIDが期待値と一致する
 - `cream-manga-mustard-v1`指定では外観プロファイルの現在実装確認と5幅の実表示記録があり、指定profile/design/由来と実DOM、使用する各CTAとカードの外観が一致する。欠落・不一致・旧記事への漏出を既定表示で隠さない
-- 成約用では`cta_strategy.planned_count`、`official_confirmation_moments`、`affiliate_link_manifest.links`、実CTAの件数と`placement_id`が一致し、各CTAの直前文脈が対応する`reader_question`と`official_information_needed`を説明している
+- 両事業目的で`cta_strategy.planned_count`、`official_confirmation_moments`、`affiliate_link_manifest.links`、実CTAの件数と`placement_id`が一致し、各CTAの直前文脈が対応する`reader_question`と`official_information_needed`を説明している
 - CTA同士が近接せず、同じ`lead_text`または実質的に同じ確認理由を繰り返していない
 - アフィリエイトCTAがある場合、320・375・390・768・1280pxの実表示結果で横方向にはみ出さず、ボタン寸法と計測画像寸法が表示契約を満たし、ブラウザコンソールにCTA起因のエラーがない
-- `traffic`ではCTA・計測画像・ASP URLが0件で、`required: true`の主成約記事画像カードが期待マニフェストどおり1件存在する
+- 両目的で本文CTAが最低2件あり、計画・原稿・最終HTMLと一致する。集客用は必須の主成約記事画像カード1件も監査する。
 - `image_card`では、画像が左・文章が右の配置と、画面幅別の固定寸法が表示結果に反映されている
 
 不一致が1件でもあれば `blocked` と `blocks_draft: true` を返す。合格時だけ親スキルの後続品質ゲートへ進める。
@@ -133,11 +135,11 @@ HTML化後の本文と `expected_link_manifest` を比較し、次を確認す�
 
 - 親スキルは `plan` の結果を記事設計書へ含め、ユーザー承認済みの意図だけを `insert` に渡す
 - 親スキルは挿入前の本文を保持し、`audit` 合格までは内部リンク済み本文を確定版にしない
-- 本スキルは記事本文の事実確認、SEO構成全体、画像、サイト共通CSSの実装、WordPress操作を引き受けない。アフィリエイトリンクは`conversion`で、ユーザー提供済みの進研ゼミ・スマイルゼミ・Z会の講座別リンクを、標準3件を起点に意味から増減した`cta_strategy`と配置計画に従って挿入・監査する場合に限る。`traffic`では扱わない
+- 本スキルは記事本文の事実確認・SEO構成・画像・共通CSS・公開を扱わない。両目的で承認済みの講座別CTAだけを共通配置方針に沿って扱う。
 - `blocks_draft: true` の結果を、親スキルが独自判断で合格へ上書きしてはならない
 
 ## 完了条件
 
 - `plan`: 承認可能なリンク意図または構造化された未解決入力を返した
 - `insert`: 元本文を保持したまま、検証済み本文と期待リンク一覧、またはブロック理由を返した
-- `audit`: HTMLと期待リンク一覧の一致に加え、成約用ではCTA、集客用では主成約記事カードとアフィリエイト0件を判定し、下書き可否を明示した
+- `audit`: 両目的の本文CTA最低2件と計画一致、前後文脈、実表示、集客用主成約記事カードを判定する。

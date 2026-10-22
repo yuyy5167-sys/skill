@@ -25,7 +25,7 @@ ui_design:
 
 ### 勉強ブログのA〜E接続
 
-このブログの新規記事の`cream-manga-mustard-v1`では、上記に次を追加する。A〜Eは見た目の設計であり、成約用・集客用などの事業目的から独立している。子は型、CTA件数、導線先を再推定しない。
+このブログの新規記事の`cream-manga-mustard-v1`では、上記に次を追加する。A〜Eは見た目の設計であり、成約用・集客用などの事業目的から独立している。子は型、CTA件数、導線先を再推定しない。両目的最低2CTAの配置ID・講座・URL・案内文・placement_contextをpreserve_elementsで保持し、変換後に件数・前後関係を再照合する。
 
 ```yaml
 ui_design:
