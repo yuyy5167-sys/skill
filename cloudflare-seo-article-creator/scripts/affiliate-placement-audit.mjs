@@ -88,7 +88,7 @@ export function auditPlacements(roots, input, phase) {
     if (primary.length!==1) fail('必須の主成約記事カード計画が1件必要です');
     for (const expectedCard of primary) {
       const anchors=roots.flatMap(root=>[root,...descendants(root,'a')]).filter(n=>n.tagName==='a' && url(n.properties?.href)===url(expectedCard.href));
-      const cards=anchors.filter(n=>classes(n).includes('article-link-card') && descendants(n,'img').length>0 && norm(text(n)).includes(norm(expectedCard.card_description)));
+      const cards=roots.flatMap(root=>[root,...descendants(root,'aside'),...descendants(root,'a')]).filter(n=>classes(n).includes('article-link-card') && [n,...descendants(n,'a')].some(a=>a.tagName==='a' && url(a.properties?.href)===url(expectedCard.href)) && descendants(n,'img').length>0 && norm(text(n)).includes(norm(expectedCard.card_description)));
       if (cards.length!==1) fail('完成HTMLの主成約記事画像カードが欠落・不一致・重複しています');
     }
   }
